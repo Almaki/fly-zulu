@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, ChevronRight, ChevronLeft } from 'lucide-react'
@@ -29,6 +30,7 @@ import { registerSchema, type RegisterFormData } from '../types'
 import { register } from '../services'
 import { useAuthStore } from '../store'
 import type { User } from '@/shared/types'
+import { getDashboardRoute } from '@/shared/utils'
 
 const STEPS = [
   { id: 'personal', title: 'Datos Personales' },
@@ -102,8 +104,11 @@ export function RegisterForm() {
 
       if (result.data) {
         setUser(result.data as User)
-        toast.success('Cuenta creada exitosamente')
-        router.push('/board')
+        toast.success('Cuenta creada exitosamente. Bienvenido a FLY-ZULU!')
+
+        // Redirigir según el rol del usuario
+        const redirectUrl = getDashboardRoute(result.data.role)
+        router.push(redirectUrl)
         router.refresh()
       }
     } catch {
@@ -125,7 +130,7 @@ export function RegisterForm() {
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
                 i <= step
-                  ? 'bg-[#00ff88] text-black'
+                  ? 'bg-primary text-white'
                   : 'bg-zinc-800 text-zinc-500'
               }`}
             >
@@ -134,7 +139,7 @@ export function RegisterForm() {
             {i < STEPS.length - 1 && (
               <div
                 className={`h-1 flex-1 mx-2 transition-colors ${
-                  i < step ? 'bg-[#00ff88]' : 'bg-zinc-800'
+                  i < step ? 'bg-primary' : 'bg-zinc-800'
                 }`}
               />
             )}
@@ -311,6 +316,22 @@ export function RegisterForm() {
           {/* Step 3: Terms */}
           {step === 3 && (
             <div className="space-y-4">
+              {/* Botón Aceptar Todo */}
+              <Button
+                type="button"
+                variant="secondary"
+                className="w-full"
+                onClick={() => {
+                  form.setValue('terminos', true, { shouldValidate: true })
+                  form.setValue('privacidad', true, { shouldValidate: true })
+                  form.setValue('cookies', true, { shouldValidate: true })
+                }}
+              >
+                Aceptar todo
+              </Button>
+
+              <div className="border-t border-[#27272a] pt-4" />
+
               <FormField
                 control={form.control}
                 name="terminos"
@@ -323,8 +344,15 @@ export function RegisterForm() {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        Acepto los términos y condiciones
+                      <FormLabel className="flex items-center gap-1">
+                        Acepto los{' '}
+                        <Link
+                          href="/terms"
+                          target="_blank"
+                          className="text-[#0066CC] hover:underline text-xs"
+                        >
+                          términos y condiciones
+                        </Link>
                       </FormLabel>
                       <FormMessage />
                     </div>
@@ -344,8 +372,15 @@ export function RegisterForm() {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        Acepto la política de privacidad
+                      <FormLabel className="flex items-center gap-1">
+                        Acepto la{' '}
+                        <Link
+                          href="/privacy"
+                          target="_blank"
+                          className="text-[#0066CC] hover:underline text-xs"
+                        >
+                          política de privacidad
+                        </Link>
                       </FormLabel>
                       <FormMessage />
                     </div>
@@ -365,8 +400,15 @@ export function RegisterForm() {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        Acepto el uso de cookies
+                      <FormLabel className="flex items-center gap-1">
+                        Acepto el uso de{' '}
+                        <Link
+                          href="/cookies"
+                          target="_blank"
+                          className="text-[#0066CC] hover:underline text-xs"
+                        >
+                          cookies
+                        </Link>
                       </FormLabel>
                       <FormMessage />
                     </div>

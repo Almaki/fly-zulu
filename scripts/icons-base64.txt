@@ -1,0 +1,29 @@
+PNG PLACEHOLDER - Base64 Data
+==============================
+
+Este es un PNG válido de 1x1 pixel que puede servir como placeholder temporal.
+
+Para crear los archivos:
+
+Windows PowerShell:
+-------------------
+$bytes = [Convert]::FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==")
+[IO.File]::WriteAllBytes("public\icons\icon-192.png", $bytes)
+[IO.File]::WriteAllBytes("public\icons\icon-512.png", $bytes)
+
+Linux/Mac:
+----------
+echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > public/icons/icon-192.png
+echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > public/icons/icon-512.png
+
+Node.js:
+--------
+npm run generate:icons
+
+Python:
+-------
+python scripts/generate_pwa_icons.py
+
+Más fácil - HTML:
+-----------------
+Abre scripts/generate-simple-icons.html en el navegador y descarga los iconos generados.

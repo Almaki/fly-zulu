@@ -14,19 +14,19 @@
   --card-foreground: #fafafa;
   --popover: #141414;
   --popover-foreground: #fafafa;
-  --primary: #00ff88;
-  --primary-foreground: #0a0a0a;
+  --primary: #0066CC;
+  --primary-foreground: #ffffff;
   --secondary: #27272a;
   --secondary-foreground: #fafafa;
   --muted: #27272a;
   --muted-foreground: #71717a;
-  --accent: #00ff88;
-  --accent-foreground: #0a0a0a;
+  --accent: #0088FF;
+  --accent-foreground: #ffffff;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
   --border: #27272a;
   --input: #27272a;
-  --ring: #00ff88;
+  --ring: #0066CC;
   --radius: 0.5rem;
 
   /* MCDU Colors */

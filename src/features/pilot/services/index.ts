@@ -92,6 +92,8 @@ export async function createPilotLog(
       off_time: formData.off_time,
       on_time: formData.on_time,
       in_time: formData.in_time,
+      flight_time_minutes: flightTime,
+      block_time_minutes: blockTime,
       notes: formData.notes || null,
       sync_status: 'synced',
     })

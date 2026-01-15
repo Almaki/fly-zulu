@@ -1,0 +1,41 @@
+INSTRUCCIONES PARA GENERAR LOS ICONOS PWA
+==========================================
+
+Los iconos PNG son necesarios para que la PWA funcione correctamente.
+
+OPCIÓN 1: Generador HTML (Recomendado - Más Fácil)
+---------------------------------------------------
+1. Abrir el archivo: scripts/generate-simple-icons.html en tu navegador
+2. Los iconos se mostrarán automáticamente
+3. Hacer clic en "Descargar icon-192.png"
+4. Hacer clic en "Descargar icon-512.png"
+5. Mover los archivos descargados a esta carpeta (public/icons/)
+
+OPCIÓN 2: Usar SVG como placeholder temporal
+---------------------------------------------
+1. Renombrar icon.svg a icon-192.png
+2. Copiar icon.svg a icon-512.png
+(Nota: Algunos navegadores aceptan SVG como PNG, pero no es ideal)
+
+OPCIÓN 3: Herramientas online profesionales
+--------------------------------------------
+1. Ir a https://realfavicongenerator.net/
+2. Subir un logo o diseño de 512x512px
+3. Descargar el paquete completo de iconos
+4. Copiar icon-192.png e icon-512.png a esta carpeta
+
+OPCIÓN 4: ImageMagick (Si lo tienes instalado)
+-----------------------------------------------
+cd public/icons
+convert icon.svg -resize 192x192 icon-192.png
+convert icon.svg -resize 512x512 icon-512.png
+
+VERIFICAR QUE FUNCIONA
+----------------------
+1. Los archivos deben existir:
+   - public/icons/icon-192.png
+   - public/icons/icon-512.png
+
+2. Iniciar el servidor de desarrollo
+3. Abrir DevTools > Application > Manifest
+4. Verificar que no haya errores 404 en los iconos

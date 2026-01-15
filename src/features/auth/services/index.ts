@@ -109,6 +109,17 @@ export async function register(formData: Omit<RegisterFormData, 'confirmPassword
     return { data: null, error: 'Error al crear perfil: ' + profileError.message }
   }
 
+  // Login automático después del registro exitoso
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: formData.email,
+    password: formData.password,
+  })
+
+  if (signInError) {
+    // No bloquear el registro si falla el login automático
+    console.error('Error en login automático:', signInError)
+  }
+
   return { data: profile as User, error: null }
 }
 

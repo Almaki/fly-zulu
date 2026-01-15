@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
+import Link from 'next/link'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import {
@@ -21,6 +22,7 @@ import { loginSchema, type LoginFormData } from '../types'
 import { login } from '../services'
 import { useAuthStore } from '../store'
 import type { User } from '@/shared/types'
+import { getDashboardRoute } from '@/shared/utils'
 
 export function LoginForm() {
   const router = useRouter()
@@ -49,7 +51,10 @@ export function LoginForm() {
       if (result.data) {
         setUser(result.data as User)
         toast.success('Bienvenido a FLY-ZULU')
-        router.push('/board')
+
+        // Redirigir según el rol del usuario
+        const redirectUrl = getDashboardRoute(result.data.role)
+        router.push(redirectUrl)
         router.refresh()
       }
     } catch {
@@ -86,7 +91,15 @@ export function LoginForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Contraseña</FormLabel>
+              <div className="flex items-center justify-between">
+                <FormLabel>Contraseña</FormLabel>
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-[#0066CC] hover:underline"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
               <FormControl>
                 <Input
                   type="password"

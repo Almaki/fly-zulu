@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { getDashboardRoute, isPublicRoute, isAuthRoute } from '@/shared/utils'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -49,18 +50,24 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Public routes that don't require auth
-  const publicPaths = ['/login', '/register', '/api/auth/callback']
-  const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path))
+  const pathname = request.nextUrl.pathname
 
-  if (!user && !isPublicPath) {
+  if (!user && !isPublicRoute(pathname)) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register')) {
+  if (user && isAuthRoute(pathname)) {
+    // Get user profile to redirect to correct dashboard
+    const { data: profile } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
     const url = request.nextUrl.clone()
-    url.pathname = '/board'
+    url.pathname = profile?.role ? getDashboardRoute(profile.role) : getDashboardRoute('')
     return NextResponse.redirect(url)
   }
 

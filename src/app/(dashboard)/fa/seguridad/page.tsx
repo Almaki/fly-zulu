@@ -1,5 +1,10 @@
-import { SecurityChecklist } from '@/features/fa/components'
+import { SecurityChecklist, IncidentForm } from '@/features/fa/components'
 
 export default function FASecurityPage() {
-  return <SecurityChecklist />
+  return (
+    <div className="space-y-4">
+      <SecurityChecklist />
+      <IncidentForm />
+    </div>
+  )
 }
