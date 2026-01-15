@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --card: #141414;
+  --card-foreground: #fafafa;
+  --popover: #141414;
+  --popover-foreground: #fafafa;
+  --primary: #00ff88;
+  --primary-foreground: #0a0a0a;
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
+  --muted: #27272a;
+  --muted-foreground: #71717a;
+  --accent: #00ff88;
+  --accent-foreground: #0a0a0a;
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #00ff88;
+  --radius: 0.5rem;
+
+  /* MCDU Colors */
+  --mcdu-green: #00ff41;
+  --mcdu-cyan: #00ffff;
+  --mcdu-amber: #ffbf00;
+
+  /* Status Colors */
+  --status-success: #22c55e;
+  --status-warning: #f59e0b;
+  --status-error: #ef4444;
+
+  /* Flight Status */
+  --flight-ontime: #fafafa;
+  --flight-delay: #FF9500;
+  --flight-gate-change: #007AFF;
+  --flight-canceled: #FF3B30;
+
+  /* Airlines */
+  --airline-volaris: #E91E8C;
+  --airline-viva: #39FF14;
+  --airline-aeromexico: #E31837;
+
+  /* WhatsApp */
+  --whatsapp: #25D366;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Prevent zoom on input focus (iOS) */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Safe area for PWA */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* MCDU specific styles */
+.mcdu-screen {
+  background-color: #0a0a0a;
+  font-family: var(--font-mono), monospace;
+  color: var(--mcdu-green);
+}
+
+.mcdu-text {
+  color: var(--mcdu-green);
+  text-shadow: 0 0 10px var(--mcdu-green);
+}
+
+.mcdu-cyan {
+  color: var(--mcdu-cyan);
+  text-shadow: 0 0 10px var(--mcdu-cyan);
+}
+
+.mcdu-amber {
+  color: var(--mcdu-amber);
+  text-shadow: 0 0 10px var(--mcdu-amber);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* Mobile touch improvements */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Bottom navigation spacing */
+.pb-nav {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+}
