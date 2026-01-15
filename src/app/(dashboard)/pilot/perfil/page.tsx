@@ -12,7 +12,7 @@ import { useAuthStore } from '@/features/auth/store'
 
 export default function PerfilPage() {
   const router = useRouter()
-  const { user, setUser, clearAuth } = useAuthStore()
+  const { user, setUser, logout } = useAuthStore()
   const [isEditing, setIsEditing] = useState(false)
   const [newName, setNewName] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -33,8 +33,8 @@ export default function PerfilPage() {
     setIsSaving(true)
     try {
       const supabase = createClient()
-      const { error } = await supabase
-        .from('users')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase.from('users') as any)
         .update({ nombre: newName.trim() })
         .eq('id', user?.id)
 
@@ -60,7 +60,7 @@ export default function PerfilPage() {
     try {
       const supabase = createClient()
       await supabase.auth.signOut()
-      clearAuth()
+      logout()
       router.push('/login')
     } catch {
       toast.error('Error al cerrar sesión')

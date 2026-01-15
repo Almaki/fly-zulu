@@ -54,8 +54,8 @@ export default function MensajesPage() {
     setIsLoading(true)
     try {
       const supabase = createClient()
-      const { data, error } = await supabase
-        .from('admin_messages')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase.from('admin_messages') as any)
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: true })
@@ -80,8 +80,8 @@ export default function MensajesPage() {
     setIsSending(true)
     try {
       const supabase = createClient()
-      const { data, error } = await supabase
-        .from('admin_messages')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase.from('admin_messages') as any)
         .insert({
           user_id: user.id,
           content: newMessage.trim(),
