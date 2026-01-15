@@ -74,6 +74,37 @@ export async function createDirectoryEntry(
   return { data: data as DirectoryEntry, error: null }
 }
 
+export async function updateDirectoryEntry(
+  entryId: string,
+  formData: DirectoryEntryFormData
+): Promise<{ data: DirectoryEntry | null; error: string | null }> {
+  const supabase = await createServerSupabaseClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { data: null, error: 'No autenticado' }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.from('directory_entries') as any)
+    .update({
+      ...formData,
+      airport_code: formData.airport_code.toUpperCase(),
+      updated_by: user.id,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', entryId)
+    .select()
+    .single()
+
+  if (error) {
+    return { data: null, error: error.message }
+  }
+
+  return { data: data as DirectoryEntry, error: null }
+}
+
 export async function rateDirectoryEntry(
   entryId: string,
   rating: number

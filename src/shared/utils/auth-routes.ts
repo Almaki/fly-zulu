@@ -1,7 +1,7 @@
 import type { UserRole } from '../types'
 
 /**
- * Mapa de roles a sus dashboards correspondientes
+ * Mapa de roles a sus dashboards específicos (para funcionalidades específicas del rol)
  */
 export const ROLE_ROUTES: Record<UserRole, string> = {
   PILOT: '/pilot',
@@ -13,17 +13,27 @@ export const ROLE_ROUTES: Record<UserRole, string> = {
 }
 
 /**
+ * Ruta principal después del login/registro (Home con cards de navegación)
+ */
+export const HOME_ROUTE = '/home'
+
+/**
  * Ruta por defecto cuando no se encuentra el rol
  */
-export const DEFAULT_DASHBOARD = '/board'
+export const DEFAULT_DASHBOARD = '/home'
 
 /**
  * Obtiene la ruta del dashboard según el rol del usuario
+ * Todos los usuarios van a /home después de login/registro
  * @param role - Rol del usuario
  * @returns URL del dashboard correspondiente
  */
 export function getDashboardRoute(role: UserRole | string): string {
-  return ROLE_ROUTES[role as UserRole] || DEFAULT_DASHBOARD
+  // Todos van a /home ahora, excepto SUPERADMIN que va a admin
+  if (role === 'SUPERADMIN') {
+    return '/admin'
+  }
+  return HOME_ROUTE
 }
 
 /**

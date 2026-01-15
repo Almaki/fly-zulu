@@ -254,7 +254,7 @@ export function MCDUScreen() {
           {/* Row 4: OUT / OFF */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex items-center gap-2">
-              <span className="mcdu-amber text-xs">OUT</span>
+              <span className="mcdu-amber text-xs w-8">OUT</span>
               <FormField
                 control={form.control}
                 name="out_time"
@@ -273,7 +273,7 @@ export function MCDUScreen() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="mcdu-amber text-xs">OFF</span>
+              <span className="mcdu-amber text-xs w-8">OFF</span>
               <FormField
                 control={form.control}
                 name="off_time"
@@ -295,7 +295,7 @@ export function MCDUScreen() {
           {/* Row 5: ON / IN */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex items-center gap-2">
-              <span className="mcdu-amber text-xs">ON</span>
+              <span className="mcdu-amber text-xs w-8">ON</span>
               <FormField
                 control={form.control}
                 name="on_time"
@@ -314,7 +314,7 @@ export function MCDUScreen() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="mcdu-amber text-xs">IN</span>
+              <span className="mcdu-amber text-xs w-8">IN</span>
               <FormField
                 control={form.control}
                 name="in_time"

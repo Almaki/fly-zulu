@@ -13,6 +13,7 @@ export interface DirectoryEntry {
   rating: number
   rating_count: number
   created_by: string
+  updated_by: string | null
   is_verified: boolean
   created_at: string
   updated_at: string

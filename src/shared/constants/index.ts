@@ -70,7 +70,7 @@ export const SPECIAL_PAX_CODES = [
 
 // Directory categories
 export const DIRECTORY_CATEGORIES = [
-  { id: 'airplane', label: 'A pie del avión', emoji: '✈️' },
+  { id: 'radial', label: 'Radial', emoji: '✈️' },
   { id: 'airport', label: 'Aeropuerto', emoji: '🏢' },
   { id: 'taxi', label: 'Taxi/Uber confianza', emoji: '🚕' },
   { id: 'hotel', label: 'Hotel', emoji: '🏨' },

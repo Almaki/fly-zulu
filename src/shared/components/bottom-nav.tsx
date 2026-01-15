@@ -3,20 +3,19 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
+  Home,
   Plane,
-  BookOpen,
-  MapPin,
+  Clock,
   User,
-  LayoutDashboard
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { useAuth } from '@/features/auth/hooks'
 
 const NAV_ITEMS = [
   {
-    href: '/board',
-    label: 'FIDS',
-    icon: LayoutDashboard,
+    href: '/home',
+    label: 'Inicio',
+    icon: Home,
     roles: ['PILOT', 'FA', 'OPS', 'TRAFICO', 'MANTTO', 'SUPERADMIN'],
   },
   {
@@ -27,16 +26,10 @@ const NAV_ITEMS = [
     // Dynamic route based on role
   },
   {
-    href: '/directory',
-    label: 'Directorio',
-    icon: MapPin,
-    roles: ['PILOT', 'FA', 'SUPERADMIN'], // Only FLIGHT
-  },
-  {
-    href: '/academy',
-    label: 'Academy',
-    icon: BookOpen,
-    roles: ['PILOT', 'FA', 'SUPERADMIN'], // Only FLIGHT
+    href: '/board',
+    label: 'Salidas',
+    icon: Clock,
+    roles: ['PILOT', 'FA', 'OPS', 'TRAFICO', 'MANTTO', 'SUPERADMIN'],
   },
   {
     href: '/profile',

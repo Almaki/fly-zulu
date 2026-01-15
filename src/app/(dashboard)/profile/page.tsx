@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LogOut, User, Crown, AlertTriangle, Settings } from 'lucide-react'
+import { LogOut, User, AlertTriangle, Settings } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/shared/components/ui/button'
@@ -11,7 +11,6 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Separator } from '@/shared/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar'
 import { useAuth } from '@/features/auth/hooks'
-import { SUBSCRIPTION } from '@/shared/constants'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -62,9 +61,6 @@ export default function ProfilePage() {
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-semibold">{user.nombre}</h2>
-                {user.subscription_tier === 'PREMIUM' && (
-                  <Crown className="h-5 w-5 text-[#00ff88]" />
-                )}
               </div>
               <p className="text-sm text-zinc-500">{user.email}</p>
               <div className="flex items-center gap-2 mt-2">
@@ -73,44 +69,6 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Subscription status */}
-      <Card className="border-zinc-800 bg-zinc-900/50">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Crown className="h-4 w-4" />
-            Suscripción
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {user.subscription_tier === 'PREMIUM' ? (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[#00ff88] font-medium">Plan Premium</span>
-                <Badge className="bg-[#00ff88]/20 text-[#00ff88]">Activo</Badge>
-              </div>
-              {user.subscription_expires_at && (
-                <p className="text-xs text-zinc-500">
-                  Vence: {new Date(user.subscription_expires_at).toLocaleDateString()}
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <p className="text-zinc-400">Plan Free</p>
-              <div className="p-3 bg-zinc-800/50 rounded-lg">
-                <p className="text-sm font-medium mb-1">Upgrade a Premium</p>
-                <p className="text-xs text-zinc-500 mb-3">
-                  Acceso ilimitado, historial, export y más
-                </p>
-                <Button className="w-full bg-[#00ff88] hover:bg-[#00ff88]/90 text-black">
-                  ${SUBSCRIPTION.PREMIUM_PRICE_MXN} MXN/mes
-                </Button>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
 
