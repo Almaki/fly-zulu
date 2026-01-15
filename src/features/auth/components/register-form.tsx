@@ -315,12 +315,12 @@ export function RegisterForm() {
 
           {/* Step 3: Terms */}
           {step === 3 && (
-            <div className="space-y-4">
-              {/* Botón Aceptar Todo */}
+            <div className="space-y-5 px-1">
+              {/* Botón Aceptar Todo con glow */}
               <Button
                 type="button"
                 variant="secondary"
-                className="w-full"
+                className="w-full py-3 text-base font-semibold shadow-[0_0_20px_rgba(0,102,204,0.5)] hover:shadow-[0_0_30px_rgba(0,102,204,0.7)] border border-[#0066CC]/30 transition-all duration-300"
                 onClick={() => {
                   form.setValue('terminos', true, { shouldValidate: true })
                   form.setValue('privacidad', true, { shouldValidate: true })
@@ -330,26 +330,30 @@ export function RegisterForm() {
                 Aceptar todo
               </Button>
 
-              <div className="border-t border-[#27272a] pt-4" />
+              <div className="border-t border-[#27272a] pt-5" />
+
+              <p className="text-xs text-[#71717a] text-center mb-2">
+                O selecciona individualmente:
+              </p>
 
               <FormField
                 control={form.control}
                 name="terminos"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormItem className="flex flex-row items-center space-x-4 space-y-0 p-3 rounded-lg bg-zinc-900/30 border border-[#27272a]">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="flex items-center gap-1">
+                    <div className="flex-1 leading-none">
+                      <FormLabel className="text-sm text-[#fafafa]">
                         Acepto los{' '}
                         <Link
                           href="/terms"
                           target="_blank"
-                          className="text-[#0066CC] hover:underline text-xs"
+                          className="text-[#0066CC] hover:underline"
                         >
                           términos y condiciones
                         </Link>
@@ -364,20 +368,20 @@ export function RegisterForm() {
                 control={form.control}
                 name="privacidad"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormItem className="flex flex-row items-center space-x-4 space-y-0 p-3 rounded-lg bg-zinc-900/30 border border-[#27272a]">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="flex items-center gap-1">
+                    <div className="flex-1 leading-none">
+                      <FormLabel className="text-sm text-[#fafafa]">
                         Acepto la{' '}
                         <Link
                           href="/privacy"
                           target="_blank"
-                          className="text-[#0066CC] hover:underline text-xs"
+                          className="text-[#0066CC] hover:underline"
                         >
                           política de privacidad
                         </Link>
@@ -392,20 +396,20 @@ export function RegisterForm() {
                 control={form.control}
                 name="cookies"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormItem className="flex flex-row items-center space-x-4 space-y-0 p-3 rounded-lg bg-zinc-900/30 border border-[#27272a]">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="flex items-center gap-1">
+                    <div className="flex-1 leading-none">
+                      <FormLabel className="text-sm text-[#fafafa]">
                         Acepto el uso de{' '}
                         <Link
                           href="/cookies"
                           target="_blank"
-                          className="text-[#0066CC] hover:underline text-xs"
+                          className="text-[#0066CC] hover:underline"
                         >
                           cookies
                         </Link>
