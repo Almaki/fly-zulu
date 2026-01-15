@@ -4,12 +4,12 @@ import type { UserRole } from '../types'
  * Mapa de roles a sus dashboards correspondientes
  */
 export const ROLE_ROUTES: Record<UserRole, string> = {
-  PILOT: '/pilot/mcdu',
-  FA: '/fa/vuelo',
-  OPS: '/ops/control',
-  TRAFICO: '/trafico/tiempos',
-  MANTTO: '/mantto/transit',
-  SUPERADMIN: '/admin/metrics',
+  PILOT: '/pilot',
+  FA: '/fa',
+  OPS: '/ops',
+  TRAFICO: '/trafico',
+  MANTTO: '/mantto',
+  SUPERADMIN: '/admin',
 }
 
 /**
