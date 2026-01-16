@@ -166,23 +166,23 @@ export function AddFlightSheet({
         onClick={handleClose}
       />
 
-      {/* Sheet */}
-      <div className="absolute bottom-0 left-0 right-0 bg-[#0a0a0a] rounded-t-3xl animate-in slide-in-from-bottom duration-300">
+      {/* Sheet - Optimized for keyboard visibility */}
+      <div className="absolute bottom-0 left-0 right-0 bg-[#0a0a0a] rounded-t-3xl animate-in slide-in-from-bottom duration-300 max-h-[85vh] flex flex-col">
         {/* Handle */}
-        <div className="flex justify-center pt-3 pb-2">
+        <div className="flex justify-center pt-3 pb-2 flex-shrink-0">
           <div className="w-10 h-1 rounded-full bg-zinc-700" />
         </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 pb-4 border-b border-[#27272a]">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#E91E8C]/20 flex items-center justify-center">
-              <Plane className="w-5 h-5 text-[#E91E8C]" />
+        {/* Header - Compact */}
+        <div className="flex items-center justify-between px-4 pb-3 border-b border-[#27272a] flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-[#E91E8C]/20 flex items-center justify-center">
+              <Plane className="w-4 h-4 text-[#E91E8C]" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-[#fafafa]">Agregar Vuelo</h2>
-              <p className="text-xs text-zinc-500">
-                {direction === 'departures' ? 'Salida desde' : 'Llegada a'} {airportCode}
+              <h2 className="text-base font-bold text-[#fafafa]">Agregar Vuelo</h2>
+              <p className="text-[10px] text-zinc-500">
+                {direction === 'departures' ? 'Salida' : 'Llegada'} {airportCode}
               </p>
             </div>
           </div>
@@ -191,8 +191,8 @@ export function AddFlightSheet({
           </button>
         </div>
 
-        {/* Progress */}
-        <div className="flex gap-1 px-4 py-3">
+        {/* Progress - Compact */}
+        <div className="flex gap-1 px-4 py-2 flex-shrink-0">
           {[1, 2, 3, 4].map((s) => (
             <div
               key={s}
@@ -203,18 +203,18 @@ export function AddFlightSheet({
           ))}
         </div>
 
-        {/* Content */}
-        <div className="px-4 py-4 min-h-[280px]">
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto px-4 py-3">
           {/* Step 1: Time */}
           {step === 1 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-[#f59e0b]/20 flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-[#f59e0b]" />
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-[#f59e0b]/20 flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-[#f59e0b]" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-[#fafafa]">¿A qué hora?</h3>
-                  <p className="text-sm text-zinc-500">Hora de {direction === 'departures' ? 'salida' : 'llegada'} (24h)</p>
+                  <h3 className="text-base font-bold text-[#fafafa]">¿A qué hora?</h3>
+                  <p className="text-xs text-zinc-500">Hora de {direction === 'departures' ? 'salida' : 'llegada'} (24h)</p>
                 </div>
               </div>
 
@@ -222,8 +222,9 @@ export function AddFlightSheet({
                 value={time}
                 onChange={(e) => handleTimeInput(e.target.value)}
                 placeholder="HH:MM"
-                className="text-center text-4xl font-mono h-20 bg-[#141414] border-[#27272a] text-[#fafafa]"
+                className="text-center text-3xl font-mono h-16 bg-[#141414] border-[#27272a] text-[#fafafa]"
                 maxLength={5}
+                inputMode="numeric"
                 autoFocus
               />
 
@@ -235,27 +236,28 @@ export function AddFlightSheet({
 
           {/* Step 2: Flight Number */}
           {step === 2 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-[#E91E8C]/20 flex items-center justify-center">
-                  <span className="text-lg font-bold text-[#E91E8C]">VOI</span>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-[#E91E8C]/20 flex items-center justify-center">
+                  <span className="text-sm font-bold text-[#E91E8C]">VOI</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-[#fafafa]">Número de vuelo</h3>
-                  <p className="text-sm text-zinc-500">Solo el número (sin VOI)</p>
+                  <h3 className="text-base font-bold text-[#fafafa]">Número de vuelo</h3>
+                  <p className="text-xs text-zinc-500">Solo el número (sin VOI)</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <div className="px-4 py-5 bg-[#E91E8C] rounded-xl">
-                  <span className="text-xl font-bold text-white">VOI</span>
+                <div className="px-3 py-4 bg-[#E91E8C] rounded-xl">
+                  <span className="text-lg font-bold text-white">VOI</span>
                 </div>
                 <Input
                   value={flightNumber}
                   onChange={(e) => setFlightNumber(e.target.value.replace(/\D/g, '').slice(0, 4))}
                   placeholder="1234"
-                  className="text-center text-4xl font-mono h-16 bg-[#141414] border-[#27272a] text-[#fafafa]"
+                  className="text-center text-3xl font-mono h-14 bg-[#141414] border-[#27272a] text-[#fafafa]"
                   maxLength={4}
+                  inputMode="numeric"
                   autoFocus
                 />
               </div>
@@ -264,16 +266,16 @@ export function AddFlightSheet({
 
           {/* Step 3: Destination */}
           {step === 3 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-[#00ffff]/20 flex items-center justify-center">
-                  <MapPin className="w-6 h-6 text-[#00ffff]" />
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-[#00ffff]/20 flex items-center justify-center">
+                  <MapPin className="w-5 h-5 text-[#00ffff]" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-[#fafafa]">
+                  <h3 className="text-base font-bold text-[#fafafa]">
                     {direction === 'departures' ? 'Destino' : 'Origen'}
                   </h3>
-                  <p className="text-sm text-zinc-500">Busca por código o ciudad</p>
+                  <p className="text-xs text-zinc-500">Busca por código o ciudad</p>
                 </div>
               </div>
 
@@ -328,14 +330,14 @@ export function AddFlightSheet({
 
           {/* Step 4: Gate */}
           {step === 4 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-[#22c55e]/20 flex items-center justify-center">
-                  <span className="text-lg font-bold text-[#22c55e]">#</span>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-[#22c55e]/20 flex items-center justify-center">
+                  <span className="text-sm font-bold text-[#22c55e]">#</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-[#fafafa]">Puerta de abordaje</h3>
-                  <p className="text-sm text-zinc-500">Opcional - puedes agregarlo después</p>
+                  <h3 className="text-base font-bold text-[#fafafa]">Puerta de abordaje</h3>
+                  <p className="text-xs text-zinc-500">Opcional - puedes agregarlo después</p>
                 </div>
               </div>
 
@@ -409,14 +411,14 @@ export function AddFlightSheet({
           </div>
         )}
 
-        {/* Actions - Fixed at bottom with safe area for mobile */}
-        <div className="sticky bottom-0 bg-[#0a0a0a] border-t border-[#27272a] p-4 pb-safe">
-          <div className="flex gap-3">
+        {/* Actions - Always visible, above keyboard */}
+        <div className="flex-shrink-0 bg-[#0a0a0a] border-t border-[#27272a] p-3 pb-safe">
+          <div className="flex gap-2">
             {step > 1 && (
               <Button
                 variant="outline"
                 onClick={() => setStep(step - 1)}
-                className="flex-1 h-12 text-base border-zinc-700"
+                className="flex-1 h-11 text-sm border-zinc-700"
               >
                 Atrás
               </Button>
@@ -426,7 +428,7 @@ export function AddFlightSheet({
               <Button
                 onClick={() => setStep(step + 1)}
                 disabled={!canProceed()}
-                className="flex-1 h-12 text-base bg-[#E91E8C] hover:bg-[#E91E8C]/90 text-white font-bold disabled:opacity-50"
+                className="flex-1 h-11 text-sm bg-[#E91E8C] hover:bg-[#E91E8C]/90 text-white font-bold disabled:opacity-50"
               >
                 Siguiente
               </Button>
@@ -434,14 +436,12 @@ export function AddFlightSheet({
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="flex-1 h-12 text-base bg-[#22c55e] hover:bg-[#22c55e]/90 text-black font-bold"
+                className="flex-1 h-11 text-sm bg-[#22c55e] hover:bg-[#22c55e]/90 text-black font-bold"
               >
                 {isSubmitting ? 'Guardando...' : 'Agregar Vuelo'}
               </Button>
             )}
           </div>
-          {/* Extra safe area for bottom navigation */}
-          <div className="h-20" />
         </div>
       </div>
     </div>
