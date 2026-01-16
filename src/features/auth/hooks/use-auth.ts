@@ -19,20 +19,39 @@ export function useAuth() {
     let isMounted = true
 
     const fetchUserProfile = async (userId: string): Promise<User | null> => {
-      const { data: profile } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single()
-      return profile as User | null
+      try {
+        const timeoutPromise = new Promise<null>((resolve) =>
+          setTimeout(() => resolve(null), 5000)
+        )
+        const queryPromise = supabase
+          .from('users')
+          .select('*')
+          .eq('id', userId)
+          .single()
+          .then(({ data }) => data as User | null)
+
+        return await Promise.race([queryPromise, timeoutPromise])
+      } catch {
+        return null
+      }
     }
 
-    // Get initial session
+    // Get initial session with timeout
     const getInitialSession = async () => {
+      // Safety timeout - ensure loading stops after 8 seconds max
+      const safetyTimeout = setTimeout(() => {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      }, 8000)
+
       try {
         const { data: { user: authUser } } = await supabase.auth.getUser()
 
-        if (!isMounted) return
+        if (!isMounted) {
+          clearTimeout(safetyTimeout)
+          return
+        }
 
         if (authUser) {
           const profile = await fetchUserProfile(authUser.id)
@@ -51,6 +70,8 @@ export function useAuth() {
           setUser(null)
           setIsLoading(false)
         }
+      } finally {
+        clearTimeout(safetyTimeout)
       }
     }
 

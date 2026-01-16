@@ -249,7 +249,7 @@ export async function cleanupOldAuditLogs(
 
   const supabase = await createServiceRoleClient()
 
-  const { data, error } = await supabase.rpc('cleanup_old_audit_logs', {
+  const { data, error } = await (supabase as any).rpc("cleanup_old_audit_logs", {
     days_to_keep: daysToKeep
   })
 
