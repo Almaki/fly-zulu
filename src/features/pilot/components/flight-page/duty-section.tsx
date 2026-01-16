@@ -266,7 +266,7 @@ export function DutySection({
             </div>
             <div>
               <span className="text-xs text-[#71717a]">
-                Fin {dutyEnd ? '(editado)' : 'estimado'}
+                Fin {dutyEnd ? '(fijo)' : estimatedEnd ? 'estimado' : ''}
               </span>
               {isEditingEnd ? (
                 <div className="flex items-center gap-1">
@@ -290,24 +290,22 @@ export function DutySection({
                 </div>
               ) : (
                 <div className="flex items-center gap-1">
-                  <p className={`text-lg font-mono ${dutyEnd ? 'text-[#00ff41]' : 'text-[#ffbf00]'}`}>
+                  <p className={`text-lg font-mono ${dutyEnd ? 'text-[#00ff41]' : estimatedEnd ? 'text-[#ffbf00]' : 'text-[#71717a]'}`}>
                     {dutyEnd || estimatedEnd || '--:--'}Z
                   </p>
-                  {/* Always show edit button when there's a time to edit */}
-                  {(dutyEnd || estimatedEnd) && (
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => {
-                        setEditEndValue(dutyEnd || estimatedEnd || '')
-                        setIsEditingEnd(true)
-                      }}
-                      className="h-6 w-6"
-                      title="Editar fin de jornada (valor fijo para cálculos)"
-                    >
-                      <Edit2 className="w-3 h-3 text-[#71717a]" />
-                    </Button>
-                  )}
+                  {/* Always show edit button to allow manual entry */}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => {
+                      setEditEndValue(dutyEnd || estimatedEnd || '')
+                      setIsEditingEnd(true)
+                    }}
+                    className="h-6 w-6"
+                    title="Editar fin de jornada"
+                  >
+                    <Edit2 className="w-3 h-3 text-[#71717a]" />
+                  </Button>
                 </div>
               )}
               {dutyEnd && (

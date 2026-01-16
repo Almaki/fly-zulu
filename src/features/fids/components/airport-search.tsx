@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { Search, MapPin, Star, Plane, X, ChevronRight, Globe } from 'lucide-react'
+import { Search, MapPin, Star, Plane, X, ChevronRight, Globe, AlertCircle } from 'lucide-react'
 import { Input } from '@/shared/components/ui/input'
-import { searchAirports, AIRPORTS, type Airport } from '../constants/airports'
+import { Button } from '@/shared/components/ui/button'
+import { searchAirports, AIRPORTS, createCustomAirport, type Airport } from '../constants/airports'
 
 interface AirportSearchProps {
   onSelect: (airport: Airport) => void
@@ -104,16 +105,30 @@ export function AirportSearch({ onSelect, onCancel }: AirportSearchProps) {
           </div>
         )}
 
-        {/* No results */}
+        {/* No results - allow custom entry */}
         {query && results.length === 0 && (
-          <div className="p-8 text-center">
-            <MapPin className="w-12 h-12 mx-auto text-zinc-700 mb-3" />
-            <p className="text-sm text-zinc-500">
-              No se encontró "{query}"
-            </p>
-            <p className="text-xs text-zinc-600 mt-1">
-              Intenta con el código IATA o nombre de ciudad
-            </p>
+          <div className="p-6">
+            <div className="bg-[#1a1a1a] border border-[#27272a] rounded-xl p-4 text-center">
+              <AlertCircle className="w-10 h-10 mx-auto text-[#f59e0b] mb-3" />
+              <p className="text-sm text-zinc-400 mb-2">
+                "{query.toUpperCase()}" no está en la base de datos
+              </p>
+              <p className="text-xs text-zinc-500 mb-4">
+                Puedes continuar con este código y aparecerá como lo escribiste
+              </p>
+              <Button
+                onClick={() => {
+                  const customAirport = createCustomAirport(query)
+                  onSelect(customAirport)
+                }}
+                className="w-full bg-[#f59e0b] hover:bg-[#f59e0b]/90 text-black font-medium"
+              >
+                Usar "{query.toUpperCase()}" de todas formas
+              </Button>
+              <p className="text-[10px] text-zinc-600 mt-3">
+                Tip: Busca por código IATA (3 letras) o nombre de ciudad
+              </p>
+            </div>
           </div>
         )}
 
