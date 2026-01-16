@@ -177,84 +177,8 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
 
   return (
     <div className="bg-[#0a0a0a] hover:bg-[#0f0f0f] transition-colors border-b border-zinc-800/50">
-      {/* Row 1: Time, Flight Number, Status */}
-      <div className="px-4 pt-3 pb-1 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          {/* Time - Editable */}
-          {editField === 'time' ? (
-            <div className="flex items-center gap-1">
-              <Input
-                value={editValue}
-                onChange={(e) => handleTimeInput(e.target.value)}
-                className="w-16 h-8 text-sm px-2 bg-[#1a1a1a] border-[#E91E8C]"
-                maxLength={5}
-                inputMode="numeric"
-                autoFocus
-              />
-              <button onClick={saveEdit} disabled={isSubmitting} className="text-[#22c55e] p-1">
-                <Check className="w-4 h-4" />
-              </button>
-              <button onClick={cancelEdit} className="text-zinc-500 p-1">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => startEdit('time', displayTime)}
-              className="text-left hover:text-[#E91E8C] transition-colors"
-            >
-              <span className={`text-xl font-bold font-mono ${hasDelay ? 'text-zinc-500 line-through' : 'text-[#fafafa]'}`}>
-                {displayTime}
-              </span>
-              {newTime && (
-                <span className="ml-2 text-sm font-mono text-[#f59e0b]">
-                  → {newTime}
-                </span>
-              )}
-            </button>
-          )}
-
-          {/* Flight Number - Editable - Larger and more prominent */}
-          {editField === 'flight' ? (
-            <div className="flex items-center gap-1">
-              <span className="text-[#E91E8C] text-base font-bold">VOI</span>
-              <Input
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                className="w-16 h-9 text-base px-2 bg-[#1a1a1a] border-[#E91E8C]"
-                maxLength={4}
-                inputMode="numeric"
-                autoFocus
-              />
-              <button onClick={saveEdit} disabled={isSubmitting} className="text-[#22c55e] p-1">
-                <Check className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => startEdit('flight', flight.flight_number.replace('VOI', ''))}
-              className="flex items-center hover:opacity-80 transition-opacity"
-            >
-              <span className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-[#E91E8C] text-white text-sm font-bold tracking-wide">
-                VOI {flight.flight_number.replace('VOI', '')}
-              </span>
-            </button>
-          )}
-        </div>
-
-        {/* Status Editor Modal */}
-        {editField === 'status' && (
-          <StatusEditor
-            currentStatus={flight.status}
-            onSave={saveStatus}
-            onCancel={cancelEdit}
-            isSubmitting={isSubmitting}
-          />
-        )}
-      </div>
-
-      {/* Row 2: Status indicator (clickable) + Destination + Status badges + Gate */}
-      <div className="px-4 pb-3 flex items-center gap-3">
+      {/* Single Row: Time, Flight Number, Gate */}
+      <div className="px-4 py-3 flex items-center gap-3">
         {/* Status indicator - breathing animation, clickable to edit */}
         <button
           onClick={() => setEditField('status')}
@@ -262,42 +186,98 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
           aria-label="Editar status"
         >
           <div
-            className={`w-4 h-4 rounded-full ${statusConfig.color} ${
+            className={`w-3.5 h-3.5 rounded-full ${statusConfig.color} ${
               statusConfig.breathe ? 'animate-[pulse_2s_ease-in-out_infinite]' : ''
-            } ring-2 ring-offset-2 ring-offset-[#0a0a0a] ring-transparent hover:ring-white/20 transition-all`}
+            } ring-2 ring-offset-1 ring-offset-[#0a0a0a] ring-transparent hover:ring-white/20 transition-all`}
           />
         </button>
 
+        {/* Time - Editable */}
+        {editField === 'time' ? (
+          <div className="flex items-center gap-1">
+            <Input
+              value={editValue}
+              onChange={(e) => handleTimeInput(e.target.value)}
+              className="w-16 h-8 text-sm px-2 bg-[#1a1a1a] border-[#E91E8C]"
+              maxLength={5}
+              inputMode="numeric"
+              autoFocus
+            />
+            <button onClick={saveEdit} disabled={isSubmitting} className="text-[#22c55e] p-1">
+              <Check className="w-4 h-4" />
+            </button>
+            <button onClick={cancelEdit} className="text-zinc-500 p-1">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => startEdit('time', displayTime)}
+            className="text-left hover:text-[#E91E8C] transition-colors flex-shrink-0"
+          >
+            <span className={`text-lg font-bold font-mono ${hasDelay ? 'text-zinc-500 line-through' : 'text-[#fafafa]'}`}>
+              {displayTime}
+            </span>
+            {newTime && (
+              <span className="ml-1 text-xs font-mono text-[#f59e0b]">
+                →{newTime}
+              </span>
+            )}
+          </button>
+        )}
+
+        {/* Flight Number - Editable */}
+        {editField === 'flight' ? (
+          <div className="flex items-center gap-1">
+            <span className="text-[#E91E8C] text-sm font-bold">VOI</span>
+            <Input
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value.replace(/\D/g, '').slice(0, 4))}
+              className="w-14 h-8 text-sm px-2 bg-[#1a1a1a] border-[#E91E8C]"
+              maxLength={4}
+              inputMode="numeric"
+              autoFocus
+            />
+            <button onClick={saveEdit} disabled={isSubmitting} className="text-[#22c55e] p-1">
+              <Check className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => startEdit('flight', flight.flight_number.replace('VOI', ''))}
+            className="flex items-center hover:opacity-80 transition-opacity flex-shrink-0"
+          >
+            <span className="inline-flex items-center justify-center px-2 py-1 rounded-md bg-[#E91E8C] text-white text-xs font-bold tracking-wide">
+              VOI {flight.flight_number.replace('VOI', '')}
+            </span>
+          </button>
+        )}
+
         {/* Destination + Status badges */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-base font-medium text-[#fafafa]">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <p className="text-sm font-medium text-[#fafafa] truncate">
               {displayCity}
             </p>
             {/* Status badges inline */}
             {statusConfig.label && (
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${statusConfig.textColor} bg-current/10`}>
+              <span className={`text-[9px] font-bold px-1 py-0.5 rounded ${statusConfig.textColor} bg-current/10`}>
                 {statusConfig.label}
               </span>
             )}
-            {hasDelay && newTime && (
-              <span className="text-[10px] font-mono text-[#f59e0b] bg-[#f59e0b]/10 px-1.5 py-0.5 rounded">
-                → {newTime}
-              </span>
-            )}
           </div>
-          <p className="text-xs text-zinc-500 font-mono">
+          <p className="text-[10px] text-zinc-500 font-mono">
             {displayCode}
           </p>
         </div>
 
         {/* Gate - Editable - Color changes on gate change */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center flex-shrink-0">
           {editField === 'gate' ? (
             <div className="flex items-center gap-1">
               {gateOptions.length > 0 ? (
                 <Select value={editValue} onValueChange={setEditValue}>
-                  <SelectTrigger className="w-20 h-10 text-base bg-[#1a1a1a] border-[#d97706]">
+                  <SelectTrigger className="w-16 h-10 text-sm bg-[#1a1a1a] border-[#d97706]">
                     <SelectValue placeholder="-" />
                   </SelectTrigger>
                   <SelectContent>
@@ -314,7 +294,7 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
                 <Input
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value.toUpperCase().slice(0, 4))}
-                  className="w-16 h-10 text-base px-2 bg-[#1a1a1a] border-[#d97706]"
+                  className="w-14 h-10 text-sm px-2 bg-[#1a1a1a] border-[#d97706]"
                   maxLength={4}
                   autoFocus
                 />
@@ -326,19 +306,29 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
           ) : (
             <button
               onClick={() => startEdit('gate', flight.gate || '')}
-              className={`relative flex items-center justify-center min-w-[52px] h-[52px] px-2 rounded-lg transition-colors ${gateCardColor}`}
+              className={`relative flex items-center justify-center min-w-[44px] h-[44px] px-2 rounded-lg transition-colors ${gateCardColor}`}
             >
               {/* Gate change indicator icon */}
               {hasGateChange && (
-                <ArrowRightLeft className="absolute -top-1 -right-1 w-4 h-4 text-white bg-[#3b82f6] rounded-full p-0.5" />
+                <ArrowRightLeft className="absolute -top-1 -right-1 w-3.5 h-3.5 text-white bg-[#3b82f6] rounded-full p-0.5" />
               )}
-              <span className="text-2xl font-bold font-mono text-white tracking-wide">
+              <span className="text-xl font-bold font-mono text-white tracking-wide">
                 {flight.gate || '—'}
               </span>
             </button>
           )}
         </div>
       </div>
+
+      {/* Status Editor Modal */}
+      {editField === 'status' && (
+        <StatusEditor
+          currentStatus={flight.status}
+          onSave={saveStatus}
+          onCancel={cancelEdit}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </div>
   )
 }
