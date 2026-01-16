@@ -82,7 +82,7 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
   // Gate card color based on gate change status
   const gateCardColor = hasGateChange
     ? 'bg-[#3b82f6] hover:bg-[#2563eb]' // Blue for gate change
-    : 'bg-[#b45309] hover:bg-[#92400e]' // Amber for normal
+    : 'bg-[#ca8a04] hover:bg-[#a16207]' // Yellow for normal
 
   // Start editing
   const startEdit = (field: EditField, currentValue: string) => {
@@ -278,13 +278,13 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
           </div>
         </div>
 
-        {/* Right side: Gate card spanning both rows */}
-        <div className="flex items-center pr-3 py-2">
+        {/* Right side: Gate card - full row 1 height + half of row 2 */}
+        <div className="flex items-start pr-3 py-1.5">
           {editField === 'gate' ? (
             <div className="flex items-center gap-1">
               {gateOptions.length > 0 ? (
                 <Select value={editValue} onValueChange={setEditValue}>
-                  <SelectTrigger className="w-16 h-14 text-lg bg-[#1a1a1a] border-[#d97706]">
+                  <SelectTrigger className="w-20 h-16 text-xl bg-[#1a1a1a] border-[#d97706]">
                     <SelectValue placeholder="-" />
                   </SelectTrigger>
                   <SelectContent>
@@ -301,7 +301,7 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
                 <Input
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value.toUpperCase().slice(0, 4))}
-                  className="w-16 h-14 text-lg text-center bg-[#1a1a1a] border-[#d97706]"
+                  className="w-20 h-16 text-xl text-center bg-[#1a1a1a] border-[#d97706]"
                   maxLength={4}
                   autoFocus
                 />
@@ -313,13 +313,16 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
           ) : (
             <button
               onClick={() => startEdit('gate', flight.gate || '')}
-              className={`relative flex items-center justify-center min-w-[56px] h-[56px] px-3 rounded-xl transition-colors ${gateCardColor}`}
+              className={`relative flex flex-col items-center justify-center min-w-[64px] h-[52px] px-4 rounded-xl transition-colors ${gateCardColor}`}
             >
               {/* Gate change indicator icon */}
               {hasGateChange && (
                 <ArrowRightLeft className="absolute -top-1.5 -right-1.5 w-4 h-4 text-white bg-[#3b82f6] rounded-full p-0.5" />
               )}
-              <span className="text-2xl font-bold font-mono text-white tracking-wide">
+              <span className="text-[10px] text-white/60 font-medium uppercase tracking-wider -mb-0.5">
+                Puerta
+              </span>
+              <span className="text-3xl font-bold font-mono text-white tracking-wide leading-none">
                 {flight.gate || '—'}
               </span>
             </button>
