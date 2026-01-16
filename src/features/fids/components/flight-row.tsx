@@ -52,29 +52,37 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
     ? format(new Date(new Date(scheduledTime).getTime() + flight.delay_minutes * 60000), 'HH:mm')
     : null
 
-  // Status indicator
+  // Check if gate was changed (status includes GATE_CHANGE or has gate_changed flag)
+  const hasGateChange = flight.status === 'GATE_CHANGE'
+
+  // Status indicator - breathing animation for active statuses
   const getStatusConfig = (status: FlightStatus) => {
     switch (status) {
       case 'ON_TIME':
-        return { color: 'bg-[#22c55e]', icon: null, label: '' }
+        return { color: 'bg-[#22c55e]', breathe: true, label: '', textColor: 'text-[#22c55e]' }
       case 'DELAY':
-        return { color: 'bg-[#f59e0b]', icon: Clock, label: 'DLY' }
+        return { color: 'bg-[#f59e0b]', breathe: true, label: 'DLY', textColor: 'text-[#f59e0b]' }
       case 'GATE_CHANGE':
-        return { color: 'bg-[#3b82f6]', icon: ArrowRightLeft, label: 'CHG' }
+        return { color: 'bg-[#3b82f6]', breathe: true, label: 'CHG', textColor: 'text-[#3b82f6]' }
       case 'CANCELED':
-        return { color: 'bg-[#ef4444]', icon: Ban, label: 'CNL' }
+        return { color: 'bg-[#ef4444]', breathe: false, label: 'CNL', textColor: 'text-[#ef4444]' }
       case 'BOARDING':
-        return { color: 'bg-[#22c55e] animate-pulse', icon: null, label: 'BRD' }
+        return { color: 'bg-[#22c55e]', breathe: true, label: 'BRD', textColor: 'text-[#22c55e]' }
       case 'DEPARTED':
-        return { color: 'bg-zinc-600', icon: null, label: 'DEP' }
+        return { color: 'bg-zinc-500', breathe: false, label: 'DEP', textColor: 'text-zinc-500' }
       case 'ARRIVED':
-        return { color: 'bg-zinc-600', icon: null, label: 'ARR' }
+        return { color: 'bg-zinc-500', breathe: false, label: 'ARR', textColor: 'text-zinc-500' }
       default:
-        return { color: 'bg-zinc-600', icon: null, label: '' }
+        return { color: 'bg-zinc-600', breathe: true, label: '', textColor: 'text-zinc-500' }
     }
   }
 
   const statusConfig = getStatusConfig(flight.status)
+
+  // Gate card color based on gate change status
+  const gateCardColor = hasGateChange
+    ? 'bg-[#3b82f6] hover:bg-[#2563eb]' // Blue for gate change
+    : 'bg-[#b45309] hover:bg-[#92400e]' // Amber for normal
 
   // Start editing
   const startEdit = (field: EditField, currentValue: string) => {
@@ -234,47 +242,57 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
           )}
         </div>
 
-        {/* Status label - tapping opens editor */}
-        <div className="flex items-center gap-2">
-          {editField === 'status' ? (
-            <StatusEditor
-              currentStatus={flight.status}
-              onSave={saveStatus}
-              onCancel={cancelEdit}
-              isSubmitting={isSubmitting}
-            />
-          ) : (
-            <button
-              onClick={() => setEditField('status')}
-              className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-zinc-800 transition-colors"
-            >
-              {statusConfig.label && (
-                <span className="text-xs font-medium text-zinc-400">
-                  {statusConfig.label}
-                </span>
-              )}
-            </button>
-          )}
-        </div>
+        {/* Status Editor Modal */}
+        {editField === 'status' && (
+          <StatusEditor
+            currentStatus={flight.status}
+            onSave={saveStatus}
+            onCancel={cancelEdit}
+            isSubmitting={isSubmitting}
+          />
+        )}
       </div>
 
-      {/* Row 2: Destination with status indicator + Gate */}
-      <div className="px-4 pb-3 flex items-center justify-between">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          {/* Status indicator next to destination */}
-          <div className={`w-3 h-3 rounded-full flex-shrink-0 ${statusConfig.color}`} />
-          <div className="min-w-0">
-            <p className="text-base font-medium text-[#fafafa] truncate">
+      {/* Row 2: Status indicator (clickable) + Destination + Status badges + Gate */}
+      <div className="px-4 pb-3 flex items-center gap-3">
+        {/* Status indicator - breathing animation, clickable to edit */}
+        <button
+          onClick={() => setEditField('status')}
+          className="flex-shrink-0 focus:outline-none"
+          aria-label="Editar status"
+        >
+          <div
+            className={`w-4 h-4 rounded-full ${statusConfig.color} ${
+              statusConfig.breathe ? 'animate-[pulse_2s_ease-in-out_infinite]' : ''
+            } ring-2 ring-offset-2 ring-offset-[#0a0a0a] ring-transparent hover:ring-white/20 transition-all`}
+          />
+        </button>
+
+        {/* Destination + Status badges */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-base font-medium text-[#fafafa]">
               {displayCity}
             </p>
-            <p className="text-xs text-zinc-500 font-mono">
-              {displayCode}
-            </p>
+            {/* Status badges inline */}
+            {statusConfig.label && (
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${statusConfig.textColor} bg-current/10`}>
+                {statusConfig.label}
+              </span>
+            )}
+            {hasDelay && newTime && (
+              <span className="text-[10px] font-mono text-[#f59e0b] bg-[#f59e0b]/10 px-1.5 py-0.5 rounded">
+                → {newTime}
+              </span>
+            )}
           </div>
+          <p className="text-xs text-zinc-500 font-mono">
+            {displayCode}
+          </p>
         </div>
 
-        {/* Gate - Editable - Airport style with softer amber */}
-        <div className="flex items-center gap-2">
+        {/* Gate - Editable - Color changes on gate change */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           {editField === 'gate' ? (
             <div className="flex items-center gap-1">
               {gateOptions.length > 0 ? (
@@ -308,8 +326,12 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
           ) : (
             <button
               onClick={() => startEdit('gate', flight.gate || '')}
-              className="flex items-center justify-center min-w-[56px] h-[56px] px-3 rounded-lg bg-[#b45309] hover:bg-[#92400e] transition-colors"
+              className={`relative flex items-center justify-center min-w-[52px] h-[52px] px-2 rounded-lg transition-colors ${gateCardColor}`}
             >
+              {/* Gate change indicator icon */}
+              {hasGateChange && (
+                <ArrowRightLeft className="absolute -top-1 -right-1 w-4 h-4 text-white bg-[#3b82f6] rounded-full p-0.5" />
+              )}
               <span className="text-2xl font-bold font-mono text-white tracking-wide">
                 {flight.gate || '—'}
               </span>
@@ -317,15 +339,6 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
           )}
         </div>
       </div>
-
-      {/* Delay/Gate change info row */}
-      {(flight.status === 'DELAY' || flight.status === 'GATE_CHANGE') && flight.delay_reason && (
-        <div className="px-4 pb-3 -mt-1">
-          <p className="text-xs text-[#f59e0b] bg-[#f59e0b]/10 px-3 py-1.5 rounded-lg inline-block">
-            {flight.delay_reason}
-          </p>
-        </div>
-      )}
     </div>
   )
 }
