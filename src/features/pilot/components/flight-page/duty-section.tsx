@@ -121,10 +121,12 @@ export function DutySection({
   }
 
   const handleSaveEditEnd = () => {
-    if (editEndValue) {
+    // Validate time format HH:MM
+    if (editEndValue && /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(editEndValue)) {
       onUpdateDutyEnd(editEndValue)
     }
     setIsEditingEnd(false)
+    setEditEndValue('')
   }
 
   const handleSaveLimit = () => {
@@ -263,14 +265,24 @@ export function DutySection({
               )}
             </div>
             <div>
-              <span className="text-xs text-[#71717a]">Fin estimado</span>
+              <span className="text-xs text-[#71717a]">
+                Fin {dutyEnd ? '(editado)' : 'estimado'}
+              </span>
               {isEditingEnd ? (
                 <div className="flex items-center gap-1">
                   <Input
                     value={editEndValue}
-                    onChange={(e) => setEditEndValue(e.target.value)}
+                    onChange={(e) => {
+                      let val = e.target.value.replace(/[^0-9:]/g, '')
+                      if (val.length === 2 && !val.includes(':')) {
+                        val = val + ':'
+                      }
+                      setEditEndValue(val)
+                    }}
+                    placeholder="HH:MM"
                     className="w-20 h-8 text-center font-mono bg-[#0a0a0a]"
                     maxLength={5}
+                    autoFocus
                   />
                   <Button size="icon" variant="ghost" onClick={handleSaveEditEnd} className="h-8 w-8">
                     <Check className="w-4 h-4 text-[#22c55e]" />
@@ -278,23 +290,28 @@ export function DutySection({
                 </div>
               ) : (
                 <div className="flex items-center gap-1">
-                  <p className="text-lg font-mono text-[#ffbf00]">
+                  <p className={`text-lg font-mono ${dutyEnd ? 'text-[#00ff41]' : 'text-[#ffbf00]'}`}>
                     {dutyEnd || estimatedEnd || '--:--'}Z
                   </p>
-                  {!dutyEnd && estimatedEnd && (
+                  {/* Always show edit button when there's a time to edit */}
+                  {(dutyEnd || estimatedEnd) && (
                     <Button
                       size="icon"
                       variant="ghost"
                       onClick={() => {
-                        setEditEndValue(estimatedEnd)
+                        setEditEndValue(dutyEnd || estimatedEnd || '')
                         setIsEditingEnd(true)
                       }}
                       className="h-6 w-6"
+                      title="Editar fin de jornada (valor fijo para cálculos)"
                     >
                       <Edit2 className="w-3 h-3 text-[#71717a]" />
                     </Button>
                   )}
                 </div>
+              )}
+              {dutyEnd && (
+                <p className="text-[10px] text-[#22c55e] mt-0.5">Valor fijo para cálculos</p>
               )}
             </div>
           </div>

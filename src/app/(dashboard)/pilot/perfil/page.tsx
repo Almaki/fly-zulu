@@ -8,11 +8,14 @@ import { toast } from 'sonner'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { createClient } from '@/shared/lib/supabase/client'
+import { useAuth } from '@/features/auth/hooks'
 import { useAuthStore } from '@/features/auth/store'
 
 export default function PerfilPage() {
   const router = useRouter()
-  const { user, setUser, logout } = useAuthStore()
+  const { user, isLoading } = useAuth()
+  const setUser = useAuthStore((state) => state.setUser)
+  const storeLogout = useAuthStore((state) => state.logout)
   const [isEditing, setIsEditing] = useState(false)
   const [newName, setNewName] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -60,7 +63,7 @@ export default function PerfilPage() {
     try {
       const supabase = createClient()
       await supabase.auth.signOut()
-      logout()
+      storeLogout()
       router.push('/login')
     } catch {
       toast.error('Error al cerrar sesión')
@@ -81,10 +84,23 @@ export default function PerfilPage() {
     return labels[position] || position
   }
 
-  if (!user) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#0066CC]" />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
+        <div className="text-center">
+          <p className="text-zinc-400 mb-4">No se encontró el perfil</p>
+          <Button onClick={() => router.push('/login')} variant="outline">
+            Ir a iniciar sesión
+          </Button>
+        </div>
       </div>
     )
   }

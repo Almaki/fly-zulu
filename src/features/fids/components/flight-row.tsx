@@ -46,38 +46,48 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
   const scheduledTime = direction === 'departures' ? flight.std : flight.sta
   const displayTime = format(new Date(scheduledTime), 'HH:mm')
 
-  // Get delay info
-  const hasDelay = flight.status === 'DELAY' && flight.delay_minutes > 0
+  // Get delay info - show delay indicator if delay_minutes > 0 (regardless of current status)
+  // This allows delay to persist even when status changes to GATE_CHANGE
+  const hasDelay = flight.delay_minutes > 0
+  // delay_minutes stores the new time as total minutes from midnight (e.g., 14:30 = 870 minutes)
   const newTime = hasDelay
-    ? format(new Date(new Date(scheduledTime).getTime() + flight.delay_minutes * 60000), 'HH:mm')
+    ? `${String(Math.floor(flight.delay_minutes / 60)).padStart(2, '0')}:${String(flight.delay_minutes % 60).padStart(2, '0')}`
     : null
 
-  // Check if gate was changed (status includes GATE_CHANGE or has gate_changed flag)
+  // Check if gate was changed
   const hasGateChange = flight.status === 'GATE_CHANGE'
 
-  // Status indicator - ON_TIME is static, others breathe
-  const getStatusConfig = (status: FlightStatus) => {
-    switch (status) {
-      case 'ON_TIME':
-        return { color: 'bg-[#22c55e]', breathe: false, label: '', textColor: 'text-[#22c55e]' } // Static green
-      case 'DELAY':
-        return { color: 'bg-[#f59e0b]', breathe: true, label: 'DLY', textColor: 'text-[#f59e0b]' }
-      case 'GATE_CHANGE':
-        return { color: 'bg-[#3b82f6]', breathe: true, label: 'CHG', textColor: 'text-[#3b82f6]' }
-      case 'CANCELED':
-        return { color: 'bg-[#ef4444]', breathe: true, label: 'CNL', textColor: 'text-[#ef4444]' }
-      case 'BOARDING':
-        return { color: 'bg-[#22c55e]', breathe: true, label: 'BRD', textColor: 'text-[#22c55e]' }
-      case 'DEPARTED':
-        return { color: 'bg-zinc-500', breathe: false, label: 'DEP', textColor: 'text-zinc-500' }
-      case 'ARRIVED':
-        return { color: 'bg-zinc-500', breathe: false, label: 'ARR', textColor: 'text-zinc-500' }
-      default:
-        return { color: 'bg-zinc-600', breathe: false, label: '', textColor: 'text-zinc-500' }
+  // Show both labels when there's delay AND gate change
+  const showDelayLabel = hasDelay
+  const showGateChangeLabel = hasGateChange
+
+  // Status indicator color - consider multiple states
+  // Priority: CANCELED > GATE_CHANGE (with delay) > DELAY > ON_TIME
+  const getStatusColor = () => {
+    if (flight.status === 'CANCELED') {
+      return { color: 'bg-[#ef4444]', breathe: true }
     }
+    if (hasGateChange && hasDelay) {
+      // Both delay and gate change - show blue (most recent change)
+      return { color: 'bg-[#3b82f6]', breathe: true }
+    }
+    if (hasGateChange) {
+      return { color: 'bg-[#3b82f6]', breathe: true }
+    }
+    if (hasDelay) {
+      return { color: 'bg-[#f59e0b]', breathe: true }
+    }
+    if (flight.status === 'BOARDING') {
+      return { color: 'bg-[#22c55e]', breathe: true }
+    }
+    if (flight.status === 'DEPARTED' || flight.status === 'ARRIVED') {
+      return { color: 'bg-zinc-500', breathe: false }
+    }
+    // ON_TIME - static green
+    return { color: 'bg-[#22c55e]', breathe: false }
   }
 
-  const statusConfig = getStatusConfig(flight.status)
+  const statusConfig = getStatusColor()
 
   // Gate card color based on gate change status
   const gateCardColor = hasGateChange
@@ -268,10 +278,25 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
               <span className="text-xs text-zinc-600 font-mono">
                 {displayCode}
               </span>
-              {/* Status label */}
-              {statusConfig.label && (
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${statusConfig.textColor} bg-current/10`}>
-                  {statusConfig.label}
+              {/* Status labels - can show multiple (DLY + CHG) */}
+              {showDelayLabel && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded text-[#f59e0b] bg-[#f59e0b]/10">
+                  DLY
+                </span>
+              )}
+              {showGateChangeLabel && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded text-[#3b82f6] bg-[#3b82f6]/10">
+                  CHG
+                </span>
+              )}
+              {flight.status === 'CANCELED' && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded text-[#ef4444] bg-[#ef4444]/10">
+                  CNL
+                </span>
+              )}
+              {flight.status === 'BOARDING' && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded text-[#22c55e] bg-[#22c55e]/10">
+                  BRD
                 </span>
               )}
             </div>

@@ -125,13 +125,15 @@ export async function updateFlightStatus(
     updated_at: new Date().toISOString(),
   }
 
-  if (status === 'DELAY' && delayMinutes !== undefined) {
+  // Only update delay_minutes if explicitly provided (for DELAY status)
+  if (delayMinutes !== undefined) {
     updates.delay_minutes = delayMinutes
     updates.delay_reason = delayReason || null
   }
 
-  // Reset delay info if changing from DELAY to other status
-  if (status !== 'DELAY') {
+  // Only reset delay info if explicitly setting to ON_TIME or CANCELED
+  // This preserves delay info when changing to GATE_CHANGE (allows both indicators)
+  if (status === 'ON_TIME' || status === 'CANCELED') {
     updates.delay_minutes = 0
     updates.delay_reason = null
   }
