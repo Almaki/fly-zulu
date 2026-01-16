@@ -28,11 +28,9 @@ export const DEFAULT_DASHBOARD = '/home'
  * @param role - Rol del usuario
  * @returns URL del dashboard correspondiente
  */
-export function getDashboardRoute(role: UserRole | string): string {
-  // Todos van a /home ahora, excepto SUPERADMIN que va a admin
-  if (role === 'SUPERADMIN') {
-    return '/admin'
-  }
+export function getDashboardRoute(_role: UserRole | string): string {
+  // Todos van a /home después de login/registro
+  // SUPERADMIN puede acceder a /admin desde el menú de perfil
   return HOME_ROUTE
 }
 
