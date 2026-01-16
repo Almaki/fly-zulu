@@ -316,11 +316,10 @@ export function RegisterForm() {
           {/* Step 3: Terms */}
           {step === 3 && (
             <div className="space-y-5 px-1">
-              {/* Botón Aceptar Todo con glow */}
+              {/* Botón Aceptar Todo - Azul con glow verde neón */}
               <Button
                 type="button"
-                variant="secondary"
-                className="w-full py-3 text-base font-semibold shadow-[0_0_20px_rgba(0,102,204,0.5)] hover:shadow-[0_0_30px_rgba(0,102,204,0.7)] border border-[#0066CC]/30 transition-all duration-300"
+                className="w-full py-3 text-base font-semibold bg-[#0088FF] hover:bg-[#0066CC] text-white shadow-[0_0_20px_rgba(0,255,136,0.4)] hover:shadow-[0_0_30px_rgba(0,255,136,0.6)] border border-[#00ff88]/30 transition-all duration-300"
                 onClick={() => {
                   form.setValue('terminos', true, { shouldValidate: true })
                   form.setValue('privacidad', true, { shouldValidate: true })
