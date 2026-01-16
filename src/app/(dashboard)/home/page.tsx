@@ -7,11 +7,14 @@ import {
   Clock,
   ChevronRight,
   Users,
-  Edit3
+  Edit3,
+  Wifi,
+  WifiOff
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/hooks'
 
-const features = [
+// Features base para todos los usuarios
+const baseFeatures = [
   {
     id: 'salidas',
     title: 'Salidas',
@@ -32,30 +35,41 @@ const features = [
     color: 'from-[#22c55e] to-[#4ade80]',
     available: true,
   },
+]
+
+// Features específicos para PILOT
+const pilotFeatures = [
   {
-    id: 'work',
-    title: 'Work',
-    description: 'Registra tu jornada y bitácora de vuelo',
+    id: 'salidas',
+    title: 'Salidas',
+    description: 'Tablero FIDS colaborativo',
+    subdescription: 'Consulta vuelos, reporta delays, cambios de gate y más. ¡Ayuda a otros tripulantes!',
+    icon: Clock,
+    href: '/board',
+    color: 'from-[#f59e0b] to-[#fbbf24]',
+    available: true,
+    collaborative: true,
+  },
+  {
+    id: 'flight',
+    title: 'Flight',
+    description: 'Jornada y bitácora de vuelo',
+    subdescription: 'Registra OUT/OFF/ON/IN, calcula tiempos de vuelo y bloque. Funciona sin conexión.',
     icon: Plane,
-    href: '/pilot/mcdu',
+    href: '/pilot/flight',
     color: 'from-[#0066CC] to-[#0088FF]',
     available: true,
+    offlineReady: true,
   },
-  // Academy oculto por ahora - descomentar cuando esté listo
-  // {
-  //   id: 'academy',
-  //   title: 'Academy',
-  //   description: 'Algo increíble está en camino...',
-  //   icon: GraduationCap,
-  //   href: '#',
-  //   color: 'from-[#8b5cf6] to-[#a78bfa]',
-  //   available: false,
-  //   comingSoon: true,
-  // },
 ]
 
 export default function HomePage() {
   const { user } = useAuth()
+
+  // Seleccionar features según posición
+  // Por ahora mostramos pilotFeatures para todos (la mayoría son pilotos)
+  // TODO: Personalizar por rol cuando el auth esté estabilizado
+  const features = pilotFeatures
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] p-4 pb-24">
@@ -74,7 +88,7 @@ export default function HomePage() {
             const Icon = feature.icon
 
             // Card especial para Salidas (colaborativa)
-            if (feature.collaborative) {
+            if ('collaborative' in feature && feature.collaborative) {
               return (
                 <Link
                   key={feature.id}
@@ -117,6 +131,54 @@ export default function HomePage() {
 
                   {/* Glow effect */}
                   <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-[#f59e0b]/10 rounded-full blur-2xl pointer-events-none group-hover:bg-[#f59e0b]/20 transition-colors" />
+                </Link>
+              )
+            }
+
+            // Card especial para Flight (offline ready)
+            if ('offlineReady' in feature && feature.offlineReady) {
+              return (
+                <Link
+                  key={feature.id}
+                  href={feature.href}
+                  className="group block relative overflow-hidden rounded-xl border border-[#0066CC]/30 bg-gradient-to-br from-[#141414] to-[#0a1a2a] p-5 transition-all duration-300 hover:border-[#0066CC]/50 hover:bg-[#1a1a1a] active:scale-[0.98]"
+                >
+                  {/* Badge Offline Ready */}
+                  <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full bg-[#00ff88]/20 border border-[#00ff88]/30">
+                    <WifiOff className="w-3 h-3 text-[#00ff88]" />
+                    <span className="text-[10px] font-medium text-[#00ff88]">Offline Ready</span>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <div className={`p-3 rounded-xl bg-gradient-to-br ${feature.color} shadow-lg group-hover:shadow-xl group-hover:shadow-[#0066CC]/20 transition-shadow`}>
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1 pr-20">
+                      <h3 className="font-semibold text-[#fafafa] text-lg group-hover:text-white transition-colors">
+                        {feature.title}
+                      </h3>
+                      <p className="text-sm text-[#0088FF] mt-1 font-medium">
+                        {feature.description}
+                      </p>
+                      <p className="text-xs text-[#71717a] mt-2 group-hover:text-[#a1a1aa] transition-colors">
+                        {feature.subdescription}
+                      </p>
+                      {/* Características clave */}
+                      <div className="flex items-center gap-3 mt-3">
+                        <span className="inline-flex items-center gap-1 text-[10px] text-[#71717a]">
+                          <Clock className="w-3 h-3" />
+                          Tiempo ZULU
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-[10px] text-[#71717a]">
+                          <Plane className="w-3 h-3" />
+                          FLT / BLK
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Glow effect */}
+                  <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-[#0066CC]/10 rounded-full blur-2xl pointer-events-none group-hover:bg-[#0066CC]/20 transition-colors" />
                 </Link>
               )
             }

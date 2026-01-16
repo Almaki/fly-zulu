@@ -41,7 +41,7 @@ const NAV_ITEMS = [
 
 // Map role to work page
 const WORK_ROUTES: Record<string, string> = {
-  PILOT: '/pilot/mcdu',
+  PILOT: '/pilot/flight',
   FA: '/fa/vuelo',
   OPS: '/ops/control',
   TRAFICO: '/trafico/tiempos',
