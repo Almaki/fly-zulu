@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { Check, X, Clock, AlertTriangle, Ban, ArrowRightLeft } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Input } from '@/shared/components/ui/input'
 import { Button } from '@/shared/components/ui/button'
@@ -351,11 +351,13 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
           ) : (
             <button
               onClick={() => startEdit('gate', flight.gate || '')}
-              className={`relative flex flex-col items-center justify-center w-[48px] h-[40px] rounded-lg transition-colors ${gateCardColor}`}
+              className={`relative flex flex-col items-center justify-center w-[48px] h-[40px] rounded-lg transition-colors overflow-hidden ${gateCardColor}`}
             >
-              {/* Gate change indicator icon */}
+              {/* Gate change ribbon - diagonal banner */}
               {hasGateChange && (
-                <ArrowRightLeft className="absolute -top-1 -right-1 w-3 h-3 text-white bg-[#3b82f6] rounded-full p-0.5" />
+                <div className="absolute -top-1 -right-3 w-10 h-4 bg-[#3b82f6] rotate-45 flex items-center justify-center shadow-md">
+                  <span className="text-[5px] font-bold text-white tracking-tight">CHG</span>
+                </div>
               )}
               <span className="text-[7px] text-white/70 font-medium uppercase tracking-wide leading-none">
                 Gate
