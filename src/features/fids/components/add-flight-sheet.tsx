@@ -409,39 +409,40 @@ export function AddFlightSheet({
           </div>
         )}
 
-        {/* Actions */}
-        <div className="p-4 flex gap-3">
-          {step > 1 && (
-            <Button
-              variant="outline"
-              onClick={() => setStep(step - 1)}
-              className="flex-1"
-            >
-              Atrás
-            </Button>
-          )}
+        {/* Actions - Fixed at bottom with safe area for mobile */}
+        <div className="sticky bottom-0 bg-[#0a0a0a] border-t border-[#27272a] p-4 pb-safe">
+          <div className="flex gap-3">
+            {step > 1 && (
+              <Button
+                variant="outline"
+                onClick={() => setStep(step - 1)}
+                className="flex-1 h-12 text-base border-zinc-700"
+              >
+                Atrás
+              </Button>
+            )}
 
-          {step < 4 ? (
-            <Button
-              onClick={() => setStep(step + 1)}
-              disabled={!canProceed()}
-              className="flex-1 bg-[#E91E8C] hover:bg-[#E91E8C]/90 text-white font-bold"
-            >
-              Continuar
-            </Button>
-          ) : (
-            <Button
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="flex-1 bg-[#22c55e] hover:bg-[#22c55e]/90 text-black font-bold"
-            >
-              {isSubmitting ? 'Guardando...' : 'Agregar Vuelo'}
-            </Button>
-          )}
+            {step < 4 ? (
+              <Button
+                onClick={() => setStep(step + 1)}
+                disabled={!canProceed()}
+                className="flex-1 h-12 text-base bg-[#E91E8C] hover:bg-[#E91E8C]/90 text-white font-bold disabled:opacity-50"
+              >
+                Siguiente
+              </Button>
+            ) : (
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="flex-1 h-12 text-base bg-[#22c55e] hover:bg-[#22c55e]/90 text-black font-bold"
+              >
+                {isSubmitting ? 'Guardando...' : 'Agregar Vuelo'}
+              </Button>
+            )}
+          </div>
+          {/* Extra safe area for bottom navigation */}
+          <div className="h-20" />
         </div>
-
-        {/* Bottom safe area */}
-        <div className="h-4" />
       </div>
     </div>
   )

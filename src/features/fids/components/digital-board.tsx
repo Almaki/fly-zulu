@@ -120,11 +120,14 @@ export function DigitalBoard({ initialAirport }: DigitalBoardProps) {
       {/* Digital Board Header - Airport Style */}
       <div className="bg-[#0a0a0a] border-b-2 border-[#1a1a1a] sticky top-0 z-20">
         {/* Airport selector */}
-        <button
-          onClick={() => setShowSearch(true)}
-          className="w-full flex items-center justify-between px-4 py-3 hover:bg-[#141414] transition-colors"
-        >
-          <div className="flex items-center gap-3">
+        <div className="w-full flex items-center justify-between px-4 py-3">
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => setShowSearch(true)}
+            onKeyDown={(e) => e.key === 'Enter' && setShowSearch(true)}
+            className="flex items-center gap-3 flex-1 cursor-pointer hover:opacity-80 transition-opacity"
+          >
             <div className="w-10 h-10 rounded-lg bg-[#E91E8C]/20 flex items-center justify-center">
               <Plane className="w-5 h-5 text-[#E91E8C]" />
             </div>
@@ -136,22 +139,18 @@ export function DigitalBoard({ initialAirport }: DigitalBoardProps) {
                 {getCityName(selectedAirport || '')}
               </p>
             </div>
+            <ChevronDown className="w-5 h-5 text-zinc-500 ml-auto" />
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                toggleFavorite()
-              }}
-              className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
-            >
-              <Star
-                className={`w-5 h-5 ${isFavorite ? 'fill-[#f59e0b] text-[#f59e0b]' : 'text-zinc-600'}`}
-              />
-            </button>
-            <ChevronDown className="w-5 h-5 text-zinc-500" />
-          </div>
-        </button>
+          <button
+            onClick={toggleFavorite}
+            className="p-2 hover:bg-zinc-800 rounded-lg transition-colors ml-2"
+            aria-label={isFavorite ? 'Remover de favoritos' : 'Agregar a favoritos'}
+          >
+            <Star
+              className={`w-5 h-5 ${isFavorite ? 'fill-[#f59e0b] text-[#f59e0b]' : 'text-zinc-600'}`}
+            />
+          </button>
+        </div>
 
         {/* Direction tabs */}
         <div className="flex border-t border-[#1a1a1a]">

@@ -35,8 +35,10 @@ export function AirportSearch({ onSelect, onCancel }: AirportSearchProps) {
 
   // Popular Mexican airports (quick access)
   const popularAirports = useMemo(() => {
-    const popularCodes = ['MEX', 'CUN', 'GDL', 'MTY', 'TIJ', 'PVR', 'SJD', 'MID']
-    return AIRPORTS.filter(a => popularCodes.includes(a.code))
+    const popularCodes = ['MTY', 'TIJ', 'GDL', 'CUN', 'MEX']
+    return popularCodes
+      .map(code => AIRPORTS.find(a => a.code === code))
+      .filter((a): a is Airport => a !== undefined)
   }, [])
 
   return (

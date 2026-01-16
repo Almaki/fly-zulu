@@ -6,6 +6,8 @@ interface AuthStore extends AuthState {
   setUser: (user: User | null) => void
   setLoading: (isLoading: boolean) => void
   logout: () => void
+  _hasHydrated: boolean
+  setHasHydrated: (state: boolean) => void
 }
 
 const STORE_VERSION = 1
@@ -16,6 +18,7 @@ export const useAuthStore = create<AuthStore>()(
       user: null,
       isLoading: true,
       isAuthenticated: false,
+      _hasHydrated: false,
 
       setUser: (user) =>
         set({
@@ -32,6 +35,8 @@ export const useAuthStore = create<AuthStore>()(
           isAuthenticated: false,
           isLoading: false,
         }),
+
+      setHasHydrated: (state) => set({ _hasHydrated: state }),
     }),
     {
       name: 'fly-zulu-auth',
@@ -40,6 +45,9 @@ export const useAuthStore = create<AuthStore>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true)
+      },
     }
   )
 )
