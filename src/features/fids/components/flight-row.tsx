@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { Check, X } from 'lucide-react'
+import { Check, X, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import { Input } from '@/shared/components/ui/input'
 import { Button } from '@/shared/components/ui/button'
@@ -89,9 +89,9 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
 
   const statusConfig = getStatusColor()
 
-  // Gate card color based on gate change or delay status - amber for both
+  // Gate card color based on gate change or delay status - RED for both
   const gateCardColor = (hasGateChange || hasDelay)
-    ? 'bg-[#f59e0b] hover:bg-[#d97706]' // Amber for gate change or delay
+    ? 'bg-[#ef4444] hover:bg-[#dc2626]' // Red for gate change or delay
     : 'bg-[#ca8a04] hover:bg-[#a16207]' // Yellow for normal
 
   // Start editing
@@ -246,14 +246,15 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
             {/* Status indicator - clickable to edit */}
             <button
               onClick={() => setEditField('status')}
-              className="flex-shrink-0 focus:outline-none"
+              className="flex-shrink-0 focus:outline-none flex items-center gap-1 group"
               aria-label="Editar status"
             >
               <div
                 className={`w-2.5 h-2.5 rounded-full ${statusConfig.color} ${
                   statusConfig.breathe ? 'animate-[pulse_2s_ease-in-out_infinite]' : ''
-                } hover:ring-2 hover:ring-white/20 transition-all`}
+                } group-hover:ring-2 group-hover:ring-white/20 transition-all`}
               />
+              <Pencil className="w-2.5 h-2.5 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
             </button>
 
             {/* Time - Editable */}

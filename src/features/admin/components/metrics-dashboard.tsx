@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Users, Crown, Plane, TrendingUp, AlertTriangle, RefreshCw } from 'lucide-react'
+import { Users, Crown, Plane, TrendingUp, AlertTriangle, RefreshCw, Activity, MapPin } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Button } from '@/shared/components/ui/button'
@@ -118,6 +120,43 @@ export function MetricsDashboard() {
             </div>
             <Progress value={metrics.conversionRate} className="h-2" />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Users connected last hour */}
+      <Card className="border-[#00ff88]/30 bg-[#00ff88]/5">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Activity className="h-4 w-4 text-[#00ff88]" />
+              Conectados última hora
+            </CardTitle>
+            <span className="text-2xl font-bold text-[#00ff88]">{metrics.usersLastHour}</span>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {metrics.recentUsers.length > 0 ? (
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {metrics.recentUsers.map((user) => (
+                <div key={user.id} className="flex items-center justify-between p-2 rounded-lg bg-zinc-900/50">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[#fafafa] truncate">{user.nombre}</p>
+                    <div className="flex items-center gap-1 text-xs text-zinc-500">
+                      <MapPin className="h-3 w-3" />
+                      <span>{user.last_location || 'Desconocido'}</span>
+                    </div>
+                  </div>
+                  <span className="text-xs text-zinc-500 flex-shrink-0">
+                    {formatDistanceToNow(new Date(user.last_seen_at), { addSuffix: true, locale: es })}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-zinc-500 text-center py-2">
+              Sin usuarios activos en la última hora
+            </p>
+          )}
         </CardContent>
       </Card>
 

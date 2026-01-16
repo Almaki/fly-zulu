@@ -61,6 +61,21 @@ export async function getAdminMetrics(): Promise<{
     .gte('std', `${today}T00:00:00`)
     .lte('std', `${today}T23:59:59`)
 
+  // Users active in the last hour
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+  const { data: activeUsersData } = await supabase
+    .from('users')
+    .select('id, nombre, last_seen_at, last_location')
+    .gte('last_seen_at', oneHourAgo)
+    .order('last_seen_at', { ascending: false })
+
+  const usersLastHour = (activeUsersData || []) as Array<{
+    id: string
+    nombre: string
+    last_seen_at: string
+    last_location: string | null
+  }>
+
   const metrics: AdminMetrics = {
     totalUsers,
     activeUsers,
@@ -69,6 +84,8 @@ export async function getAdminMetrics(): Promise<{
     usersByRole,
     flightsToday: flightsToday || 0,
     conversionRate: totalUsers > 0 ? (premiumUsers / totalUsers) * 100 : 0,
+    usersLastHour: usersLastHour.length,
+    recentUsers: usersLastHour.slice(0, 10),
   }
 
   return { data: metrics, error: null }

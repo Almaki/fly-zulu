@@ -1,5 +1,12 @@
 import type { User, FlightStatus } from '@/shared/types'
 
+export interface RecentUser {
+  id: string
+  nombre: string
+  last_seen_at: string
+  last_location: string | null
+}
+
 export interface AdminMetrics {
   totalUsers: number
   activeUsers: number
@@ -8,6 +15,8 @@ export interface AdminMetrics {
   usersByRole: Record<string, number>
   flightsToday: number
   conversionRate: number
+  usersLastHour: number
+  recentUsers: RecentUser[]
 }
 
 export interface UserWithActivity extends User {
