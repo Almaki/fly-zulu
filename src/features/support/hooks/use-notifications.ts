@@ -37,15 +37,26 @@ export function useNotifications(userId: string | undefined, muted: boolean = fa
     }
   }, [muted])
 
-  // Fetch unread count
-  const fetchUnreadCount = useCallback(async () => {
+  // Fetch unread count and optionally refresh notifications if count changed
+  const fetchUnreadCount = useCallback(async (refreshContent: boolean = false) => {
     if (!userId) return
 
     const { count } = await getUnreadNotificationCount(userId)
 
-    // Play sound if count increased
+    // Play sound and refresh content if count increased
     if (count > previousCountRef.current && previousCountRef.current > 0) {
       playNotificationSound()
+      // Also refresh the notifications list when count increases
+      const { data } = await getUserNotifications(userId)
+      if (data) {
+        setNotifications(data)
+      }
+    } else if (refreshContent && count !== previousCountRef.current) {
+      // Refresh content if explicitly requested and count changed
+      const { data } = await getUserNotifications(userId)
+      if (data) {
+        setNotifications(data)
+      }
     }
 
     previousCountRef.current = count

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Search, Plus, MapPin, Hotel, Car, Utensils, Plane, Building2, Users } from 'lucide-react'
+import { Search, Plus, MapPin, Hotel, Car, Utensils, Plane, Users } from 'lucide-react'
 import { Input } from '@/shared/components/ui/input'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
@@ -11,13 +11,18 @@ import { DirectoryEntryCard } from './directory-entry-card'
 import { DirectoryEntryForm } from './directory-entry-form'
 import { useDirectoryStore } from '../store'
 import { getDirectoryEntries } from '../services'
+import { useAuth } from '@/features/auth/hooks'
 import type { DirectoryFilters } from '../types'
 
 export function DirectoryList() {
   const { entries, filters, isLoading, setEntries, setFilters, setLoading } =
     useDirectoryStore()
+  const { profile } = useAuth()
   const [localSearch, setLocalSearch] = useState('')
   const [isFormOpen, setIsFormOpen] = useState(false)
+
+  // Solo usuarios FLIGHT (PILOT o FA) pueden agregar entradas
+  const canAddEntries = profile?.categoria === 'FLIGHT'
 
   const fetchEntries = useCallback(async (newFilters?: DirectoryFilters) => {
     setLoading(true)
@@ -64,9 +69,11 @@ export function DirectoryList() {
             className="pl-10"
           />
         </div>
-        <Button size="icon" variant="outline" onClick={() => setIsFormOpen(true)}>
-          <Plus className="h-4 w-4" />
-        </Button>
+{canAddEntries && (
+          <Button size="icon" variant="outline" onClick={() => setIsFormOpen(true)}>
+            <Plus className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
       {/* Airport filter */}
@@ -156,13 +163,19 @@ export function DirectoryList() {
                 </div>
               </div>
 
-              <Button
-                className="bg-[#22c55e] hover:bg-[#22c55e]/90 text-black font-semibold px-6"
-                onClick={() => setIsFormOpen(true)}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Agregar primer contacto
-              </Button>
+{canAddEntries ? (
+                <Button
+                  className="bg-[#22c55e] hover:bg-[#22c55e]/90 text-black font-semibold px-6"
+                  onClick={() => setIsFormOpen(true)}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Agregar primer contacto
+                </Button>
+              ) : (
+                <p className="text-sm text-zinc-400">
+                  Solo tripulación FLIGHT puede agregar contactos
+                </p>
+              )}
 
               <p className="text-xs text-[#52525b] mt-4">
                 Juntos construimos el mejor directorio crew de México
@@ -181,8 +194,7 @@ export function DirectoryList() {
 
       {entries.length > 0 && (
         <p className="text-center text-xs text-zinc-600">
-          {entries.length} servicio{entries.length !== 1 ? 's' : ''} encontrado
-          {entries.length !== 1 ? 's' : ''}
+          {entries.length} {entries.length === 1 ? 'servicio encontrado' : 'servicios encontrados'}
         </p>
       )}
 

@@ -8,10 +8,7 @@ import { Skeleton } from '@/shared/components/ui/skeleton'
 import { useFlights } from '../hooks'
 import { FlightCard } from './flight-card'
 import { FIDSFiltersComponent } from './fids-filters'
-import { useAuth } from '@/features/auth/hooks'
-
 export function FIDSBoard() {
-  const { user } = useAuth()
   const {
     flights,
     filters,
@@ -20,9 +17,6 @@ export function FIDSBoard() {
     refetch,
     setFilters,
   } = useFlights()
-
-  // Todos los usuarios autenticados pueden añadir/editar vuelos
-  const canAddFlights = !!user
 
   return (
     <div className="space-y-4">
@@ -40,12 +34,14 @@ export function FIDSBoard() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* TODO: Implementar funcionalidad de agregar vuelos
           {canAddFlights && (
-            <Button size="sm" variant="outline" className="h-8">
+            <Button size="sm" variant="outline" className="h-8" onClick={handleAddFlight}>
               <Plus className="h-4 w-4 mr-1" />
               Añadir
             </Button>
           )}
+          */}
           <Button
             size="sm"
             variant="ghost"
@@ -115,12 +111,18 @@ export function FIDSBoard() {
               </div>
             </div>
 
+            {/* TODO: Implementar funcionalidad de agregar vuelos
             <Button
               className="bg-[#f59e0b] hover:bg-[#f59e0b]/90 text-black font-medium"
+              onClick={handleAddFlight}
             >
               <Plus className="h-4 w-4 mr-2" />
               Agregar primer vuelo
             </Button>
+            */}
+            <p className="text-sm text-[#f59e0b]">
+              Próximamente: agregar vuelos colaborativos
+            </p>
 
             <p className="text-xs text-zinc-600 mt-4">
               <Users className="h-3 w-3 inline mr-1" />

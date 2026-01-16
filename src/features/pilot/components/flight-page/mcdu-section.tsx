@@ -24,6 +24,7 @@ import {
   calculateMinutesBetween,
   formatDurationHHMM,
   getCurrentZuluDate,
+  validateFlightTimes,
 } from '@/shared/lib/time'
 
 const AIRCRAFT_TYPES = [
@@ -68,6 +69,7 @@ export function MCDUSection({
 }: MCDUSectionProps) {
   const [flightTime, setFlightTime] = useState<string | null>(null)
   const [blockTime, setBlockTime] = useState<string | null>(null)
+  const [timeError, setTimeError] = useState<string | null>(null)
 
   const form = useForm<MCDUFormData>({
     resolver: zodResolver(mcduSchema),
@@ -101,6 +103,19 @@ export function MCDUSection({
       if (currentValues === prevValuesRef.current) return
       prevValuesRef.current = currentValues
 
+      // Validate time order if all times are present
+      if (values.outTime && values.offTime && values.onTime && values.inTime) {
+        const validation = validateFlightTimes(
+          values.outTime,
+          values.offTime,
+          values.onTime,
+          values.inTime
+        )
+        setTimeError(validation.valid ? null : validation.error || null)
+      } else {
+        setTimeError(null)
+      }
+
       // Flight time = ON - OFF
       if (values.offTime && values.onTime) {
         const mins = calculateMinutesBetween(values.offTime, values.onTime)
@@ -121,7 +136,11 @@ export function MCDUSection({
       stableOnFormChange(values as Partial<MCDUFormData>)
 
       // Check if flight is complete (only notify once per complete set)
-      const isComplete = values.outTime && values.offTime && values.onTime && values.inTime &&
+      const allTimesPresent = values.outTime && values.offTime && values.onTime && values.inTime
+      const timesValid = allTimesPresent
+        ? validateFlightTimes(values.outTime, values.offTime, values.onTime, values.inTime).valid
+        : false
+      const isComplete = allTimesPresent && timesValid &&
                          values.tail && values.aircraftType && values.dep && values.dest
 
       if (isComplete && !hasNotifiedComplete.current) {
@@ -351,19 +370,26 @@ export function MCDUSection({
                 )}
               />
             </div>
+
+            {/* Time validation error */}
+            {timeError && (
+              <p className="text-[#FF3B30] text-xs text-center mt-2 font-sans">
+                {timeError}
+              </p>
+            )}
           </div>
 
           {/* Row 4: Calculated Times */}
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="text-center p-3 bg-[#141414] rounded-lg">
               <p className="text-xs text-[#71717a] mb-1">FLT (ON-OFF)</p>
-              <p className="text-2xl font-bold text-[#00ff41]">
+              <p className={`text-2xl font-bold ${timeError ? 'text-[#FF3B30]' : 'text-[#00ff41]'}`}>
                 {flightTime || '--:--'}
               </p>
             </div>
             <div className="text-center p-3 bg-[#141414] rounded-lg">
               <p className="text-xs text-[#71717a] mb-1">BLK (IN-OUT)</p>
-              <p className="text-2xl font-bold text-[#00ff41]">
+              <p className={`text-2xl font-bold ${timeError ? 'text-[#FF3B30]' : 'text-[#00ff41]'}`}>
                 {blockTime || '--:--'}
               </p>
             </div>
