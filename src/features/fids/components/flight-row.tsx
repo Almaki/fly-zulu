@@ -150,17 +150,26 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
     }
   }
 
-  // Save status
+  // Save status - preserves existing delay when changing to GATE_CHANGE
   const saveStatus = async (status: FlightStatus, delayMinutes?: number) => {
     setIsSubmitting(true)
     try {
       const { error } = await updateFlightStatus(flight.id, status, delayMinutes)
       if (error) throw new Error(error)
 
-      updateLocalFlight(flight.id, {
-        status,
-        delay_minutes: delayMinutes || 0,
-      })
+      // Build local update - preserve delay_minutes when changing to GATE_CHANGE
+      const localUpdate: Partial<Flight> = { status }
+
+      if (status === 'DELAY' && delayMinutes !== undefined) {
+        // Explicitly setting delay
+        localUpdate.delay_minutes = delayMinutes
+      } else if (status === 'ON_TIME' || status === 'CANCELED') {
+        // Reset delay only for ON_TIME or CANCELED
+        localUpdate.delay_minutes = 0
+      }
+      // For GATE_CHANGE and other statuses, don't touch delay_minutes (preserve it)
+
+      updateLocalFlight(flight.id, localUpdate)
       toast.success('Status actualizado')
       cancelEdit()
     } catch (error) {

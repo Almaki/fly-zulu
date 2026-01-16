@@ -1603,4 +1603,572 @@ CREATE POLICY "Authenticated users can create changes"
 
 ---
 
+## 📊 SISTEMA DE AUDITORÍA Y TRACKING DE USUARIOS
+
+> Todas las acciones de los usuarios deben ser registradas para control, métricas y detección de cambios falsos.
+
+---
+
+### PRINCIPIO DE AUDITORÍA
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│   CADA CAMBIO = REGISTRO EN audit_logs                      │
+│   - Quién (user_id + nombre)                                │
+│   - Qué (tabla + campo + registro)                          │
+│   - Cuándo (timestamp)                                      │
+│   - Antes → Después (old_value → new_value)                 │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 1. TABLA DE AUDITORÍA GENERAL
+
+```sql
+-- Tabla principal de auditoría para TODAS las acciones
+CREATE TABLE audit_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  -- Quién
+  user_id UUID NOT NULL REFERENCES auth.users(id),
+  user_email TEXT NOT NULL,
+  user_name TEXT,
+  user_position TEXT,  -- PILOT, FA, OPS, etc.
+
+  -- Qué
+  action TEXT NOT NULL CHECK (action IN (
+    'CREATE', 'UPDATE', 'DELETE', 'STATUS_CHANGE',
+    'LOGIN', 'LOGOUT', 'VIEW'
+  )),
+  table_name TEXT NOT NULL,
+  record_id UUID,
+  field_name TEXT,  -- Campo específico que cambió
+
+  -- Valores
+  old_value JSONB,  -- Estado anterior (null si es CREATE)
+  new_value JSONB,  -- Estado nuevo (null si es DELETE)
+
+  -- Contexto
+  ip_address INET,
+  user_agent TEXT,
+
+  -- Tiempo
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- Para consolidación visual (1 hora sin cambios)
+  is_consolidated BOOLEAN DEFAULT FALSE,
+  consolidated_at TIMESTAMPTZ
+);
+
+-- Índices para queries rápidas
+CREATE INDEX idx_audit_user_id ON audit_logs(user_id);
+CREATE INDEX idx_audit_table_record ON audit_logs(table_name, record_id);
+CREATE INDEX idx_audit_created_at ON audit_logs(created_at DESC);
+CREATE INDEX idx_audit_action ON audit_logs(action);
+
+-- RLS
+ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
+
+-- Solo admins pueden ver todos los logs
+CREATE POLICY "Admins can view all audit logs"
+  ON audit_logs FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM users
+      WHERE id = auth.uid()
+      AND role = 'SUPERADMIN'
+    )
+  );
+
+-- Usuarios pueden ver sus propios logs
+CREATE POLICY "Users can view own audit logs"
+  ON audit_logs FOR SELECT
+  USING (user_id = auth.uid());
+
+-- Sistema puede insertar logs
+CREATE POLICY "System can insert audit logs"
+  ON audit_logs FOR INSERT
+  WITH CHECK (true);
+```
+
+---
+
+### 2. FUNCIÓN PARA REGISTRAR AUDITORÍA
+
+```sql
+-- Función helper para insertar logs de auditoría
+CREATE OR REPLACE FUNCTION log_audit(
+  p_user_id UUID,
+  p_action TEXT,
+  p_table_name TEXT,
+  p_record_id UUID,
+  p_field_name TEXT DEFAULT NULL,
+  p_old_value JSONB DEFAULT NULL,
+  p_new_value JSONB DEFAULT NULL
+) RETURNS UUID AS $$
+DECLARE
+  v_user_info RECORD;
+  v_log_id UUID;
+BEGIN
+  -- Obtener info del usuario
+  SELECT email, nombre, posicion
+  INTO v_user_info
+  FROM users
+  WHERE id = p_user_id;
+
+  -- Insertar log
+  INSERT INTO audit_logs (
+    user_id, user_email, user_name, user_position,
+    action, table_name, record_id, field_name,
+    old_value, new_value
+  ) VALUES (
+    p_user_id, v_user_info.email, v_user_info.nombre, v_user_info.posicion,
+    p_action, p_table_name, p_record_id, p_field_name,
+    p_old_value, p_new_value
+  ) RETURNING id INTO v_log_id;
+
+  RETURN v_log_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
+---
+
+### 3. TRIGGERS AUTOMÁTICOS PARA TABLAS CRÍTICAS
+
+```sql
+-- Trigger genérico para auditoría
+CREATE OR REPLACE FUNCTION audit_trigger_func()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    PERFORM log_audit(
+      COALESCE(NEW.created_by, auth.uid()),
+      'CREATE',
+      TG_TABLE_NAME,
+      NEW.id,
+      NULL,
+      NULL,
+      to_jsonb(NEW)
+    );
+    RETURN NEW;
+
+  ELSIF TG_OP = 'UPDATE' THEN
+    -- Solo loguear si hay cambios reales
+    IF OLD IS DISTINCT FROM NEW THEN
+      PERFORM log_audit(
+        COALESCE(auth.uid(), NEW.created_by),
+        'UPDATE',
+        TG_TABLE_NAME,
+        NEW.id,
+        NULL,
+        to_jsonb(OLD),
+        to_jsonb(NEW)
+      );
+    END IF;
+    RETURN NEW;
+
+  ELSIF TG_OP = 'DELETE' THEN
+    PERFORM log_audit(
+      auth.uid(),
+      'DELETE',
+      TG_TABLE_NAME,
+      OLD.id,
+      NULL,
+      to_jsonb(OLD),
+      NULL
+    );
+    RETURN OLD;
+  END IF;
+
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Aplicar trigger a tablas críticas
+CREATE TRIGGER audit_flights
+  AFTER INSERT OR UPDATE OR DELETE ON flights
+  FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
+
+CREATE TRIGGER audit_pilot_duty_days
+  AFTER INSERT OR UPDATE OR DELETE ON pilot_duty_days
+  FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
+
+CREATE TRIGGER audit_pilot_segments
+  AFTER INSERT OR UPDATE OR DELETE ON pilot_segments
+  FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
+```
+
+---
+
+### 4. CONSOLIDACIÓN VISUAL (1 HORA SIN CAMBIOS)
+
+```sql
+-- Función que consolida cambios después de 1 hora
+-- Los cambios se mantienen en audit_logs pero se marcan como consolidados
+CREATE OR REPLACE FUNCTION consolidate_audit_logs()
+RETURNS INTEGER AS $$
+DECLARE
+  v_count INTEGER;
+BEGIN
+  UPDATE audit_logs
+  SET
+    is_consolidated = TRUE,
+    consolidated_at = NOW()
+  WHERE
+    is_consolidated = FALSE
+    AND created_at < NOW() - INTERVAL '1 hour'
+    AND NOT EXISTS (
+      -- No consolidar si hay cambios más recientes en el mismo registro
+      SELECT 1 FROM audit_logs al2
+      WHERE al2.table_name = audit_logs.table_name
+        AND al2.record_id = audit_logs.record_id
+        AND al2.created_at > audit_logs.created_at
+        AND al2.created_at >= NOW() - INTERVAL '1 hour'
+    );
+
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+  RETURN v_count;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Llamar cada 15 minutos via cron o Edge Function
+-- SELECT consolidate_audit_logs();
+```
+
+---
+
+### 5. SERVICIO DE AUDITORÍA (TypeScript)
+
+```typescript
+// src/shared/services/audit-service.ts
+
+'use server'
+
+import { createServerSupabaseClient } from '@/shared/lib/supabase/server'
+
+export type AuditAction =
+  | 'CREATE'
+  | 'UPDATE'
+  | 'DELETE'
+  | 'STATUS_CHANGE'
+  | 'LOGIN'
+  | 'LOGOUT'
+  | 'VIEW'
+
+interface LogAuditParams {
+  action: AuditAction
+  tableName: string
+  recordId?: string
+  fieldName?: string
+  oldValue?: unknown
+  newValue?: unknown
+}
+
+export async function logAudit(params: LogAuditParams) {
+  const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'No autenticado' }
+
+  const { error } = await supabase.rpc('log_audit', {
+    p_user_id: user.id,
+    p_action: params.action,
+    p_table_name: params.tableName,
+    p_record_id: params.recordId,
+    p_field_name: params.fieldName,
+    p_old_value: params.oldValue ? JSON.stringify(params.oldValue) : null,
+    p_new_value: params.newValue ? JSON.stringify(params.newValue) : null,
+  })
+
+  if (error) {
+    console.error('Error logging audit:', error)
+    return { error: error.message }
+  }
+
+  return { error: null }
+}
+
+// Obtener historial de cambios de un registro
+export async function getRecordHistory(
+  tableName: string,
+  recordId: string
+): Promise<AuditLog[]> {
+  const supabase = await createServerSupabaseClient()
+
+  const { data, error } = await supabase
+    .from('audit_logs')
+    .select('*')
+    .eq('table_name', tableName)
+    .eq('record_id', recordId)
+    .order('created_at', { ascending: false })
+    .limit(50)
+
+  if (error) return []
+  return data as AuditLog[]
+}
+
+// Obtener cambios recientes (no consolidados) para mostrar en UI
+export async function getRecentChanges(
+  tableName: string,
+  recordId: string
+): Promise<AuditLog[]> {
+  const supabase = await createServerSupabaseClient()
+
+  const { data, error } = await supabase
+    .from('audit_logs')
+    .select('*')
+    .eq('table_name', tableName)
+    .eq('record_id', recordId)
+    .eq('is_consolidated', false)
+    .order('created_at', { ascending: false })
+
+  if (error) return []
+  return data as AuditLog[]
+}
+```
+
+---
+
+### 6. MÉTRICAS PARA ADMIN
+
+```sql
+-- Vista para métricas de usuario
+CREATE OR REPLACE VIEW user_activity_metrics AS
+SELECT
+  u.id as user_id,
+  u.nombre,
+  u.email,
+  u.posicion,
+
+  -- Total de acciones
+  COUNT(al.id) as total_actions,
+
+  -- Por tipo de acción
+  COUNT(al.id) FILTER (WHERE al.action = 'CREATE') as creates,
+  COUNT(al.id) FILTER (WHERE al.action = 'UPDATE') as updates,
+  COUNT(al.id) FILTER (WHERE al.action = 'DELETE') as deletes,
+  COUNT(al.id) FILTER (WHERE al.action = 'STATUS_CHANGE') as status_changes,
+
+  -- Por tabla
+  COUNT(al.id) FILTER (WHERE al.table_name = 'flights') as flight_edits,
+  COUNT(al.id) FILTER (WHERE al.table_name = 'pilot_duty_days') as duty_edits,
+
+  -- Actividad reciente
+  COUNT(al.id) FILTER (WHERE al.created_at >= NOW() - INTERVAL '24 hours') as last_24h,
+  COUNT(al.id) FILTER (WHERE al.created_at >= NOW() - INTERVAL '7 days') as last_7d,
+
+  -- Último acceso
+  MAX(al.created_at) as last_activity
+
+FROM users u
+LEFT JOIN audit_logs al ON al.user_id = u.id
+GROUP BY u.id, u.nombre, u.email, u.posicion;
+
+-- Query para detectar cambios sospechosos (muchos cambios rápidos)
+CREATE OR REPLACE FUNCTION detect_suspicious_activity(
+  p_time_window INTERVAL DEFAULT '5 minutes',
+  p_threshold INTEGER DEFAULT 10
+)
+RETURNS TABLE (
+  user_id UUID,
+  user_name TEXT,
+  action_count BIGINT,
+  time_period TIMESTAMPTZ
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    al.user_id,
+    al.user_name,
+    COUNT(*) as action_count,
+    date_trunc('minute', al.created_at) as time_period
+  FROM audit_logs al
+  WHERE al.created_at >= NOW() - p_time_window
+  GROUP BY al.user_id, al.user_name, date_trunc('minute', al.created_at)
+  HAVING COUNT(*) >= p_threshold
+  ORDER BY action_count DESC;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+---
+
+### 7. COMPONENTE DE HISTORIAL DE CAMBIOS
+
+```typescript
+// src/shared/components/ChangeHistory.tsx
+
+'use client'
+
+import { formatDistanceToNow } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { Clock, User } from 'lucide-react'
+
+interface ChangeHistoryProps {
+  changes: AuditLog[]
+  showConsolidated?: boolean
+}
+
+export function ChangeHistory({ changes, showConsolidated = false }: ChangeHistoryProps) {
+  const visibleChanges = showConsolidated
+    ? changes
+    : changes.filter(c => !c.is_consolidated)
+
+  if (visibleChanges.length === 0) return null
+
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-zinc-500 uppercase tracking-wide">
+        Cambios recientes
+      </p>
+
+      {visibleChanges.map((change) => (
+        <div
+          key={change.id}
+          className={`text-xs p-2 rounded-lg ${
+            change.is_consolidated
+              ? 'bg-zinc-900/50 text-zinc-500'
+              : 'bg-zinc-800/50 text-zinc-300'
+          }`}
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <User className="w-3 h-3" />
+            <span className="font-medium">{change.user_name || 'Usuario'}</span>
+            <span className="text-zinc-600">•</span>
+            <Clock className="w-3 h-3" />
+            <span>
+              {formatDistanceToNow(new Date(change.created_at), {
+                addSuffix: true,
+                locale: es
+              })}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-zinc-500">{change.action}:</span>
+            {change.old_value && (
+              <span className="line-through text-red-400/70">
+                {JSON.stringify(change.old_value)}
+              </span>
+            )}
+            {change.old_value && change.new_value && (
+              <span className="text-zinc-600">→</span>
+            )}
+            {change.new_value && (
+              <span className="text-green-400">
+                {JSON.stringify(change.new_value)}
+              </span>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+---
+
+### 8. REGLAS DE RETENCIÓN
+
+```sql
+-- Eliminar logs muy antiguos (mantener 90 días)
+CREATE OR REPLACE FUNCTION cleanup_old_audit_logs()
+RETURNS INTEGER AS $$
+DECLARE
+  v_count INTEGER;
+BEGIN
+  DELETE FROM audit_logs
+  WHERE created_at < NOW() - INTERVAL '90 days';
+
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+  RETURN v_count;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Ejecutar semanalmente
+-- SELECT cleanup_old_audit_logs();
+```
+
+---
+
+### RESUMEN: FLUJO DE AUDITORÍA
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     USUARIO HACE CAMBIO                          │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+              ┌───────────────────────────────┐
+              │   Trigger automático captura  │
+              │   - old_value (estado antes)  │
+              │   - new_value (estado después)│
+              │   - user_id + timestamp       │
+              └───────────────────────────────┘
+                              │
+                              ▼
+              ┌───────────────────────────────┐
+              │   INSERT en audit_logs        │
+              │   is_consolidated = FALSE     │
+              └───────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     PASA 1 HORA                                 │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┴───────────────┐
+              │                               │
+       ¿Hay cambios                     No hay cambios
+       más recientes?                   en ese registro
+              │                               │
+              ▼                               ▼
+     ┌──────────────┐              ┌──────────────────┐
+     │  Mantener    │              │  is_consolidated │
+     │  visible     │              │  = TRUE          │
+     └──────────────┘              └──────────────────┘
+                                          │
+                                          ▼
+                              ┌───────────────────────────────┐
+                              │   UI muestra solo cambios     │
+                              │   NO consolidados (recientes) │
+                              │   Historial completo en admin │
+                              └───────────────────────────────┘
+```
+
+---
+
+### DASHBOARD ADMIN: MÉTRICAS DE USUARIOS
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  📊 MÉTRICAS DE ACTIVIDAD                                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  TOP COLABORADORES (últimos 7 días)                            │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ 1. @maria_ops     │ 47 cambios  │ 🟢 98% precisión      │   │
+│  │ 2. @carlos_pilot  │ 32 cambios  │ 🟢 95% precisión      │   │
+│  │ 3. @ana_trafico   │ 28 cambios  │ 🟡 87% precisión      │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+│  ⚠️ ALERTAS                                                    │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ @nuevo_usuario: 15 cambios en 5 min (revisar)          │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+│  ACTIVIDAD POR HORA                                            │
+│  [░░░░░░██████████████░░░░░░░░]                                │
+│   6am         12pm         6pm         12am                    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 *Última actualización: 2026-01-16*
