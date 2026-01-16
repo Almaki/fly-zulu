@@ -140,9 +140,9 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
     try {
       // If it's a local ID, we need to create the record
       if (rate.id.startsWith('local-')) {
-        // Try to upsert
+        // Try to upsert - use type assertion since table not in generated types
         const supabase = createClient()
-        const { error } = await supabase.from('exchange_rates').upsert({
+        const { error } = await (supabase as any).from('exchange_rates').upsert({
           airport_code: airportCode,
           location: rate.location,
           rate: newRate,
@@ -151,8 +151,9 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
 
         if (error) throw error
       } else {
+        // Use type assertion since table not in generated types
         const supabase = createClient()
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('exchange_rates')
           .update({
             rate: newRate,
