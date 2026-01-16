@@ -1,3 +1,7 @@
 export { FIDSBoard } from './fids-board'
+export { DigitalBoard } from './digital-board'
 export { FlightCard } from './flight-card'
+export { FlightRow } from './flight-row'
 export { FIDSFiltersComponent } from './fids-filters'
+export { AirportSearch } from './airport-search'
+export { AddFlightSheet } from './add-flight-sheet'

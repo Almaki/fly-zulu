@@ -1,14 +1,14 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useRef } from 'react'
 import { useFIDSStore } from '../store'
 import { getFlights } from '../services'
 import type { FIDSFilters } from '../types'
 
-export function useFlights(initialFilters?: FIDSFilters) {
+export function useFlights(externalFilters?: FIDSFilters) {
   const {
     flights,
-    filters,
+    filters: storeFilters,
     isLoading,
     lastUpdated,
     setFlights,
@@ -18,41 +18,50 @@ export function useFlights(initialFilters?: FIDSFilters) {
     addFlight,
   } = useFIDSStore()
 
-  const fetchFlights = useCallback(async (newFilters?: FIDSFilters) => {
+  // Use external filters if provided, otherwise use store filters
+  const activeFilters = externalFilters || storeFilters
+  const prevFiltersRef = useRef<string>('')
+
+  const fetchFlights = useCallback(async (filtersToUse?: FIDSFilters) => {
     setLoading(true)
-    const currentFilters = newFilters || filters
+    const currentFilters = filtersToUse || activeFilters
     const result = await getFlights(currentFilters)
 
     if (result.data) {
       setFlights(result.data)
     }
-  }, [filters, setFlights, setLoading])
+  }, [activeFilters, setFlights, setLoading])
 
-  // Initial fetch
+  // Fetch when external filters change
   useEffect(() => {
-    if (initialFilters) {
-      setFilters(initialFilters)
+    const filtersKey = JSON.stringify(externalFilters)
+    if (filtersKey !== prevFiltersRef.current) {
+      prevFiltersRef.current = filtersKey
+      if (externalFilters?.airport) {
+        fetchFlights(externalFilters)
+      }
     }
-    fetchFlights(initialFilters)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [externalFilters, fetchFlights])
 
   // Auto-refresh every 60 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      fetchFlights()
+      if (activeFilters.airport) {
+        fetchFlights()
+      }
     }, 60000)
 
     return () => clearInterval(interval)
-  }, [fetchFlights])
+  }, [fetchFlights, activeFilters.airport])
 
   const changeFilters = useCallback((newFilters: Partial<FIDSFilters>) => {
     setFilters(newFilters)
-    fetchFlights({ ...filters, ...newFilters })
-  }, [filters, setFilters, fetchFlights])
+    fetchFlights({ ...storeFilters, ...newFilters })
+  }, [storeFilters, setFilters, fetchFlights])
 
   return {
     flights,
-    filters,
+    filters: activeFilters,
     isLoading,
     lastUpdated,
     refetch: fetchFlights,

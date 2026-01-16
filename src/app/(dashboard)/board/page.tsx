@@ -1,5 +1,5 @@
-import { FIDSBoard } from '@/features/fids/components'
+import { DigitalBoard } from '@/features/fids/components'
 
 export default function BoardPage() {
-  return <FIDSBoard />
+  return <DigitalBoard />
 }

@@ -57,23 +57,14 @@ export async function createFlight(formData: FlightFormData): Promise<{ data: Fl
     return { data: null, error: 'No autenticado' }
   }
 
-  // Check if user is PREMIUM or SUPERADMIN
-  const { data: profileData } = await supabase
-    .from('users')
-    .select('subscription_tier, role')
-    .eq('id', user.id)
-    .single()
-
-  const profile = profileData as { subscription_tier: string; role: string } | null
-  if (!profile || (profile.subscription_tier !== 'PREMIUM' && profile.role !== 'SUPERADMIN')) {
-    return { data: null, error: 'Se requiere suscripción Premium para agregar vuelos' }
-  }
-
+  // All authenticated users can add flights (collaborative board)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.from('flights') as any)
     .insert({
       ...formData,
       created_by: user.id,
+      status: 'ON_TIME',
+      delay_minutes: 0,
     })
     .select()
     .single()
@@ -97,21 +88,13 @@ export async function updateFlight(
     return { data: null, error: 'No autenticado' }
   }
 
-  // Check if user is PREMIUM or SUPERADMIN
-  const { data: profileData } = await supabase
-    .from('users')
-    .select('subscription_tier, role')
-    .eq('id', user.id)
-    .single()
-
-  const profile = profileData as { subscription_tier: string; role: string } | null
-  if (!profile || (profile.subscription_tier !== 'PREMIUM' && profile.role !== 'SUPERADMIN')) {
-    return { data: null, error: 'Se requiere suscripción Premium para editar vuelos' }
-  }
-
+  // All authenticated users can update flights (collaborative board)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.from('flights') as any)
-    .update(updates)
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
     .eq('id', id)
     .select()
     .single()
@@ -137,11 +120,20 @@ export async function updateFlightStatus(
     return { error: 'No autenticado' }
   }
 
-  const updates: Record<string, unknown> = { status }
+  const updates: Record<string, unknown> = {
+    status,
+    updated_at: new Date().toISOString(),
+  }
 
   if (status === 'DELAY' && delayMinutes !== undefined) {
     updates.delay_minutes = delayMinutes
     updates.delay_reason = delayReason || null
+  }
+
+  // Reset delay info if changing from DELAY to other status
+  if (status !== 'DELAY') {
+    updates.delay_minutes = 0
+    updates.delay_reason = null
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

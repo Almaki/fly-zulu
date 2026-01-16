@@ -4,7 +4,7 @@ export type UserPosition = 'PILOT' | 'FA' | 'OPS' | 'TRAFICO' | 'MANTTO';
 export type UserRole = UserPosition | 'SUPERADMIN';
 
 // Flight status
-export type FlightStatus = 'ON_TIME' | 'DELAY' | 'GATE_CHANGE' | 'CANCELED';
+export type FlightStatus = 'ON_TIME' | 'DELAY' | 'GATE_CHANGE' | 'CANCELED' | 'BOARDING' | 'DEPARTED' | 'ARRIVED';
 
 // Subscription tier
 export type SubscriptionTier = 'FREE' | 'PREMIUM';

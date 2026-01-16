@@ -12,7 +12,7 @@ interface FlightCardProps {
   onClick?: () => void
 }
 
-const STATUS_STYLES = {
+const STATUS_STYLES: Record<string, { badge: string; label: string }> = {
   ON_TIME: {
     badge: 'bg-zinc-700 text-zinc-100',
     label: 'On Time',
@@ -28,6 +28,18 @@ const STATUS_STYLES = {
   CANCELED: {
     badge: 'bg-[#FF3B30]/20 text-[#FF3B30]',
     label: 'Cancelado',
+  },
+  BOARDING: {
+    badge: 'bg-[#22c55e]/20 text-[#22c55e]',
+    label: 'Abordando',
+  },
+  DEPARTED: {
+    badge: 'bg-zinc-600/20 text-zinc-400',
+    label: 'Despegó',
+  },
+  ARRIVED: {
+    badge: 'bg-zinc-600/20 text-zinc-400',
+    label: 'Llegó',
   },
 }
 
