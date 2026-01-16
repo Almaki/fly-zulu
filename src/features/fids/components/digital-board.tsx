@@ -16,6 +16,7 @@ import { useAuth } from '@/features/auth/hooks'
 import { FlightRow } from './flight-row'
 import { AddFlightSheet } from './add-flight-sheet'
 import { AirportSearch } from './airport-search'
+import { ExchangeRate } from './exchange-rate'
 import { searchAirports, getCityName, type Airport } from '../constants/airports'
 import type { FIDSFilters } from '../types'
 
@@ -151,6 +152,13 @@ export function DigitalBoard({ initialAirport }: DigitalBoardProps) {
             />
           </button>
         </div>
+
+        {/* Exchange Rate - Only for MEX and TIJ */}
+        {selectedAirport && (selectedAirport === 'MEX' || selectedAirport === 'TIJ') && (
+          <div className="px-4 pb-3">
+            <ExchangeRate airportCode={selectedAirport} />
+          </div>
+        )}
 
         {/* Direction tabs */}
         <div className="flex border-t border-[#1a1a1a]">
