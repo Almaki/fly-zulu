@@ -69,9 +69,20 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
   }, [airportCode])
 
   const loadRates = async () => {
+    // Always start with local fallback data
+    const fallbackRates = config.locations.map((location, i) => ({
+      id: `local-${i}`,
+      airport_code: airportCode,
+      location,
+      rate: 0,
+      updated_by: null,
+      updated_at: new Date().toISOString(),
+    }))
+
     try {
       const supabase = createClient()
-      const { data, error } = await supabase
+      // Use type assertion since table may not exist in generated types yet
+      const { data, error } = await (supabase as any)
         .from('exchange_rates')
         .select('*')
         .eq('airport_code', airportCode)
@@ -87,41 +98,23 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
           rate: 0,
         }))
 
-        const { data: newRates, error: insertError } = await supabase
+        const { data: newRates, error: insertError } = await (supabase as any)
           .from('exchange_rates')
           .insert(defaultRates)
           .select()
 
         if (insertError) {
           // Table might not exist, use local state
-          setRates(
-            config.locations.map((location, i) => ({
-              id: `local-${i}`,
-              airport_code: airportCode,
-              location,
-              rate: 0,
-              updated_by: null,
-              updated_at: new Date().toISOString(),
-            }))
-          )
+          setRates(fallbackRates)
         } else {
-          setRates(newRates || [])
+          setRates(newRates || fallbackRates)
         }
       } else {
-        setRates(data)
+        setRates(data as ExchangeRateData[])
       }
-    } catch (error) {
+    } catch {
       // Fallback to local state if table doesn't exist
-      setRates(
-        config.locations.map((location, i) => ({
-          id: `local-${i}`,
-          airport_code: airportCode,
-          location,
-          rate: 0,
-          updated_by: null,
-          updated_at: new Date().toISOString(),
-        }))
-      )
+      setRates(fallbackRates)
     } finally {
       setIsLoading(false)
     }
