@@ -10,7 +10,11 @@ export async function getDirectoryEntries(
 
   let query = supabase
     .from('directory_entries')
-    .select('*')
+    .select(`
+      *,
+      created_by_user:users!directory_entries_created_by_fkey(nombre),
+      updated_by_user:users!directory_entries_updated_by_fkey(nombre)
+    `)
     .order('rating', { ascending: false })
 
   if (filters?.airport) {

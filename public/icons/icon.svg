@@ -1,13 +1,28 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="512" height="512" rx="100" fill="#0a0a0a"/>
+  <!-- Background with rounded corners -->
+  <rect width="512" height="512" rx="96" fill="#0a0a0a"/>
 
-  <!-- Aviation themed icon - Airplane -->
-  <path d="M256 128L128 256L192 256L192 320L256 384L320 320L320 256L384 256L256 128Z" fill="#0066CC"/>
+  <!-- Outer glow ring -->
+  <circle cx="256" cy="256" r="200" stroke="url(#glowGradient)" stroke-width="4" fill="none" opacity="0.6"/>
 
-  <!-- Letter Z -->
-  <text x="256" y="320" font-family="system-ui, -apple-system, sans-serif" font-size="180" font-weight="900" fill="#0066CC" text-anchor="middle" dominant-baseline="middle">Z</text>
+  <!-- Main circle border -->
+  <circle cx="256" cy="256" r="180" stroke="#0066CC" stroke-width="6" fill="none"/>
 
-  <!-- Accent circle -->
-  <circle cx="256" cy="256" r="140" stroke="#0088FF" stroke-width="8" fill="none"/>
+  <!-- F letter -->
+  <text x="180" y="290" font-family="Arial Black, Helvetica, sans-serif" font-size="200" font-weight="900" fill="#fafafa">F</text>
+
+  <!-- Z letter with blue accent -->
+  <text x="280" y="290" font-family="Arial Black, Helvetica, sans-serif" font-size="200" font-weight="900" fill="#0088FF">Z</text>
+
+  <!-- Small airplane silhouette on top -->
+  <path d="M256 85 L266 105 L290 105 L270 120 L278 145 L256 130 L234 145 L242 120 L222 105 L246 105 Z" fill="#00ff88"/>
+
+  <!-- Gradient definitions -->
+  <defs>
+    <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0088FF"/>
+      <stop offset="50%" stop-color="#00ff88"/>
+      <stop offset="100%" stop-color="#0088FF"/>
+    </linearGradient>
+  </defs>
 </svg>

@@ -1,0 +1,52 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0a0a0a"/>
+
+  <!-- Subtle grid pattern -->
+  <defs>
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="logoGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0088FF"/>
+      <stop offset="50%" stop-color="#00ff88"/>
+      <stop offset="100%" stop-color="#0088FF"/>
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fafafa"/>
+      <stop offset="100%" stop-color="#d4d4d8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="100" cy="100" r="200" fill="#0066CC" opacity="0.05"/>
+  <circle cx="1100" cy="530" r="250" fill="#00ff88" opacity="0.03"/>
+
+  <!-- Logo circle -->
+  <circle cx="350" cy="315" r="180" stroke="url(#logoGlow)" stroke-width="4" fill="none" opacity="0.6"/>
+  <circle cx="350" cy="315" r="160" stroke="#0066CC" stroke-width="5" fill="none"/>
+
+  <!-- FZ Letters in logo -->
+  <text x="280" y="350" font-family="Arial Black, Helvetica, sans-serif" font-size="150" font-weight="900" fill="#fafafa">F</text>
+  <text x="360" y="350" font-family="Arial Black, Helvetica, sans-serif" font-size="150" font-weight="900" fill="#0088FF">Z</text>
+
+  <!-- Airplane icon on top of logo -->
+  <path d="M350 160 L360 180 L385 180 L365 195 L373 220 L350 205 L327 220 L335 195 L315 180 L340 180 Z" fill="#00ff88"/>
+
+  <!-- App name -->
+  <text x="580" y="280" font-family="Arial Black, Helvetica, sans-serif" font-size="90" font-weight="900" fill="url(#textGradient)">FLY-ZULU</text>
+
+  <!-- Tagline -->
+  <text x="580" y="360" font-family="Arial, Helvetica, sans-serif" font-size="32" fill="#71717a">Tu base de operaciones</text>
+
+  <!-- Accent line -->
+  <rect x="580" y="390" width="200" height="4" rx="2" fill="url(#logoGlow)"/>
+
+  <!-- Description -->
+  <text x="580" y="450" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#a1a1aa">PWA para tripulaciones de aviacion</text>
+  <text x="580" y="485" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#a1a1aa">FIDS | Directorio | Logbook | Academy</text>
+
+  <!-- Bottom accent -->
+  <rect x="0" y="620" width="1200" height="10" fill="url(#logoGlow)"/>
+</svg>

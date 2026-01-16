@@ -17,6 +17,9 @@ export interface DirectoryEntry {
   is_verified: boolean
   created_at: string
   updated_at: string
+  // Populated from joins
+  created_by_user?: { nombre: string } | null
+  updated_by_user?: { nombre: string } | null
 }
 
 export const directoryEntrySchema = z.object({

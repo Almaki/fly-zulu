@@ -1,6 +1,8 @@
 'use client'
 
-import { Phone, MapPin, Star, CheckCircle, MessageCircle } from 'lucide-react'
+import { Phone, MapPin, Star, CheckCircle, MessageCircle, Clock, User } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { Card, CardContent } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
@@ -102,6 +104,28 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
               WhatsApp
             </Button>
           )}
+        </div>
+
+        {/* Last update info */}
+        <div className="mt-3 pt-3 border-t border-zinc-800">
+          <div className="flex items-center justify-between text-[10px] text-zinc-500">
+            <div className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              <span>
+                {entry.updated_at !== entry.created_at ? 'Actualizado' : 'Agregado'}{' '}
+                {formatDistanceToNow(new Date(entry.updated_at || entry.created_at), {
+                  addSuffix: true,
+                  locale: es,
+                })}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <User className="h-3 w-3" />
+              <span>
+                {entry.updated_by_user?.nombre || entry.created_by_user?.nombre || 'Usuario'}
+              </span>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>

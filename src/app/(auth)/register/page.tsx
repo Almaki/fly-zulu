@@ -1,6 +1,12 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { RegisterForm } from '@/features/auth/components'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card'
+
+export const metadata: Metadata = {
+  title: 'Crear Cuenta',
+  description: 'Registrate en FLY-ZULU. La app para tripulaciones de aviacion en Mexico.',
+}
 
 export default function RegisterPage() {
   return (

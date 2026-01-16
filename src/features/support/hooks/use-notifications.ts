@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { getUnreadNotificationCount, getUserNotifications } from '../services'
 import type { UserNotification } from '../types'
 
-const SEATBELT_SOUND_URL = '/sounds/seatbelt.mp3'
+const SEATBELT_SOUND_URL = '/sounds/Aviation_Seat_Belt_Chime_Airplane_Interior_Fasten_Seatbelts_Bell_SDCOLLA_45251.wav'
 
 export function useNotifications(userId: string | undefined, muted: boolean = false) {
   const [unreadCount, setUnreadCount] = useState(0)
