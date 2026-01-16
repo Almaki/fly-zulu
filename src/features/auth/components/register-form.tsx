@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, ChevronRight, ChevronLeft } from 'lucide-react'
+import { Loader2, ChevronRight, ChevronLeft, Mail, CheckCircle } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/shared/components/ui/button'
@@ -43,6 +43,8 @@ export function RegisterForm() {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
+  const [showEmailVerification, setShowEmailVerification] = useState(false)
+  const [registeredEmail, setRegisteredEmail] = useState('')
   const setUser = useAuthStore((state) => state.setUser)
 
   const form = useForm<RegisterFormData>({
@@ -102,6 +104,14 @@ export function RegisterForm() {
         return
       }
 
+      // Check if email verification is required
+      if (result.requiresEmailVerification) {
+        setRegisteredEmail(data.email)
+        setShowEmailVerification(true)
+        toast.success('Cuenta creada. Revisa tu email para verificar.')
+        return
+      }
+
       if (result.data) {
         setUser(result.data as User)
         toast.success('Cuenta creada exitosamente. Bienvenido a FLY-ZULU!')
@@ -116,6 +126,53 @@ export function RegisterForm() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Email verification screen
+  if (showEmailVerification) {
+    return (
+      <div className="space-y-6 text-center py-8">
+        <div className="w-20 h-20 mx-auto rounded-full bg-[#00ff88]/20 flex items-center justify-center">
+          <Mail className="w-10 h-10 text-[#00ff88]" />
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="text-xl font-bold text-[#fafafa]">Verifica tu Email</h2>
+          <p className="text-sm text-zinc-400">
+            Hemos enviado un enlace de verificación a:
+          </p>
+          <p className="text-[#00ff88] font-medium">{registeredEmail}</p>
+        </div>
+
+        <div className="bg-zinc-900/50 rounded-xl p-4 space-y-3">
+          <div className="flex items-start gap-3 text-left">
+            <CheckCircle className="w-5 h-5 text-[#00ff88] mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-zinc-300">
+              Revisa tu bandeja de entrada y haz clic en el enlace para activar tu cuenta
+            </p>
+          </div>
+          <div className="flex items-start gap-3 text-left">
+            <CheckCircle className="w-5 h-5 text-[#00ff88] mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-zinc-300">
+              Si no lo encuentras, revisa la carpeta de spam
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-3 pt-4">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => router.push('/login')}
+          >
+            Ir a Iniciar Sesión
+          </Button>
+          <p className="text-xs text-zinc-500">
+            Una vez verificado, podrás iniciar sesión normalmente
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (

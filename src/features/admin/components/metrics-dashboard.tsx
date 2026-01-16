@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Users, Crown, Plane, TrendingUp, AlertTriangle, RefreshCw, Activity, MapPin } from 'lucide-react'
+import Link from 'next/link'
+import { Users, Crown, Plane, TrendingUp, AlertTriangle, RefreshCw, Activity, MapPin, MessageCircle, ChevronRight } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -184,6 +185,26 @@ export function MetricsDashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Support Tickets Link */}
+      <Link href="/admin/tickets">
+        <Card className="border-[#E91E8C]/30 bg-[#E91E8C]/5 hover:bg-[#E91E8C]/10 transition-colors cursor-pointer">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#E91E8C]/20 flex items-center justify-center">
+                  <MessageCircle className="h-5 w-5 text-[#E91E8C]" />
+                </div>
+                <div>
+                  <p className="font-medium text-[#fafafa]">Tickets de Soporte</p>
+                  <p className="text-xs text-zinc-500">Ver mensajes de usuarios</p>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-zinc-500" />
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
     </div>
   )
 }

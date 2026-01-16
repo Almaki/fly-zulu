@@ -24,6 +24,9 @@ export interface User {
   subscription_expires_at: string | null;
   device_fingerprint: string | null;
   last_ip: string | null;
+  notifications_muted: boolean;
+  last_seen_at: string | null;
+  last_location: string | null;
   created_at: string;
   updated_at: string;
 }

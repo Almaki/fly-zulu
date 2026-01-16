@@ -2,7 +2,17 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LogOut, User, AlertTriangle, Settings, UserCircle } from 'lucide-react'
+import {
+  LogOut,
+  User,
+  AlertTriangle,
+  Settings,
+  UserCircle,
+  Bell,
+  BellOff,
+  MessageCircle,
+  HeadphonesIcon,
+} from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/shared/components/ui/button'
@@ -11,11 +21,18 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Separator } from '@/shared/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar'
 import { useAuth } from '@/features/auth/hooks'
+import { NotificationBell, NotificationCenter, CreateTicketDialog, TicketList } from '@/features/support/components'
 
 export default function ProfilePage() {
   const router = useRouter()
   const { user, isLoading, logout } = useAuth()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [showSupport, setShowSupport] = useState(false)
+  const [showCreateTicket, setShowCreateTicket] = useState(false)
+  const [notificationsMuted, setNotificationsMuted] = useState(
+    user?.notifications_muted ?? false
+  )
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -100,9 +117,27 @@ export default function ProfilePage() {
     .substring(0, 2)
     .toUpperCase()
 
+  // Support view
+  if (showSupport) {
+    return (
+      <div className="h-[calc(100vh-180px)] bg-[#0a0a0a] rounded-xl overflow-hidden">
+        <TicketList userId={user.id} />
+        <div className="p-4 border-t border-zinc-800">
+          <Button
+            variant="outline"
+            className="w-full border-zinc-700"
+            onClick={() => setShowSupport(false)}
+          >
+            Volver al Perfil
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
-      {/* Profile header */}
+      {/* Profile header with notification bell */}
       <Card className="border-zinc-800 bg-zinc-900/50">
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
@@ -122,6 +157,13 @@ export default function ProfilePage() {
                 <Badge variant="outline">{user.categoria}</Badge>
               </div>
             </div>
+
+            {/* Notification bell */}
+            <NotificationBell
+              userId={user.id}
+              muted={notificationsMuted}
+              onClick={() => setShowNotifications(true)}
+            />
           </div>
         </CardContent>
       </Card>
@@ -145,6 +187,27 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Contact Support - prominent CTA */}
+      <Card className="border-[#E91E8C]/30 bg-[#E91E8C]/5">
+        <CardContent className="p-4">
+          <button
+            onClick={() => setShowSupport(true)}
+            className="w-full flex items-center gap-4 text-left"
+          >
+            <div className="w-12 h-12 rounded-full bg-[#E91E8C]/20 flex items-center justify-center flex-shrink-0">
+              <HeadphonesIcon className="w-6 h-6 text-[#E91E8C]" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-[#fafafa]">Soporte</h3>
+              <p className="text-xs text-zinc-400">
+                Reporta bugs, sugerencias o contacta al admin
+              </p>
+            </div>
+            <MessageCircle className="w-5 h-5 text-[#E91E8C]" />
+          </button>
+        </CardContent>
+      </Card>
 
       {/* Account info */}
       <Card className="border-zinc-800 bg-zinc-900/50">
@@ -174,6 +237,32 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
+      {/* Notification settings */}
+      <Card className="border-zinc-800 bg-zinc-900/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            {notificationsMuted ? (
+              <BellOff className="h-4 w-4" />
+            ) : (
+              <Bell className="h-4 w-4" />
+            )}
+            Notificaciones
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <button
+            onClick={() => setShowNotifications(true)}
+            className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-zinc-800/50 transition-colors"
+          >
+            <span className="text-sm text-zinc-400">Ver notificaciones</span>
+            <NotificationBell
+              userId={user.id}
+              muted={notificationsMuted}
+            />
+          </button>
+        </CardContent>
+      </Card>
+
       {/* Admin link */}
       {user.role === 'SUPERADMIN' && (
         <Button
@@ -196,6 +285,27 @@ export default function ProfilePage() {
         <LogOut className="h-4 w-4 mr-2" />
         {isLoggingOut ? 'Cerrando sesión...' : 'Cerrar sesión'}
       </Button>
+
+      {/* Notification Center Modal */}
+      {showNotifications && (
+        <NotificationCenter
+          userId={user.id}
+          muted={notificationsMuted}
+          onMutedChange={setNotificationsMuted}
+          onClose={() => setShowNotifications(false)}
+          onTicketClick={(ticketId) => {
+            setShowNotifications(false)
+            setShowSupport(true)
+          }}
+        />
+      )}
+
+      {/* Create Ticket Dialog */}
+      <CreateTicketDialog
+        open={showCreateTicket}
+        onOpenChange={setShowCreateTicket}
+        userId={user.id}
+      />
     </div>
   )
 }

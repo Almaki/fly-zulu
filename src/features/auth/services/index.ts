@@ -44,7 +44,13 @@ export async function login(email: string, password: string): Promise<AuthResult
   return { data: profile as User | null, error: null }
 }
 
-export async function register(formData: Omit<RegisterFormData, 'confirmPassword' | 'terminos' | 'privacidad' | 'cookies'>): Promise<AuthResult> {
+type RegisterResult = {
+  data: User | null
+  error: string | null
+  requiresEmailVerification?: boolean
+}
+
+export async function register(formData: Omit<RegisterFormData, 'confirmPassword' | 'terminos' | 'privacidad' | 'cookies'>): Promise<RegisterResult> {
   const supabase = await createServerSupabaseClient()
   const serviceClient = await createServiceRoleClient()
 
@@ -70,10 +76,13 @@ export async function register(formData: Omit<RegisterFormData, 'confirmPassword
     return { data: null, error: 'Este WhatsApp ya está registrado' }
   }
 
-  // Create auth user
+  // Create auth user with email confirmation
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email: formData.email,
     password: formData.password,
+    options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://fly-zulu.com'}/auth/callback`,
+    },
   })
 
   if (authError) {
@@ -109,14 +118,25 @@ export async function register(formData: Omit<RegisterFormData, 'confirmPassword
     return { data: null, error: 'Error al crear perfil: ' + profileError.message }
   }
 
-  // Login automático después del registro exitoso
+  // Check if email confirmation is required
+  // If user.identities is empty or email is not confirmed, verification is needed
+  const needsEmailVerification = !authData.user.email_confirmed_at
+
+  if (needsEmailVerification) {
+    return {
+      data: profile as User,
+      error: null,
+      requiresEmailVerification: true
+    }
+  }
+
+  // Login automático si el email ya está verificado (ej: OAuth)
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email: formData.email,
     password: formData.password,
   })
 
   if (signInError) {
-    // No bloquear el registro si falla el login automático
     console.error('Error en login automático:', signInError)
   }
 
