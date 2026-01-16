@@ -1,6 +1,266 @@
-# PROJECT RULES - FLY-ZULU
+# 📋 PROJECT_RULES.md - Reglas Obligatorias de FLY-ZULU
 
-> Reglas críticas del proyecto que DEBEN seguirse sin excepción.
+> Este archivo es la fuente de verdad para decisiones técnicas. Claude Code DEBE consultar y seguir estas reglas.
+
+---
+
+## 🎯 OBJETIVO DE ESCALABILIDAD
+
+El sistema debe soportar **150+ usuarios concurrentes** sin degradación de rendimiento.
+
+---
+
+## 🚀 ESCALABILIDAD Y PERFORMANCE (150+ USUARIOS)
+
+### 1. CONNECTION POOLING (CRÍTICO)
+
+```typescript
+// ❌ NUNCA usar conexión directa para queries normales
+const supabase = createClient(url, key) // NO en producción
+
+// ✅ SIEMPRE usar Transaction Pooler (puerto 6543)
+// En .env.local:
+// DATABASE_URL=postgresql://user:pass@db.xxx.supabase.co:6543/postgres?pgbouncer=true
+```
+
+- Usar el connection string de "Transaction pooler" de Supabase
+- Puerto 6543 (NO 5432)
+- Parámetro `?pgbouncer=true`
+
+---
+
+### 2. CACHÉ Y DATA FETCHING
+
+```typescript
+// ✅ OBLIGATORIO: Usar React Query o SWR
+import { useQuery } from '@tanstack/react-query'
+
+const { data } = useQuery({
+  queryKey: ['flights', airportCode],
+  queryFn: () => getFlights(airportCode),
+  staleTime: 1000 * 60 * 5, // 5 minutos
+  gcTime: 1000 * 60 * 30,   // 30 minutos en caché
+})
+```
+
+**Reglas:**
+- SIEMPRE usar React Query para fetching
+- staleTime mínimo: 1 minuto para datos frecuentes
+- staleTime recomendado: 5 minutos para datos semi-estáticos
+- Implementar optimistic updates para mejor UX
+
+---
+
+### 3. REALTIME SELECTIVO
+
+```typescript
+// ✅ SOLO usar Realtime para:
+// - Tablero FIDS (actualizaciones de vuelos)
+// - Notificaciones push
+// - Chat/mensajes (si aplica)
+
+// ❌ NO usar Realtime para:
+// - Perfil de usuario
+// - Directorio de servicios
+// - Historial de vuelos
+// - Datos que cambian poco
+```
+
+**Reglas:**
+- Máximo 3-4 suscripciones Realtime activas por usuario
+- SIEMPRE hacer unsubscribe en cleanup del useEffect
+- Usar filtros específicos en las suscripciones
+
+```typescript
+// ✅ Correcto: filtro específico
+supabase
+  .channel('fids')
+  .on('postgres_changes', {
+    event: '*',
+    schema: 'public',
+    table: 'board_flights',
+    filter: `airport_code=eq.${airportCode}` // FILTRAR
+  }, handler)
+
+// ❌ Incorrecto: sin filtro
+supabase
+  .channel('fids')
+  .on('postgres_changes', {
+    event: '*',
+    schema: 'public',
+    table: 'board_flights' // SIN FILTRO = sobrecarga
+  }, handler)
+```
+
+---
+
+### 4. QUERIES OPTIMIZADAS
+
+```typescript
+// ❌ PROHIBIDO: Select all
+const { data } = await supabase.from('users').select('*')
+
+// ✅ OBLIGATORIO: Campos específicos
+const { data } = await supabase
+  .from('users')
+  .select('id, nombre, posicion, avatar_url')
+  .eq('id', userId)
+  .single()
+```
+
+**Reglas:**
+- NUNCA usar `select('*')`
+- SIEMPRE especificar campos necesarios
+- SIEMPRE paginar: `.range(0, 19)` o `.limit(20)`
+- Usar `.single()` cuando esperas un solo registro
+
+---
+
+### 5. PAGINACIÓN OBLIGATORIA
+
+```typescript
+// ✅ Todas las listas DEBEN tener paginación
+const PAGE_SIZE = 20
+
+const { data, count } = await supabase
+  .from('directory_services')
+  .select('id, nombre, telefono, rating', { count: 'exact' })
+  .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
+  .order('rating', { ascending: false })
+```
+
+**Límites por tabla:**
+- FIDS: 50 vuelos por página
+- Directorio: 20 servicios por página
+- Historial: 20 registros por página
+- Academy flashcards: 10 por sesión
+
+---
+
+### 6. DEBOUNCE EN INPUTS
+
+```typescript
+// ✅ OBLIGATORIO en búsquedas y filtros
+import { useDebouncedCallback } from 'use-debounce'
+
+const handleSearch = useDebouncedCallback((value: string) => {
+  setSearchTerm(value)
+}, 300) // Mínimo 300ms
+```
+
+**Aplicar en:**
+- Búsqueda de directorio
+- Filtros de FIDS
+- Búsqueda de aeropuertos
+- Cualquier input que dispare queries
+
+---
+
+### 7. ÍNDICES DE BASE DE DATOS
+
+```sql
+-- Crear estos índices en Supabase
+CREATE INDEX idx_board_flights_airport_date ON board_flights(airport_code, flight_date);
+CREATE INDEX idx_board_flights_std ON board_flights(std);
+CREATE INDEX idx_directory_ubicacion ON directory_services(ubicacion);
+CREATE INDEX idx_pilot_duty_user_fecha ON pilot_duty_days(user_id, fecha);
+CREATE INDEX idx_users_posicion ON users(posicion);
+```
+
+---
+
+### 8. STATIC GENERATION
+
+```typescript
+// ✅ Páginas públicas: usar SSG
+// src/app/page.tsx (landing)
+export const dynamic = 'force-static'
+export const revalidate = 3600 // 1 hora
+
+// ✅ Páginas semi-estáticas: usar ISR
+// src/app/academy/[system]/page.tsx
+export const revalidate = 86400 // 24 horas
+```
+
+---
+
+### 9. ERROR BOUNDARIES
+
+```typescript
+// ✅ OBLIGATORIO: Cada feature debe tener error boundary
+// src/features/fids/components/FidsErrorBoundary.tsx
+
+'use client'
+import { ErrorBoundary } from 'react-error-boundary'
+
+function FidsFallback({ error, resetErrorBoundary }) {
+  return (
+    <div className="p-4 text-center">
+      <p>Error cargando tablero</p>
+      <button onClick={resetErrorBoundary}>Reintentar</button>
+    </div>
+  )
+}
+```
+
+---
+
+### 10. LOADING STATES
+
+```typescript
+// ✅ OBLIGATORIO: Skeletons, no spinners genéricos
+// Cada componente que carga datos debe tener su skeleton
+
+// src/features/fids/components/FlightCardSkeleton.tsx
+export function FlightCardSkeleton() {
+  return (
+    <div className="animate-pulse bg-surface rounded-lg p-4">
+      <div className="h-4 bg-gray-700 rounded w-1/4 mb-2" />
+      <div className="h-6 bg-gray-700 rounded w-1/2" />
+    </div>
+  )
+}
+```
+
+---
+
+### 11. BUNDLE SIZE
+
+**Límites:**
+- First Load JS: < 100KB
+- Cada página: < 50KB adicional
+- Imágenes: WebP, max 100KB cada una
+
+```typescript
+// ✅ Imports dinámicos para componentes pesados
+const Academy = dynamic(() => import('@/features/pilot/components/Academy'), {
+  loading: () => <AcademySkeleton />
+})
+```
+
+---
+
+### 12. PRIORIDAD OFFLINE POR MÓDULO
+
+| Módulo | Prioridad | Nivel Offline |
+|--------|-----------|---------------|
+| PILOT (MCDU, Jornada) | CRÍTICO | 100% offline |
+| FA (Registro vuelo) | CRÍTICO | 100% offline |
+| OPS/TRAFICO/MANTTO | ALTA | 100% offline |
+| FIDS | MEDIA | Lectura offline, escritura online |
+| Directorio | MEDIA | Lectura offline |
+
+---
+
+## ✅ CHECKLIST ANTES DE CADA COMMIT
+
+- [ ] No hay `select('*')` en ningún query
+- [ ] Todas las listas tienen paginación
+- [ ] Realtime solo donde es necesario
+- [ ] Debounce en todos los inputs de búsqueda
+- [ ] Error boundaries en cada feature
+- [ ] Loading skeletons (no spinners)
+- [ ] Offline support para PILOT y FA
 
 ---
 
