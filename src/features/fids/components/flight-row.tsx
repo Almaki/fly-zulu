@@ -234,7 +234,7 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
           )}
         </div>
 
-        {/* Status - Editable */}
+        {/* Status label - tapping opens editor */}
         <div className="flex items-center gap-2">
           {editField === 'status' ? (
             <StatusEditor
@@ -246,9 +246,8 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
           ) : (
             <button
               onClick={() => setEditField('status')}
-              className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-zinc-800 transition-colors"
+              className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-zinc-800 transition-colors"
             >
-              <div className={`w-2.5 h-2.5 rounded-full ${statusConfig.color}`} />
               {statusConfig.label && (
                 <span className="text-xs font-medium text-zinc-400">
                   {statusConfig.label}
@@ -259,24 +258,28 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
         </div>
       </div>
 
-      {/* Row 2: Destination + Gate */}
+      {/* Row 2: Destination with status indicator + Gate */}
       <div className="px-4 pb-3 flex items-center justify-between">
-        <div className="flex-1 min-w-0">
-          <p className="text-base font-medium text-[#fafafa]">
-            {displayCity}
-          </p>
-          <p className="text-xs text-zinc-500 font-mono">
-            {displayCode}
-          </p>
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          {/* Status indicator next to destination */}
+          <div className={`w-3 h-3 rounded-full flex-shrink-0 ${statusConfig.color}`} />
+          <div className="min-w-0">
+            <p className="text-base font-medium text-[#fafafa] truncate">
+              {displayCity}
+            </p>
+            <p className="text-xs text-zinc-500 font-mono">
+              {displayCode}
+            </p>
+          </div>
         </div>
 
-        {/* Gate - Editable - Airport style amber/yellow */}
+        {/* Gate - Editable - Airport style with softer amber */}
         <div className="flex items-center gap-2">
           {editField === 'gate' ? (
             <div className="flex items-center gap-1">
               {gateOptions.length > 0 ? (
                 <Select value={editValue} onValueChange={setEditValue}>
-                  <SelectTrigger className="w-20 h-10 text-base bg-[#1a1a1a] border-[#f59e0b]">
+                  <SelectTrigger className="w-20 h-10 text-base bg-[#1a1a1a] border-[#d97706]">
                     <SelectValue placeholder="-" />
                   </SelectTrigger>
                   <SelectContent>
@@ -293,7 +296,7 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
                 <Input
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value.toUpperCase().slice(0, 4))}
-                  className="w-16 h-10 text-base px-2 bg-[#1a1a1a] border-[#f59e0b]"
+                  className="w-16 h-10 text-base px-2 bg-[#1a1a1a] border-[#d97706]"
                   maxLength={4}
                   autoFocus
                 />
@@ -305,10 +308,9 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
           ) : (
             <button
               onClick={() => startEdit('gate', flight.gate || '')}
-              className="flex flex-col items-center min-w-[60px] px-3 py-2 rounded-lg bg-[#f59e0b] hover:bg-[#f59e0b]/90 transition-colors shadow-md shadow-[#f59e0b]/20"
+              className="flex items-center justify-center min-w-[56px] h-[56px] px-3 rounded-lg bg-[#b45309] hover:bg-[#92400e] transition-colors"
             >
-              <span className="text-[9px] font-medium text-black/60 uppercase tracking-wider">Puerta</span>
-              <span className="text-lg font-bold font-mono text-white tracking-wide">
+              <span className="text-2xl font-bold font-mono text-white tracking-wide">
                 {flight.gate || '—'}
               </span>
             </button>

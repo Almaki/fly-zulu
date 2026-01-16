@@ -39,11 +39,14 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
 
   const config = EXCHANGE_AIRPORTS[airportCode]
 
-  // Don't render if airport doesn't have exchange rate
-  if (!config) return null
-
-  // Load exchange rates
+  // Load exchange rates - useEffect must be called before any conditional returns
   useEffect(() => {
+    // Skip if no config for this airport
+    if (!config) {
+      setIsLoading(false)
+      return
+    }
+
     loadRates()
     // Subscribe to realtime updates
     const supabase = createClient()
@@ -66,59 +69,62 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [airportCode])
 
-  const loadRates = async () => {
-    // Always start with local fallback data
-    const fallbackRates = config.locations.map((location, i) => ({
-      id: `local-${i}`,
-      airport_code: airportCode,
-      location,
-      rate: 0,
-      updated_by: null,
-      updated_at: new Date().toISOString(),
-    }))
+    async function loadRates() {
+      // Always start with local fallback data
+      const fallbackRates = config!.locations.map((location, i) => ({
+        id: `local-${i}`,
+        airport_code: airportCode,
+        location,
+        rate: 0,
+        updated_by: null,
+        updated_at: new Date().toISOString(),
+      }))
 
-    try {
-      const supabase = createClient()
-      // Use type assertion since table may not exist in generated types yet
-      const { data, error } = await (supabase as any)
-        .from('exchange_rates')
-        .select('*')
-        .eq('airport_code', airportCode)
-        .order('location')
-
-      if (error) throw error
-
-      // If no rates exist, create default ones
-      if (!data || data.length === 0) {
-        const defaultRates = config.locations.map((location) => ({
-          airport_code: airportCode,
-          location,
-          rate: 0,
-        }))
-
-        const { data: newRates, error: insertError } = await (supabase as any)
+      try {
+        const supabase = createClient()
+        // Use type assertion since table may not exist in generated types yet
+        const { data, error } = await (supabase as any)
           .from('exchange_rates')
-          .insert(defaultRates)
-          .select()
+          .select('*')
+          .eq('airport_code', airportCode)
+          .order('location')
 
-        if (insertError) {
-          // Table might not exist, use local state
-          setRates(fallbackRates)
+        if (error) throw error
+
+        // If no rates exist, create default ones
+        if (!data || data.length === 0) {
+          const defaultRates = config!.locations.map((location) => ({
+            airport_code: airportCode,
+            location,
+            rate: 0,
+          }))
+
+          const { data: newRates, error: insertError } = await (supabase as any)
+            .from('exchange_rates')
+            .insert(defaultRates)
+            .select()
+
+          if (insertError) {
+            // Table might not exist, use local state
+            setRates(fallbackRates)
+          } else {
+            setRates(newRates || fallbackRates)
+          }
         } else {
-          setRates(newRates || fallbackRates)
+          setRates(data as ExchangeRateData[])
         }
-      } else {
-        setRates(data as ExchangeRateData[])
+      } catch {
+        // Fallback to local state if table doesn't exist
+        setRates(fallbackRates)
+      } finally {
+        setIsLoading(false)
       }
-    } catch {
-      // Fallback to local state if table doesn't exist
-      setRates(fallbackRates)
-    } finally {
-      setIsLoading(false)
     }
-  }
+  }, [airportCode, config])
+
+  // Don't render if airport doesn't have exchange rate
+  if (!config) return null
 
   const startEdit = (rate: ExchangeRateData) => {
     setEditingId(rate.id)
