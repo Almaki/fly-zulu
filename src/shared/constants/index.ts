@@ -77,9 +77,9 @@ export const DIRECTORY_CATEGORIES = [
   { id: 'food', label: 'Comida', emoji: '🍔' },
 ] as const;
 
-// FIDS retention window (hours)
+// FIDS retention window
 export const FIDS_RETENTION = {
-  PAST_HOURS: 3,
+  PAST_MINUTES: 30,  // Vuelos desaparecen 30 min después de hora programada
   FUTURE_HOURS: 24,
   ARCHIVE_INTERVAL_MINUTES: 15,
 } as const;

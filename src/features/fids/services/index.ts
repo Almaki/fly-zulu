@@ -7,9 +7,9 @@ import type { Flight, FlightFormData, FIDSFilters } from '../types'
 export async function getFlights(filters?: FIDSFilters): Promise<{ data: Flight[] | null; error: string | null }> {
   const supabase = await createServerSupabaseClient()
 
-  // Calculate retention window: -3 hours to +24 hours
+  // Calculate retention window: -30 minutes to +24 hours
   const now = new Date()
-  const pastLimit = new Date(now.getTime() - FIDS_RETENTION.PAST_HOURS * 60 * 60 * 1000)
+  const pastLimit = new Date(now.getTime() - FIDS_RETENTION.PAST_MINUTES * 60 * 1000)
   const futureLimit = new Date(now.getTime() + FIDS_RETENTION.FUTURE_HOURS * 60 * 60 * 1000)
 
   let query = supabase
@@ -154,7 +154,7 @@ export async function updateFlightStatus(
 export async function archiveOldFlights(): Promise<{ count: number; error: string | null }> {
   const supabase = await createServerSupabaseClient()
 
-  const pastLimit = new Date(Date.now() - FIDS_RETENTION.PAST_HOURS * 60 * 60 * 1000)
+  const pastLimit = new Date(Date.now() - FIDS_RETENTION.PAST_MINUTES * 60 * 1000)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.from('flights') as any)
