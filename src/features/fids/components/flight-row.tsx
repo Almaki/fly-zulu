@@ -89,9 +89,9 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
 
   const statusConfig = getStatusColor()
 
-  // Gate card color based on gate change status
-  const gateCardColor = hasGateChange
-    ? 'bg-[#3b82f6] hover:bg-[#2563eb]' // Blue for gate change
+  // Gate card color based on gate change or delay status - amber for both
+  const gateCardColor = (hasGateChange || hasDelay)
+    ? 'bg-[#f59e0b] hover:bg-[#d97706]' // Amber for gate change or delay
     : 'bg-[#ca8a04] hover:bg-[#a16207]' // Yellow for normal
 
   // Start editing
@@ -351,14 +351,8 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
           ) : (
             <button
               onClick={() => startEdit('gate', flight.gate || '')}
-              className={`relative flex flex-col items-center justify-center w-[48px] h-[40px] rounded-lg transition-colors overflow-hidden ${gateCardColor}`}
+              className={`flex flex-col items-center justify-center w-[48px] h-[40px] rounded-lg transition-colors ${gateCardColor}`}
             >
-              {/* Gate change ribbon - diagonal banner */}
-              {hasGateChange && (
-                <div className="absolute -top-1 -right-3 w-10 h-4 bg-[#3b82f6] rotate-45 flex items-center justify-center shadow-md">
-                  <span className="text-[5px] font-bold text-white tracking-tight">CHG</span>
-                </div>
-              )}
               <span className="text-[7px] text-white/70 font-medium uppercase tracking-wide leading-none">
                 Gate
               </span>
