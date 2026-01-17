@@ -198,7 +198,7 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
   const hasChanges = hasDelay || hasGateChange || flight.status === 'CANCELED' || flight.status === 'BOARDING'
 
   return (
-    <div className="bg-[#0a0a0a] hover:bg-[#0f0f0f] transition-colors border-b border-zinc-800/50">
+    <div className="bg-background hover:bg-[#0f0f0f] transition-colors border-b border-zinc-800/50">
       {/* Two Row Layout - Responsive */}
       <div className="flex items-stretch">
         {/* Left side: 2 rows */}

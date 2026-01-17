@@ -127,9 +127,9 @@ export default function MensajesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-[#27272a] bg-[#0a0a0a]/95 backdrop-blur-lg p-4">
+      <div className="sticky top-0 z-10 border-b border-[#27272a] bg-background/95 backdrop-blur-lg p-4">
         <div className="max-w-lg mx-auto">
           <h1 className="text-xl font-bold text-[#fafafa]">Mensajes al Admin</h1>
           <p className="text-xs text-[#71717a] mt-1">
@@ -215,7 +215,7 @@ export default function MensajesPage() {
       </div>
 
       {/* Message Input */}
-      <div className="fixed bottom-16 left-0 right-0 border-t border-[#27272a] bg-[#0a0a0a] p-4">
+      <div className="fixed bottom-16 left-0 right-0 border-t border-[#27272a] bg-background p-4">
         <div className="max-w-lg mx-auto space-y-3">
           {/* Type Selector */}
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">

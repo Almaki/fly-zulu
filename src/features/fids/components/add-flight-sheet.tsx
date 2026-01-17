@@ -167,7 +167,7 @@ export function AddFlightSheet({
       />
 
       {/* Sheet - Top aligned to avoid keyboard overlap */}
-      <div className="absolute top-0 left-0 right-0 bg-[#0a0a0a] rounded-b-3xl animate-in slide-in-from-top duration-300 max-h-[70vh] flex flex-col shadow-2xl">
+      <div className="absolute top-0 left-0 right-0 bg-background rounded-b-3xl animate-in slide-in-from-top duration-300 max-h-[70vh] flex flex-col shadow-2xl">
         {/* Handle at top */}
         <div className="flex justify-center pt-2 pb-1 flex-shrink-0">
           <div className="w-10 h-1 rounded-full bg-zinc-700" />
@@ -412,7 +412,7 @@ export function AddFlightSheet({
         )}
 
         {/* Actions - Always visible */}
-        <div className="flex-shrink-0 bg-[#0a0a0a] border-t border-[#27272a] p-3">
+        <div className="flex-shrink-0 bg-background border-t border-[#27272a] p-3">
           <div className="flex gap-2">
             {step > 1 && (
               <Button

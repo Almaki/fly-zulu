@@ -86,7 +86,7 @@ export default function PerfilPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#0066CC]" />
       </div>
     )
@@ -94,7 +94,7 @@ export default function PerfilPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center">
           <p className="text-zinc-400 mb-4">No se encontró el perfil</p>
           <Button onClick={() => router.push('/login')} variant="outline">
@@ -106,7 +106,7 @@ export default function PerfilPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] p-4">
+    <div className="min-h-screen bg-background p-4">
       <div className="max-w-lg mx-auto">
         {/* Header */}
         <div className="mb-6 pt-4">

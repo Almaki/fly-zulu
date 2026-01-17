@@ -89,7 +89,7 @@ export function CreateTicketDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="bg-[#0a0a0a] border-zinc-800 max-w-md mx-4">
+      <DialogContent className="bg-background border-zinc-800 max-w-md mx-4">
         {showSuccess ? (
           <div className="py-8 text-center space-y-4">
             <div className="w-16 h-16 mx-auto rounded-full bg-[#22c55e]/20 flex items-center justify-center">

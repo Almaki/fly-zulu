@@ -172,7 +172,7 @@ export function MCDUSection({
   }
 
   return (
-    <div className="bg-[#0a0a0a] border-2 border-[#27272a] rounded-xl overflow-hidden">
+    <div className="bg-background border-2 border-[#27272a] rounded-xl overflow-hidden">
       {/* MCDU Header */}
       <div className="bg-[#141414] px-4 py-2 border-b border-[#27272a]">
         <div className="flex items-center gap-2">
@@ -198,7 +198,7 @@ export function MCDUSection({
                     <Input
                       type="date"
                       {...field}
-                      className="bg-[#0a0a0a] border-[#27272a] text-[#00ff41] text-sm"
+                      className="bg-background border-[#27272a] text-[#00ff41] text-sm"
                     />
                   </FormControl>
                 </FormItem>
@@ -216,7 +216,7 @@ export function MCDUSection({
                       placeholder="XA-ABC"
                       {...field}
                       onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                      className="bg-[#0a0a0a] border-[#27272a] text-[#00ff41] uppercase text-sm"
+                      className="bg-background border-[#27272a] text-[#00ff41] uppercase text-sm"
                       maxLength={10}
                     />
                   </FormControl>
@@ -232,7 +232,7 @@ export function MCDUSection({
                   <FormLabel className="text-[#00ffff] text-xs">TYPE</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger className="bg-[#0a0a0a] border-[#27272a] text-[#00ff41] text-sm">
+                      <SelectTrigger className="bg-background border-[#27272a] text-[#00ff41] text-sm">
                         <SelectValue placeholder="A/C" />
                       </SelectTrigger>
                     </FormControl>
@@ -262,7 +262,7 @@ export function MCDUSection({
                       placeholder="MEX"
                       {...field}
                       onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                      className="bg-[#0a0a0a] border-[#27272a] text-[#00ff41] uppercase text-center text-lg"
+                      className="bg-background border-[#27272a] text-[#00ff41] uppercase text-center text-lg"
                       maxLength={3}
                     />
                   </FormControl>
@@ -281,7 +281,7 @@ export function MCDUSection({
                       placeholder="CUN"
                       {...field}
                       onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                      className="bg-[#0a0a0a] border-[#27272a] text-[#00ff41] uppercase text-center text-lg"
+                      className="bg-background border-[#27272a] text-[#00ff41] uppercase text-center text-lg"
                       maxLength={3}
                     />
                   </FormControl>
@@ -305,7 +305,7 @@ export function MCDUSection({
                         placeholder="--:--"
                         value={field.value}
                         onChange={(e) => handleTimeInput(e, field.onChange)}
-                        className="bg-[#0a0a0a] border-[#27272a] text-[#fafafa] text-center text-lg"
+                        className="bg-background border-[#27272a] text-[#fafafa] text-center text-lg"
                         maxLength={5}
                       />
                     </FormControl>
@@ -324,7 +324,7 @@ export function MCDUSection({
                         placeholder="--:--"
                         value={field.value}
                         onChange={(e) => handleTimeInput(e, field.onChange)}
-                        className="bg-[#0a0a0a] border-[#27272a] text-[#fafafa] text-center text-lg"
+                        className="bg-background border-[#27272a] text-[#fafafa] text-center text-lg"
                         maxLength={5}
                       />
                     </FormControl>
@@ -343,7 +343,7 @@ export function MCDUSection({
                         placeholder="--:--"
                         value={field.value}
                         onChange={(e) => handleTimeInput(e, field.onChange)}
-                        className="bg-[#0a0a0a] border-[#27272a] text-[#fafafa] text-center text-lg"
+                        className="bg-background border-[#27272a] text-[#fafafa] text-center text-lg"
                         maxLength={5}
                       />
                     </FormControl>
@@ -362,7 +362,7 @@ export function MCDUSection({
                         placeholder="--:--"
                         value={field.value}
                         onChange={(e) => handleTimeInput(e, field.onChange)}
-                        className="bg-[#0a0a0a] border-[#27272a] text-[#fafafa] text-center text-lg"
+                        className="bg-background border-[#27272a] text-[#fafafa] text-center text-lg"
                         maxLength={5}
                       />
                     </FormControl>

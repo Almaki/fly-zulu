@@ -45,7 +45,7 @@ export function AirportSearch({ onSelect, onCancel }: AirportSearchProps) {
   return (
     <div className="flex-1 flex flex-col">
       {/* Header */}
-      <div className="bg-[#0a0a0a] border-b border-[#27272a] px-4 py-4 sticky top-0 z-10">
+      <div className="bg-background border-b border-[#27272a] px-4 py-4 sticky top-0 z-10">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E91E8C] to-[#E91E8C]/50 flex items-center justify-center">

@@ -119,7 +119,7 @@ export function DigitalBoard({ initialAirport }: DigitalBoardProps) {
   return (
     <div className="space-y-0">
       {/* Digital Board Header - Airport Style */}
-      <div className="bg-[#0a0a0a] border-b-2 border-[#1a1a1a] sticky top-0 z-20">
+      <div className="bg-background border-b-2 border-[#1a1a1a] sticky top-0 z-20">
         {/* Airport selector */}
         <div className="w-full flex items-center justify-between px-4 py-3">
           <div
@@ -199,7 +199,7 @@ export function DigitalBoard({ initialAirport }: DigitalBoardProps) {
         {isLoading && flights.length === 0 ? (
           // Loading skeleton
           Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-[#0a0a0a] px-3 py-4 animate-pulse">
+            <div key={i} className="bg-background px-3 py-4 animate-pulse">
               <div className="grid grid-cols-12 gap-1">
                 <div className="col-span-2 h-5 bg-zinc-800 rounded" />
                 <div className="col-span-3 h-5 bg-zinc-800 rounded" />
@@ -298,7 +298,7 @@ export function DigitalBoard({ initialAirport }: DigitalBoardProps) {
 
       {/* Footer with info */}
       {flights.length > 0 && (
-        <div className="bg-[#0a0a0a] border-t border-[#1a1a1a] px-4 py-3">
+        <div className="bg-background border-t border-[#1a1a1a] px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs text-zinc-600">
               <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />

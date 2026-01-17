@@ -178,7 +178,7 @@ export function DutySection({
                   }
                 }}
                 maxLength={5}
-                className="w-24 text-center font-mono bg-[#0a0a0a]"
+                className="w-24 text-center font-mono bg-background"
               />
               <span className="text-xs text-[#71717a]">Z</span>
               <Button
@@ -239,7 +239,7 @@ export function DutySection({
                       setEditStartValue(val)
                     }}
                     placeholder="HH:MM"
-                    className="w-20 h-8 text-center font-mono bg-[#0a0a0a]"
+                    className="w-20 h-8 text-center font-mono bg-background"
                     maxLength={5}
                     autoFocus
                   />
@@ -280,7 +280,7 @@ export function DutySection({
                       setEditEndValue(val)
                     }}
                     placeholder="HH:MM"
-                    className="w-20 h-8 text-center font-mono bg-[#0a0a0a]"
+                    className="w-20 h-8 text-center font-mono bg-background"
                     maxLength={5}
                     autoFocus
                   />
@@ -325,7 +325,7 @@ export function DutySection({
                     value={editLimitValue}
                     onChange={(e) => setEditLimitValue(e.target.value.replace(/[^0-9.]/g, ''))}
                     placeholder={dutyLimitHours.toString()}
-                    className="w-12 h-5 text-center text-xs font-mono bg-[#0a0a0a] px-1"
+                    className="w-12 h-5 text-center text-xs font-mono bg-background px-1"
                     maxLength={4}
                     autoFocus
                   />

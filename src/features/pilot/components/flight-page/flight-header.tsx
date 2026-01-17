@@ -118,7 +118,7 @@ export function FlightHeader({ selectedAirport, onAirportChange }: FlightHeaderP
             onBlur={handleAirportSubmit}
             onKeyDown={(e) => e.key === 'Enter' && handleAirportSubmit()}
             maxLength={3}
-            className="w-20 uppercase text-center bg-[#0a0a0a] border-[#27272a] font-mono"
+            className="w-20 uppercase text-center bg-background border-[#27272a] font-mono"
           />
         </div>
 

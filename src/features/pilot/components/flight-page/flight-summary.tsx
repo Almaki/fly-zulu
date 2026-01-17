@@ -47,7 +47,7 @@ export function FlightSummary({ flights }: FlightSummaryProps) {
         {flights.map((flight, index) => (
           <div
             key={flight.id}
-            className="flex items-center justify-between py-2 px-3 bg-[#0a0a0a] rounded-lg"
+            className="flex items-center justify-between py-2 px-3 bg-background rounded-lg"
           >
             <div className="flex items-center gap-3">
               <span className="text-xs text-[#71717a]">#{index + 1}</span>

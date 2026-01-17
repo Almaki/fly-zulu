@@ -108,7 +108,7 @@ export function NotificationCenter({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-end sm:items-center justify-center">
-      <div className="bg-[#0a0a0a] w-full max-w-md sm:rounded-2xl overflow-hidden animate-in slide-in-from-bottom duration-300 max-h-[85vh] flex flex-col">
+      <div className="bg-background w-full max-w-md sm:rounded-2xl overflow-hidden animate-in slide-in-from-bottom duration-300 max-h-[85vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-zinc-800">
           <div className="flex items-center gap-2">

@@ -278,23 +278,29 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
   }
 
   return (
-    <div className="flex items-center gap-3 px-3 py-1.5 bg-zinc-900/30 rounded-lg border border-zinc-800/50">
-      {/* USD Icon */}
-      <div className="flex items-center gap-1">
-        <DollarSign className="w-3 h-3 text-[#22c55e]" />
-        <span className="text-[9px] font-bold text-zinc-500">USD</span>
+    <div className="px-3 py-2 bg-zinc-800/40 rounded-lg border border-zinc-700/30">
+      {/* Row 1: Header with USD icon and colaborativo badge */}
+      <div className="flex items-center justify-between mb-1.5">
+        <div className="flex items-center gap-1.5">
+          <DollarSign className="w-3.5 h-3.5 text-[#22c55e]" />
+          <span className="text-[10px] font-bold text-zinc-400">TIPO DE CAMBIO USD</span>
+        </div>
+        <button className="flex items-center gap-1 opacity-60 hover:opacity-100 transition-opacity">
+          <Users className="w-3 h-3 text-[#f59e0b]" />
+          <span className="text-[8px] text-[#f59e0b] font-medium">COLAB</span>
+        </button>
       </div>
 
-      {/* Rates by Location - inline */}
-      <div className="flex items-center gap-4">
+      {/* Row 2: Rates by Location - responsive grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
         {rates.map((rate) => {
           const locConfig = getLocationConfig(rate.location)
           return (
-            <div key={rate.id} className="flex items-center gap-2">
-              <span className="text-[9px] font-bold text-zinc-400 uppercase">
+            <div key={rate.id} className="flex items-center justify-between bg-zinc-900/50 rounded px-2 py-1">
+              <span className="text-[9px] font-bold text-zinc-500 uppercase truncate mr-2">
                 {locConfig?.label}
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <CompactRateInput
                   value={rate.buy_rate}
                   onSave={(val) => saveRate(rate, 'buy', val)}
@@ -310,11 +316,6 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
           )
         })}
       </div>
-
-      {/* Colaborativo badge - small */}
-      <button className="flex items-center gap-0.5 ml-auto opacity-60 hover:opacity-100 transition-opacity">
-        <Users className="w-2.5 h-2.5 text-[#f59e0b]" />
-      </button>
     </div>
   )
 }

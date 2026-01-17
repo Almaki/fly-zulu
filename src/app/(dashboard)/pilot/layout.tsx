@@ -33,14 +33,14 @@ export default function PilotLayout({
   const pathname = usePathname()
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-background">
       {/* Main Content */}
       <main className="pb-20">
         {children}
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#27272a] bg-[#0a0a0a]/95 backdrop-blur-lg">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#27272a] bg-background/95 backdrop-blur-lg">
         <div className="max-w-lg mx-auto flex items-center justify-around h-16">
           {navItems.map((item) => {
             const Icon = item.icon

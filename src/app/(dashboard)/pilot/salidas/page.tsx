@@ -6,7 +6,7 @@ import { Button } from '@/shared/components/ui/button'
 
 export default function SalidasPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] p-4">
+    <div className="min-h-screen bg-background p-4">
       <div className="max-w-lg mx-auto">
         {/* Header */}
         <div className="mb-6 pt-4 flex items-center justify-between">

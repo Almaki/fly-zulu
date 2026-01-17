@@ -49,13 +49,13 @@ export function EndFlightDialog({
 
         {/* Flight Summary */}
         <div className="grid grid-cols-2 gap-3 my-4">
-          <div className="text-center p-3 bg-[#0a0a0a] rounded-lg border border-[#27272a]">
+          <div className="text-center p-3 bg-background rounded-lg border border-[#27272a]">
             <p className="text-xs text-[#71717a] mb-1">Tiempo de Vuelo</p>
             <p className="text-xl font-mono font-bold text-[#00ff41]">
               {flightSummary.flightTime}
             </p>
           </div>
-          <div className="text-center p-3 bg-[#0a0a0a] rounded-lg border border-[#27272a]">
+          <div className="text-center p-3 bg-background rounded-lg border border-[#27272a]">
             <p className="text-xs text-[#71717a] mb-1">Tiempo Block</p>
             <p className="text-xl font-mono font-bold text-[#00ff41]">
               {flightSummary.blockTime}

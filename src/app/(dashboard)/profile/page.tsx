@@ -120,7 +120,7 @@ export default function ProfilePage() {
   // Support view
   if (showSupport) {
     return (
-      <div className="h-[calc(100vh-180px)] bg-[#0a0a0a] rounded-xl overflow-hidden">
+      <div className="h-[calc(100vh-180px)] bg-background rounded-xl overflow-hidden">
         <TicketList userId={user.id} />
         <div className="p-4 border-t border-zinc-800">
           <Button

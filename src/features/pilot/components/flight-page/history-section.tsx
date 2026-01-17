@@ -104,7 +104,7 @@ export function HistorySection({ userId }: HistorySectionProps) {
             <>
               {/* Stats summary */}
               {stats && stats.totalFlights > 0 && (
-                <div className="grid grid-cols-3 gap-2 p-3 bg-[#0a0a0a] rounded-lg">
+                <div className="grid grid-cols-3 gap-2 p-3 bg-background rounded-lg">
                   <div className="text-center">
                     <p className="text-lg font-bold text-[#00ff41]">{stats.totalFlights}</p>
                     <p className="text-[10px] text-[#71717a]">Vuelos</p>
@@ -129,7 +129,7 @@ export function HistorySection({ userId }: HistorySectionProps) {
                 {sessions.map((session) => (
                   <div
                     key={session.id}
-                    className="bg-[#0a0a0a] rounded-lg border border-[#27272a] overflow-hidden"
+                    className="bg-background rounded-lg border border-[#27272a] overflow-hidden"
                   >
                     {/* Session header */}
                     <button

@@ -8,9 +8,9 @@
 }
 
 :root {
-  --background: #0a0a0a;
+  --background: #18181b;
   --foreground: #fafafa;
-  --card: #141414;
+  --card: #1f1f23;
   --card-foreground: #fafafa;
   --popover: #141414;
   --popover-foreground: #fafafa;

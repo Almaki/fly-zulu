@@ -52,7 +52,7 @@ const features = [
 
 export default function PilotDashboard() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] p-4 pb-24">
+    <div className="min-h-screen bg-background p-4 pb-24">
       <div className="max-w-lg mx-auto">
         {/* Header */}
         <div className="mb-8 pt-4">

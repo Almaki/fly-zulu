@@ -6,7 +6,7 @@ import { Button } from '@/shared/components/ui/button'
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] p-4 md:p-8">
+    <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="mx-auto max-w-3xl">
         <Link href="/register">
           <Button variant="ghost" size="sm" className="mb-6">
