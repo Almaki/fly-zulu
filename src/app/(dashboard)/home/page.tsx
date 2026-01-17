@@ -10,7 +10,8 @@ import {
   Timer,
   Wrench,
   Pencil,
-  BookOpen
+  BookOpen,
+  MessageSquare,
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/hooks'
 
@@ -73,6 +74,8 @@ function UnderConstructionCard() {
 export default function HomePage() {
   const { user } = useAuth()
   const userPosition = (user as { posicion?: string })?.posicion
+  const userRole = (user as { role?: string })?.role
+  const isAdmin = userRole === 'SUPERADMIN' || userRole === 'ADMIN'
 
   // Determinar nombre para saludo
   const firstName = (user as { nombre?: string })?.nombre?.split(' ')[0] || 'Crew'
@@ -124,7 +127,14 @@ export default function HomePage() {
                 badge="Crew"
                 badgeColor="bg-[#22c55e]/20 text-[#22c55e] border border-[#22c55e]/30"
               />
-              <UnderConstructionCard />
+              <FeatureCard
+                title="Crew Lounge"
+                href="/pilot/foro"
+                icon={MessageSquare}
+                color="from-[#E91E8C] to-[#ff6eb4]"
+                badge="Crew"
+                badgeColor="bg-[#E91E8C]/20 text-[#E91E8C] border border-[#E91E8C]/30"
+              />
             </>
           )}
 
@@ -147,7 +157,14 @@ export default function HomePage() {
                 badge="Crew"
                 badgeColor="bg-[#22c55e]/20 text-[#22c55e] border border-[#22c55e]/30"
               />
-              <UnderConstructionCard />
+              <FeatureCard
+                title="Crew Lounge"
+                href="/pilot/foro"
+                icon={MessageSquare}
+                color="from-[#E91E8C] to-[#ff6eb4]"
+                badge="Crew"
+                badgeColor="bg-[#E91E8C]/20 text-[#E91E8C] border border-[#E91E8C]/30"
+              />
             </>
           )}
 
@@ -212,8 +229,44 @@ export default function HomePage() {
             </>
           )}
 
+          {/* === ADMIN / SUPERADMIN === */}
+          {isAdmin && (
+            <>
+              <FeatureCard
+                title="Salidas"
+                href="/board"
+                icon={Clock}
+                color="from-[#f59e0b] to-[#fbbf24]"
+                badge="Admin"
+                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
+              />
+              <FeatureCard
+                title="Directorio"
+                href="/directory"
+                icon={BookOpen}
+                color="from-[#22c55e] to-[#4ade80]"
+                badge="Admin"
+                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
+              />
+              <FeatureCard
+                title="Flight"
+                href="/pilot/flight"
+                icon={Plane}
+                color="from-[#0066CC] to-[#0088FF]"
+              />
+              <FeatureCard
+                title="Crew Lounge"
+                href="/pilot/foro"
+                icon={MessageSquare}
+                color="from-[#E91E8C] to-[#ff6eb4]"
+                badge="Admin"
+                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
+              />
+            </>
+          )}
+
           {/* === FALLBACK (sin rol definido) === */}
-          {!userPosition && (
+          {!userPosition && !isAdmin && (
             <>
               <FeatureCard
                 title="Salidas"

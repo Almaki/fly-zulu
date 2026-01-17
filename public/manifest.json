@@ -2,11 +2,14 @@
   "name": "FLY-ZULU",
   "short_name": "ZULU",
   "description": "Tu base de operaciones - PWA para tripulaciones de aviación en México",
-  "start_url": "/",
+  "start_url": "/home",
+  "scope": "/",
+  "id": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#0a0a0a",
-  "theme_color": "#0a0a0a",
-  "orientation": "portrait",
+  "theme_color": "#E91E8C",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/icons/icon-192x192.svg",
@@ -23,9 +26,19 @@
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ],
-  "screenshots": [],
-  "categories": ["productivity", "business"],
-  "lang": "es-MX"
+  "categories": ["productivity", "business", "utilities"],
+  "lang": "es-MX",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  }
 }

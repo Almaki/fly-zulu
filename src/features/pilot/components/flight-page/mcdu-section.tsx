@@ -89,6 +89,30 @@ export function MCDUSection({
   // Track previous values to prevent infinite loops
   const prevValuesRef = useRef<string>('')
   const hasNotifiedComplete = useRef(false)
+  const prevLastDestRef = useRef<string | undefined>(lastDest)
+
+  // Reset form when lastDest changes (after saving a flight)
+  useEffect(() => {
+    // Only reset if lastDest actually changed (not on initial mount)
+    if (prevLastDestRef.current !== lastDest && prevLastDestRef.current !== undefined) {
+      form.reset({
+        date: getCurrentZuluDate(),
+        tail: lastTail || '',
+        aircraftType: lastAircraftType || '',
+        dep: lastDest || '',
+        dest: '',
+        outTime: '',
+        offTime: '',
+        onTime: '',
+        inTime: '',
+      })
+      setFlightTime(null)
+      setBlockTime(null)
+      setTimeError(null)
+      hasNotifiedComplete.current = false
+    }
+    prevLastDestRef.current = lastDest
+  }, [lastDest, lastTail, lastAircraftType, form])
 
   // Memoize callbacks
   const stableOnFormChange = useCallback(onFormChange, [])
@@ -187,18 +211,18 @@ export function MCDUSection({
       <Form {...form}>
         <form className="p-4 space-y-4 font-mono">
           {/* Row 1: Date, Tail, Type */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <FormField
               control={form.control}
               name="date"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="min-w-0">
                   <FormLabel className="text-[#00ffff] text-xs">DATE</FormLabel>
                   <FormControl>
                     <Input
                       type="date"
                       {...field}
-                      className="bg-background border-[#27272a] text-[#00ff41] text-sm"
+                      className="bg-background border-[#27272a] text-[#00ff41] text-xs sm:text-sm px-1 sm:px-2 [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:invert"
                     />
                   </FormControl>
                 </FormItem>
@@ -209,14 +233,14 @@ export function MCDUSection({
               control={form.control}
               name="tail"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="min-w-0">
                   <FormLabel className="text-[#00ffff] text-xs">TAIL</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="XA-ABC"
                       {...field}
                       onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                      className="bg-background border-[#27272a] text-[#00ff41] uppercase text-sm"
+                      className="bg-background border-[#27272a] text-[#00ff41] uppercase text-xs sm:text-sm px-1 sm:px-2"
                       maxLength={10}
                     />
                   </FormControl>
@@ -228,11 +252,11 @@ export function MCDUSection({
               control={form.control}
               name="aircraftType"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="min-w-0">
                   <FormLabel className="text-[#00ffff] text-xs">TYPE</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger className="bg-background border-[#27272a] text-[#00ff41] text-sm">
+                      <SelectTrigger className="bg-background border-[#27272a] text-[#00ff41] text-xs sm:text-sm px-1 sm:px-2">
                         <SelectValue placeholder="A/C" />
                       </SelectTrigger>
                     </FormControl>
@@ -293,20 +317,21 @@ export function MCDUSection({
           {/* Row 3: Times (ZULU) */}
           <div className="border-t border-[#27272a] pt-4">
             <p className="text-[#ffbf00] text-xs mb-3 text-center">TIMES (ZULU)</p>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
               <FormField
                 control={form.control}
                 name="outTime"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[#ffbf00] text-xs w-8 block text-center">OUT</FormLabel>
+                  <FormItem className="min-w-0">
+                    <FormLabel className="text-[#ffbf00] text-[10px] sm:text-xs block text-center">OUT</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="--:--"
                         value={field.value}
                         onChange={(e) => handleTimeInput(e, field.onChange)}
-                        className="bg-background border-[#27272a] text-[#fafafa] text-center text-lg"
+                        className="bg-background border-[#27272a] text-[#fafafa] text-center text-base sm:text-lg px-1"
                         maxLength={5}
+                        inputMode="numeric"
                       />
                     </FormControl>
                   </FormItem>
@@ -317,15 +342,16 @@ export function MCDUSection({
                 control={form.control}
                 name="offTime"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[#ffbf00] text-xs w-8 block text-center">OFF</FormLabel>
+                  <FormItem className="min-w-0">
+                    <FormLabel className="text-[#ffbf00] text-[10px] sm:text-xs block text-center">OFF</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="--:--"
                         value={field.value}
                         onChange={(e) => handleTimeInput(e, field.onChange)}
-                        className="bg-background border-[#27272a] text-[#fafafa] text-center text-lg"
+                        className="bg-background border-[#27272a] text-[#fafafa] text-center text-base sm:text-lg px-1"
                         maxLength={5}
+                        inputMode="numeric"
                       />
                     </FormControl>
                   </FormItem>
@@ -336,15 +362,16 @@ export function MCDUSection({
                 control={form.control}
                 name="onTime"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[#ffbf00] text-xs w-8 block text-center">ON</FormLabel>
+                  <FormItem className="min-w-0">
+                    <FormLabel className="text-[#ffbf00] text-[10px] sm:text-xs block text-center">ON</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="--:--"
                         value={field.value}
                         onChange={(e) => handleTimeInput(e, field.onChange)}
-                        className="bg-background border-[#27272a] text-[#fafafa] text-center text-lg"
+                        className="bg-background border-[#27272a] text-[#fafafa] text-center text-base sm:text-lg px-1"
                         maxLength={5}
+                        inputMode="numeric"
                       />
                     </FormControl>
                   </FormItem>
@@ -355,15 +382,16 @@ export function MCDUSection({
                 control={form.control}
                 name="inTime"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[#ffbf00] text-xs w-8 block text-center">IN</FormLabel>
+                  <FormItem className="min-w-0">
+                    <FormLabel className="text-[#ffbf00] text-[10px] sm:text-xs block text-center">IN</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="--:--"
                         value={field.value}
                         onChange={(e) => handleTimeInput(e, field.onChange)}
-                        className="bg-background border-[#27272a] text-[#fafafa] text-center text-lg"
+                        className="bg-background border-[#27272a] text-[#fafafa] text-center text-base sm:text-lg px-1"
                         maxLength={5}
+                        inputMode="numeric"
                       />
                     </FormControl>
                   </FormItem>

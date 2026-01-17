@@ -182,7 +182,7 @@ export async function archiveOldFlights(): Promise<{ count: number; error: strin
   return { count: data?.length || 0, error: null }
 }
 
-// Delete flight (SUPERADMIN only)
+// Delete flight - All authenticated users can delete (collaborative board)
 export async function deleteFlight(flightId: string): Promise<{ error: string | null }> {
   const supabase = await createServerSupabaseClient()
 
@@ -190,18 +190,6 @@ export async function deleteFlight(flightId: string): Promise<{ error: string | 
 
   if (!user) {
     return { error: 'No autenticado' }
-  }
-
-  // Check if user is SUPERADMIN
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  const userRole = (profile as { role: string } | null)?.role
-  if (userRole !== 'SUPERADMIN') {
-    return { error: 'No autorizado - Solo SUPERADMIN puede eliminar vuelos' }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

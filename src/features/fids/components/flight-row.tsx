@@ -34,7 +34,8 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { updateFlight: updateLocalFlight, removeFlight } = useFIDSStore()
   const { user } = useAuth()
-  const isSuperAdmin = user?.role === 'SUPERADMIN'
+  // Todos los usuarios autenticados pueden eliminar vuelos
+  const canDelete = !!user
 
   // Determine which city to show based on direction
   const displayCity = direction === 'departures'
@@ -375,7 +376,7 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
           onSave={saveStatus}
           onCancel={cancelEdit}
           isSubmitting={isSubmitting}
-          isSuperAdmin={isSuperAdmin}
+          canDelete={canDelete}
           onDelete={async () => {
             if (!confirm('¿Eliminar este vuelo? Esta acción no se puede deshacer.')) return
             setIsSubmitting(true)
@@ -401,14 +402,14 @@ function StatusEditor({
   onSave,
   onCancel,
   isSubmitting,
-  isSuperAdmin,
+  canDelete,
   onDelete,
 }: {
   currentStatus: FlightStatus
   onSave: (status: FlightStatus, delayMinutes?: number) => void
   onCancel: () => void
   isSubmitting: boolean
-  isSuperAdmin?: boolean
+  canDelete?: boolean
   onDelete?: () => void
 }) {
   const [status, setStatus] = useState<FlightStatus>(currentStatus)
@@ -522,8 +523,8 @@ function StatusEditor({
           </div>
         )}
 
-        {/* Delete button for SUPERADMIN */}
-        {isSuperAdmin && onDelete && (
+        {/* Delete button for all users */}
+        {canDelete && onDelete && (
           <Button
             variant="outline"
             onClick={onDelete}
