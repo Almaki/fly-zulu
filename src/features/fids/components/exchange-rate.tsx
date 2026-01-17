@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { DollarSign, Edit3, Check, X, Users } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { DollarSign, Users } from 'lucide-react'
 import { toast } from 'sonner'
-import { Input } from '@/shared/components/ui/input'
 import { createClient } from '@/shared/lib/supabase'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -23,26 +22,148 @@ interface ExchangeRateData {
 }
 
 // Airports with exchange rate display
-const EXCHANGE_AIRPORTS: Record<string, { locations: { key: string; label: string }[] }> = {
+const EXCHANGE_AIRPORTS: Record<string, { locations: { key: string; label: string; bgColor: string }[] }> = {
   MEX: {
     locations: [
-      { key: 'terminal', label: 'Adentro Terminal' },
+      { key: 'terminal', label: 'Adentro Terminal', bgColor: 'bg-[#1a2520]' },
     ],
   },
   TIJ: {
     locations: [
-      { key: 'terminal', label: 'Adentro Terminal' },
-      { key: 'entrada', label: 'Entrada Terminal' },
+      { key: 'terminal', label: 'Adentro Terminal', bgColor: 'bg-[#1a2520]' },
+      { key: 'entrada', label: 'Entrada', bgColor: 'bg-[#201a1a]' },
     ],
   },
+}
+
+// Component for 4-digit rate input (XX.XX format)
+interface RateInputProps {
+  value: number
+  onSave: (newValue: number) => void
+  label: 'BUY' | 'SELL'
+}
+
+function RateInput({ value, onSave, label }: RateInputProps) {
+  const [digits, setDigits] = useState<string[]>(['', '', '', ''])
+  const [isEditing, setIsEditing] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Convert number to 4 digits (e.g., 19.85 -> ['1','9','8','5'])
+  useEffect(() => {
+    if (value > 0 && !isEditing) {
+      const formatted = value.toFixed(2).replace('.', '')
+      const paddedDigits = formatted.padStart(4, '0').slice(-4).split('')
+      setDigits(paddedDigits)
+    } else if (!isEditing) {
+      setDigits(['0', '0', '0', '0'])
+    }
+  }, [value, isEditing])
+
+  const handleClick = () => {
+    setIsEditing(true)
+    setDigits(['', '', '', ''])
+    setTimeout(() => inputRef.current?.focus(), 50)
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value.replace(/\D/g, '').slice(0, 4)
+    const newDigits = input.split('')
+    // Pad with empty strings at the start
+    while (newDigits.length < 4) {
+      newDigits.unshift('')
+    }
+    setDigits(newDigits)
+
+    // Auto-save when 4 digits entered
+    if (input.length === 4) {
+      const numValue = parseInt(input.slice(0, 2) + '.' + input.slice(2, 4), 10)
+      const finalValue = parseFloat(input.slice(0, 2) + '.' + input.slice(2, 4))
+      if (!isNaN(finalValue) && finalValue > 0) {
+        onSave(finalValue)
+        setIsEditing(false)
+      }
+    }
+  }
+
+  const handleBlur = () => {
+    if (isEditing) {
+      const fullInput = digits.join('')
+      if (fullInput.length >= 4) {
+        const finalValue = parseFloat(fullInput.slice(0, 2) + '.' + fullInput.slice(2, 4))
+        if (!isNaN(finalValue) && finalValue > 0) {
+          onSave(finalValue)
+        }
+      }
+      setIsEditing(false)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleBlur()
+    }
+    if (e.key === 'Escape') {
+      setIsEditing(false)
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-center">
+      <span className={`text-[9px] font-bold uppercase mb-1 ${label === 'BUY' ? 'text-[#ef4444]' : 'text-[#22c55e]'}`}>
+        {label}
+      </span>
+      <button
+        onClick={handleClick}
+        className="flex items-center gap-0.5 px-2 py-1 rounded-lg bg-[#0a0a0a] border border-zinc-700 hover:border-zinc-500 transition-colors"
+      >
+        {/* Fixed $ */}
+        <span className="text-lg font-bold text-[#71717a]">$</span>
+
+        {/* Digit boxes */}
+        <div className="flex items-center">
+          {/* First 2 digits (tens, units) */}
+          <span className={`text-xl font-bold font-mono min-w-[14px] text-center ${digits[0] ? 'text-[#fafafa]' : 'text-zinc-600'}`}>
+            {digits[0] || '0'}
+          </span>
+          <span className={`text-xl font-bold font-mono min-w-[14px] text-center ${digits[1] ? 'text-[#fafafa]' : 'text-zinc-600'}`}>
+            {digits[1] || '0'}
+          </span>
+
+          {/* Fixed . in color */}
+          <span className="text-xl font-bold text-[#f59e0b] mx-0.5">.</span>
+
+          {/* Last 2 digits (decimals) */}
+          <span className={`text-xl font-bold font-mono min-w-[14px] text-center ${digits[2] ? 'text-[#fafafa]' : 'text-zinc-600'}`}>
+            {digits[2] || '0'}
+          </span>
+          <span className={`text-xl font-bold font-mono min-w-[14px] text-center ${digits[3] ? 'text-[#fafafa]' : 'text-zinc-600'}`}>
+            {digits[3] || '0'}
+          </span>
+        </div>
+
+        {/* Hidden input for mobile keyboard */}
+        {isEditing && (
+          <input
+            ref={inputRef}
+            type="tel"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={digits.filter(d => d).join('')}
+            onChange={handleInputChange}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            className="absolute opacity-0 w-0 h-0"
+            autoFocus
+          />
+        )}
+      </button>
+    </div>
+  )
 }
 
 export function ExchangeRate({ airportCode }: ExchangeRateProps) {
   const [rates, setRates] = useState<ExchangeRateData[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editField, setEditField] = useState<'buy' | 'sell' | null>(null)
-  const [editValue, setEditValue] = useState('')
 
   const config = EXCHANGE_AIRPORTS[airportCode]
 
@@ -126,27 +247,8 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
 
   if (!config) return null
 
-  const startEdit = (rate: ExchangeRateData, field: 'buy' | 'sell') => {
-    setEditingId(rate.id)
-    setEditField(field)
-    const currentValue = field === 'buy' ? rate.buy_rate : rate.sell_rate
-    setEditValue(currentValue > 0 ? currentValue.toFixed(3) : '')
-  }
-
-  const cancelEdit = () => {
-    setEditingId(null)
-    setEditField(null)
-    setEditValue('')
-  }
-
-  const saveEdit = async (rate: ExchangeRateData) => {
-    const newRate = parseFloat(editValue)
-    if (isNaN(newRate) || newRate <= 0) {
-      toast.error('Ingresa un tipo de cambio válido')
-      return
-    }
-
-    const updateField = editField === 'buy' ? 'buy_rate' : 'sell_rate'
+  const saveRate = async (rate: ExchangeRateData, field: 'buy' | 'sell', newValue: number) => {
+    const updateField = field === 'buy' ? 'buy_rate' : 'sell_rate'
 
     try {
       const supabase = createClient()
@@ -157,7 +259,7 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
         const { error } = await (supabase as any).from('exchange_rates').upsert({
           airport_code: airportCode,
           location: rate.location,
-          [updateField]: newRate,
+          [updateField]: newValue,
           updated_by_name: userName,
           updated_at: new Date().toISOString(),
         })
@@ -166,7 +268,7 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
         const { error } = await (supabase as any)
           .from('exchange_rates')
           .update({
-            [updateField]: newRate,
+            [updateField]: newValue,
             updated_by_name: userName,
             updated_at: new Date().toISOString(),
           })
@@ -177,35 +279,25 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
       setRates((prev) =>
         prev.map((r) =>
           r.id === rate.id
-            ? { ...r, [updateField]: newRate, updated_by_name: userName, updated_at: new Date().toISOString() }
+            ? { ...r, [updateField]: newValue, updated_by_name: userName, updated_at: new Date().toISOString() }
             : r
         )
       )
       toast.success('Tipo de cambio actualizado')
-      cancelEdit()
     } catch {
       setRates((prev) =>
         prev.map((r) =>
           r.id === rate.id
-            ? { ...r, [updateField]: newRate, updated_at: new Date().toISOString() }
+            ? { ...r, [updateField]: newValue, updated_at: new Date().toISOString() }
             : r
         )
       )
       toast.success('Tipo de cambio actualizado (local)')
-      cancelEdit()
     }
   }
 
-  const handleInputChange = (value: string) => {
-    const cleaned = value.replace(/[^0-9.]/g, '')
-    const parts = cleaned.split('.')
-    if (parts.length > 2) return
-    if (parts[1]?.length > 3) return
-    setEditValue(cleaned)
-  }
-
-  const getLocationLabel = (locationKey: string) => {
-    return config.locations.find(l => l.key === locationKey)?.label || locationKey
+  const getLocationConfig = (locationKey: string) => {
+    return config.locations.find(l => l.key === locationKey)
   }
 
   // Get the most recent update info
@@ -215,147 +307,66 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
 
   if (isLoading) {
     return (
-      <div className="bg-[#0f1a0f] border border-[#22c55e]/20 rounded-xl p-3 animate-pulse">
-        <div className="h-4 bg-zinc-800 rounded w-32 mb-2" />
-        <div className="h-8 bg-zinc-800 rounded w-full" />
+      <div className="bg-[#0f1a0f] border border-[#22c55e]/20 rounded-lg p-2 animate-pulse">
+        <div className="h-3 bg-zinc-800 rounded w-24 mb-2" />
+        <div className="h-10 bg-zinc-800 rounded w-full" />
       </div>
     )
   }
 
   return (
-    <div className="bg-gradient-to-br from-[#0a1a0a] to-[#0a0a0a] border border-[#22c55e]/30 rounded-xl overflow-hidden">
-      {/* Header */}
-      <div className="px-3 py-2 bg-[#22c55e]/10 border-b border-[#22c55e]/20 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-[#22c55e]" />
-          <span className="text-xs font-bold text-[#22c55e] uppercase tracking-wider">
-            Tipo de Cambio USD
+    <div className="border border-[#22c55e]/30 rounded-lg overflow-hidden">
+      {/* Compact Header */}
+      <div className="px-2 py-1.5 bg-[#22c55e]/10 border-b border-[#22c55e]/20 flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <DollarSign className="w-3 h-3 text-[#22c55e]" />
+          <span className="text-[10px] font-bold text-[#22c55e] uppercase">
+            USD {airportCode}
           </span>
         </div>
-        <div className="flex items-center gap-1 px-2 py-0.5 bg-[#22c55e]/10 rounded-full">
-          <Users className="w-3 h-3 text-[#22c55e]" />
-          <span className="text-[10px] text-[#22c55e] font-medium">colaborativo</span>
-        </div>
+        <button className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#f59e0b]/10 hover:bg-[#f59e0b]/20 transition-colors">
+          <Users className="w-2.5 h-2.5 text-[#f59e0b]" />
+          <span className="text-[9px] text-[#f59e0b] font-medium">colaborativo</span>
+        </button>
       </div>
 
-      {/* Rates Grid */}
-      <div className="divide-y divide-zinc-800/50">
-        {rates.map((rate) => (
-          <div key={rate.id} className="px-3 py-2.5">
-            {/* Location row with BUY and SELL */}
-            <div className="flex items-center gap-3">
-              {/* BUY */}
-              <div className="flex items-center gap-1.5 flex-1">
-                <span className="text-[10px] font-bold text-[#ef4444] uppercase">BUY</span>
-                {editingId === rate.id && editField === 'buy' ? (
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs text-zinc-500">$</span>
-                    <Input
-                      value={editValue}
-                      onChange={(e) => handleInputChange(e.target.value)}
-                      placeholder="00.000"
-                      className="w-16 h-7 text-xs text-center bg-[#1a1a1a] border-[#22c55e] text-[#fafafa] px-1"
-                      inputMode="decimal"
-                      autoFocus
-                    />
-                    <button
-                      onClick={() => saveEdit(rate)}
-                      className="p-1 text-[#22c55e] hover:bg-[#22c55e]/10 rounded"
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={cancelEdit}
-                      className="p-1 text-zinc-500 hover:bg-zinc-800 rounded"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => startEdit(rate, 'buy')}
-                    className="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-zinc-800/50 transition-colors group"
-                  >
-                    {rate.buy_rate > 0 ? (
-                      <span className="text-sm font-bold text-[#fafafa] font-mono">
-                        ${rate.buy_rate.toFixed(3)}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-zinc-600">$00.000</span>
-                    )}
-                    <Edit3 className="w-2.5 h-2.5 text-zinc-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </button>
-                )}
-              </div>
+      {/* Rates by Location */}
+      {rates.map((rate) => {
+        const locConfig = getLocationConfig(rate.location)
+        return (
+          <div
+            key={rate.id}
+            className={`px-2 py-2 ${locConfig?.bgColor || 'bg-[#141414]'} border-b border-zinc-800/30 last:border-b-0`}
+          >
+            {/* Location label */}
+            <p className="text-[9px] text-zinc-500 text-center mb-1.5 uppercase tracking-wider">
+              {locConfig?.label}
+            </p>
 
-              {/* SELL */}
-              <div className="flex items-center gap-1.5 flex-1">
-                <span className="text-[10px] font-bold text-[#ef4444] uppercase">SELL</span>
-                {editingId === rate.id && editField === 'sell' ? (
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs text-zinc-500">$</span>
-                    <Input
-                      value={editValue}
-                      onChange={(e) => handleInputChange(e.target.value)}
-                      placeholder="00.000"
-                      className="w-16 h-7 text-xs text-center bg-[#1a1a1a] border-[#22c55e] text-[#fafafa] px-1"
-                      inputMode="decimal"
-                      autoFocus
-                    />
-                    <button
-                      onClick={() => saveEdit(rate)}
-                      className="p-1 text-[#22c55e] hover:bg-[#22c55e]/10 rounded"
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={cancelEdit}
-                      className="p-1 text-zinc-500 hover:bg-zinc-800 rounded"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => startEdit(rate, 'sell')}
-                    className="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-zinc-800/50 transition-colors group"
-                  >
-                    {rate.sell_rate > 0 ? (
-                      <span className="text-sm font-bold text-[#fafafa] font-mono">
-                        ${rate.sell_rate.toFixed(3)}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-zinc-600">$00.000</span>
-                    )}
-                    <Edit3 className="w-2.5 h-2.5 text-zinc-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </button>
-                )}
-              </div>
-
-              {/* Location label */}
-              <div className="text-right flex-shrink-0">
-                <span className="text-[10px] text-zinc-500 italic">
-                  {getLocationLabel(rate.location)}
-                </span>
-              </div>
+            {/* BUY and SELL inputs */}
+            <div className="flex justify-center gap-4">
+              <RateInput
+                value={rate.buy_rate}
+                onSave={(val) => saveRate(rate, 'buy', val)}
+                label="BUY"
+              />
+              <RateInput
+                value={rate.sell_rate}
+                onSave={(val) => saveRate(rate, 'sell', val)}
+                label="SELL"
+              />
             </div>
           </div>
-        ))}
-      </div>
+        )
+      })}
 
-      {/* Last update info */}
+      {/* Last update info - compact */}
       {mostRecentUpdate && (
-        <div className="px-3 py-2 bg-zinc-900/50 border-t border-zinc-800/50">
-          <p className="text-[10px] text-zinc-500 text-center">
-            Última actualización:{' '}
-            <span className="text-zinc-400">
-              {format(new Date(mostRecentUpdate.updated_at), "d MMM HH:mm", { locale: es })}
-            </span>
+        <div className="px-2 py-1 bg-zinc-900/50">
+          <p className="text-[9px] text-zinc-500 text-center">
+            {format(new Date(mostRecentUpdate.updated_at), "d/M HH:mm", { locale: es })}
             {mostRecentUpdate.updated_by_name && (
-              <>
-                {' • por '}
-                <span className="text-[#22c55e]">{mostRecentUpdate.updated_by_name}</span>
-              </>
+              <span className="text-[#22c55e]"> • {mostRecentUpdate.updated_by_name}</span>
             )}
           </p>
         </div>
