@@ -65,15 +65,23 @@ export async function createDirectoryEntry(
   // Extract initial_rating from form data
   const { initial_rating, ...entryData } = formData
 
+  // Convert empty strings to null for optional fields
+  const insertData = {
+    airport_code: entryData.airport_code.toUpperCase(),
+    category: entryData.category,
+    name: entryData.name,
+    description: entryData.description || null,
+    phone: entryData.phone || null,
+    whatsapp: entryData.whatsapp,
+    address: entryData.address || null,
+    created_by: user.id,
+    rating: initial_rating || 0,
+    rating_count: initial_rating ? 1 : 0,
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.from('directory_entries') as any)
-    .insert({
-      ...entryData,
-      airport_code: entryData.airport_code.toUpperCase(),
-      created_by: user.id,
-      rating: initial_rating || 0,
-      rating_count: initial_rating ? 1 : 0,
-    })
+    .insert(insertData)
     .select()
     .single()
 
@@ -96,14 +104,26 @@ export async function updateDirectoryEntry(
     return { data: null, error: 'No autenticado' }
   }
 
+  // Remove initial_rating from form data (not used in updates)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { initial_rating, ...updateData } = formData
+
+  // Convert empty strings to null for optional fields
+  const cleanedData = {
+    airport_code: updateData.airport_code.toUpperCase(),
+    category: updateData.category,
+    name: updateData.name,
+    description: updateData.description || null,
+    phone: updateData.phone || null,
+    whatsapp: updateData.whatsapp,
+    address: updateData.address || null,
+    updated_by: user.id,
+    updated_at: new Date().toISOString(),
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.from('directory_entries') as any)
-    .update({
-      ...formData,
-      airport_code: formData.airport_code.toUpperCase(),
-      updated_by: user.id,
-      updated_at: new Date().toISOString(),
-    })
+    .update(cleanedData)
     .eq('id', entryId)
     .select()
     .single()

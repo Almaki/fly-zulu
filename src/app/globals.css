@@ -56,26 +56,26 @@
   --whatsapp: #25D366;
 }
 
-/* Light mode */
+/* Light mode - subtle gray theme */
 .light {
-  --background: #f4f4f5;
+  --background: #e4e4e7;
   --foreground: #18181b;
-  --card: #ffffff;
+  --card: #f4f4f5;
   --card-foreground: #18181b;
-  --popover: #ffffff;
+  --popover: #f4f4f5;
   --popover-foreground: #18181b;
   --primary: #0066CC;
   --primary-foreground: #ffffff;
-  --secondary: #e4e4e7;
+  --secondary: #d4d4d8;
   --secondary-foreground: #18181b;
-  --muted: #e4e4e7;
-  --muted-foreground: #71717a;
+  --muted: #d4d4d8;
+  --muted-foreground: #52525b;
   --accent: #0088FF;
   --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #d4d4d8;
-  --input: #d4d4d8;
+  --border: #a1a1aa;
+  --input: #a1a1aa;
   --ring: #0066CC;
 
   /* MCDU Colors - adjusted for light mode */
