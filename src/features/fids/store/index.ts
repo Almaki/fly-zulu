@@ -11,6 +11,7 @@ interface FIDSStore {
   setLoading: (isLoading: boolean) => void
   updateFlight: (id: string, updates: Partial<Flight>) => void
   addFlight: (flight: Flight) => void
+  removeFlight: (id: string) => void
 }
 
 export const useFIDSStore = create<FIDSStore>((set, get) => ({
@@ -48,5 +49,10 @@ export const useFIDSStore = create<FIDSStore>((set, get) => ({
       flights: [...state.flights, flight].sort(
         (a, b) => new Date(a.std).getTime() - new Date(b.std).getTime()
       ),
+    })),
+
+  removeFlight: (id) =>
+    set((state) => ({
+      flights: state.flights.filter((f) => f.id !== id),
     })),
 }))

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { Check, X, Pencil } from 'lucide-react'
+import { Check, X, Pencil, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Input } from '@/shared/components/ui/input'
 import { Button } from '@/shared/components/ui/button'
@@ -14,8 +14,9 @@ import {
   SelectValue,
 } from '@/shared/components/ui/select'
 import { getCityName, getTerminalOptions, hasTerminals } from '../constants/airports'
-import { updateFlight, updateFlightStatus } from '../services'
+import { updateFlight, updateFlightStatus, deleteFlight } from '../services'
 import { useFIDSStore } from '../store'
+import { useAuth } from '@/features/auth/hooks'
 import type { Flight } from '../types'
 import type { FlightStatus } from '@/shared/types'
 
@@ -31,7 +32,9 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
   const [editField, setEditField] = useState<EditField>(null)
   const [editValue, setEditValue] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { updateFlight: updateLocalFlight } = useFIDSStore()
+  const { updateFlight: updateLocalFlight, removeFlight } = useFIDSStore()
+  const { user } = useAuth()
+  const isSuperAdmin = user?.role === 'SUPERADMIN'
 
   // Determine which city to show based on direction
   const displayCity = direction === 'departures'
@@ -372,6 +375,20 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
           onSave={saveStatus}
           onCancel={cancelEdit}
           isSubmitting={isSubmitting}
+          isSuperAdmin={isSuperAdmin}
+          onDelete={async () => {
+            if (!confirm('¿Eliminar este vuelo? Esta acción no se puede deshacer.')) return
+            setIsSubmitting(true)
+            const result = await deleteFlight(flight.id)
+            setIsSubmitting(false)
+            if (result.error) {
+              toast.error(result.error)
+            } else {
+              toast.success('Vuelo eliminado')
+              removeFlight(flight.id)
+              cancelEdit()
+            }
+          }}
         />
       )}
     </div>
@@ -384,11 +401,15 @@ function StatusEditor({
   onSave,
   onCancel,
   isSubmitting,
+  isSuperAdmin,
+  onDelete,
 }: {
   currentStatus: FlightStatus
   onSave: (status: FlightStatus, delayMinutes?: number) => void
   onCancel: () => void
   isSubmitting: boolean
+  isSuperAdmin?: boolean
+  onDelete?: () => void
 }) {
   const [status, setStatus] = useState<FlightStatus>(currentStatus)
   const [newTime, setNewTime] = useState('')
@@ -499,6 +520,19 @@ function StatusEditor({
               Ingresa la nueva hora de salida
             </p>
           </div>
+        )}
+
+        {/* Delete button for SUPERADMIN */}
+        {isSuperAdmin && onDelete && (
+          <Button
+            variant="outline"
+            onClick={onDelete}
+            disabled={isSubmitting}
+            className="w-full h-10 border-[#ef4444] text-[#ef4444] hover:bg-[#ef4444]/10"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Eliminar Vuelo
+          </Button>
         )}
 
         {/* Action buttons */}

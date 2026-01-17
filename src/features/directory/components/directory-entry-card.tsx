@@ -115,7 +115,10 @@ export function DirectoryEntryCard({ entry, onEdit, onDeleted }: DirectoryEntryC
       toast.error(result.error)
     } else {
       toast.success('Servicio eliminado')
-      onDeleted?.()
+      // Small delay to ensure DB is updated before refetching
+      setTimeout(() => {
+        onDeleted?.()
+      }, 100)
     }
   }
 
