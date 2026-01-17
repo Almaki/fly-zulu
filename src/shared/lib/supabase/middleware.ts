@@ -58,17 +58,29 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  if (user && isAuthRoute(pathname)) {
-    // Get user profile to redirect to correct dashboard
-    const { data: profile } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
+  // Check if user's email is confirmed (for non-public routes)
+  // Don't redirect if already on verify-email page to avoid loop
+  if (user && !isPublicRoute(pathname) && !user.email_confirmed_at && pathname !== '/verify-email') {
+    // User is logged in but email not verified - redirect to verify-email page
     const url = request.nextUrl.clone()
-    url.pathname = profile?.role ? getDashboardRoute(profile.role) : getDashboardRoute('')
+    url.pathname = '/verify-email'
     return NextResponse.redirect(url)
+  }
+
+  if (user && isAuthRoute(pathname)) {
+    // Only redirect to dashboard if email is confirmed
+    if (user.email_confirmed_at) {
+      // Get user profile to redirect to correct dashboard
+      const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      const url = request.nextUrl.clone()
+      url.pathname = profile?.role ? getDashboardRoute(profile.role) : getDashboardRoute('')
+      return NextResponse.redirect(url)
+    }
   }
 
   return supabaseResponse

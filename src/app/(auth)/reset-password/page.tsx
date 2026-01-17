@@ -36,6 +36,7 @@ export default function ResetPasswordPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [isValidSession, setIsValidSession] = useState(false)
+  const [isChecking, setIsChecking] = useState(true)
 
   const form = useForm<ResetPasswordData>({
     resolver: zodResolver(resetPasswordSchema),
@@ -46,20 +47,54 @@ export default function ResetPasswordPage() {
   })
 
   useEffect(() => {
-    const checkSession = async () => {
+    const handleRecovery = async () => {
       const supabase = createClient()
+
+      // Supabase handles the hash fragment automatically via onAuthStateChange
+      // We need to listen for the PASSWORD_RECOVERY event
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          if (event === 'PASSWORD_RECOVERY') {
+            // User clicked the recovery link - session is now valid
+            setIsValidSession(true)
+            setIsChecking(false)
+          } else if (event === 'SIGNED_IN' && session) {
+            // Session was restored from the recovery token
+            setIsValidSession(true)
+            setIsChecking(false)
+          }
+        }
+      )
+
+      // Also check if there's already a valid session (for cases where
+      // the page was refreshed after clicking the recovery link)
       const { data: { session } } = await supabase.auth.getSession()
 
       if (session) {
         setIsValidSession(true)
+        setIsChecking(false)
       } else {
-        toast.error('Enlace inválido o expirado')
-        router.push('/forgot-password')
+        // Give Supabase a moment to process the hash fragment
+        setTimeout(() => {
+          setIsChecking(false)
+        }, 2000)
+      }
+
+      return () => {
+        subscription.unsubscribe()
       }
     }
 
-    checkSession()
+    handleRecovery()
   }, [router])
+
+  // Redirect if no valid session after checking
+  useEffect(() => {
+    if (!isChecking && !isValidSession && !isSuccess) {
+      toast.error('Enlace inválido o expirado')
+      router.push('/forgot-password')
+    }
+  }, [isChecking, isValidSession, isSuccess, router])
 
   async function onSubmit(data: ResetPasswordData) {
     setIsLoading(true)
@@ -104,7 +139,7 @@ export default function ResetPasswordPage() {
     )
   }
 
-  if (!isValidSession) {
+  if (isChecking || !isValidSession) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4">
         <div className="w-full max-w-md space-y-6 text-center">

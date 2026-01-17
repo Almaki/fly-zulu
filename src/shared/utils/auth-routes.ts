@@ -40,7 +40,15 @@ export function getDashboardRoute(_role: UserRole | string): string {
  * @returns true si la ruta es pública
  */
 export function isPublicRoute(pathname: string): boolean {
-  const publicPaths = ['/login', '/register', '/api/auth/callback']
+  const publicPaths = [
+    '/login',
+    '/register',
+    '/forgot-password',
+    '/reset-password',
+    '/verify-email',
+    '/api/auth/callback',
+    '/auth/callback',
+  ]
   return publicPaths.some(path => pathname.startsWith(path))
 }
 
