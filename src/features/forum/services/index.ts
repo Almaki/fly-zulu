@@ -245,12 +245,14 @@ export async function togglePostLike(postId: string): Promise<{ liked: boolean; 
     .eq('post_id', postId)
     .single()
 
-  if (existing) {
+  const existingLike = existing as { id: string } | null
+
+  if (existingLike) {
     // Unlike
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase.from('forum_likes') as any)
       .delete()
-      .eq('id', existing.id)
+      .eq('id', existingLike.id)
 
     if (error) return { liked: false, error: error.message }
     return { liked: false, error: null }
@@ -283,12 +285,14 @@ export async function toggleCommentLike(commentId: string): Promise<{ liked: boo
     .eq('comment_id', commentId)
     .single()
 
-  if (existing) {
+  const existingLike = existing as { id: string } | null
+
+  if (existingLike) {
     // Unlike
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase.from('forum_likes') as any)
       .delete()
-      .eq('id', existing.id)
+      .eq('id', existingLike.id)
 
     if (error) return { liked: false, error: error.message }
     return { liked: false, error: null }
