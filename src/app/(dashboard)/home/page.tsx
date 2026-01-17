@@ -13,6 +13,7 @@ import {
   Pencil
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/hooks'
+import { LiveFlightBoard } from '@/features/fids/components'
 
 // Card component reutilizable - versión compacta
 interface FeatureCardProps {
@@ -210,6 +211,16 @@ export default function HomePage() {
               <UnderConstructionCard />
             </>
           )}
+        </div>
+
+        {/* Live Flight Board - visible para todos */}
+        <div className="mt-6">
+          <LiveFlightBoard
+            mode="both"
+            maxFlights={4}
+            autoRefresh={true}
+            refreshInterval={5 * 60 * 1000}
+          />
         </div>
       </div>
     </div>
