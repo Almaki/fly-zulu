@@ -67,8 +67,8 @@ export function DirectoryEntryCard({ entry, onEdit, onDeleted }: DirectoryEntryC
   const [newRating, setNewRating] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Solo admin puede eliminar
-  const isAdmin = user?.role === 'SUPERADMIN' || user?.role === 'ADMIN'
+  // Solo SUPERADMIN puede eliminar
+  const isAdmin = user?.role === 'SUPERADMIN'
   // Todos los usuarios autenticados pueden editar
   const canEdit = !!user
 
