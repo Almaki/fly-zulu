@@ -70,14 +70,14 @@ CREATE POLICY "Pilots can view posts" ON forum_posts
     )
   );
 
-CREATE POLICY "Pilots can create posts" ON forum_posts
+CREATE POLICY "Pilots and admins can create posts" ON forum_posts
   FOR INSERT
   WITH CHECK (
     auth.uid() = author_id AND
     EXISTS (
       SELECT 1 FROM users
       WHERE id = auth.uid()
-      AND categoria = 'FLIGHT'
+      AND (categoria = 'FLIGHT' OR role = 'SUPERADMIN')
     )
   );
 
@@ -108,14 +108,14 @@ CREATE POLICY "Pilots can view comments" ON forum_comments
     )
   );
 
-CREATE POLICY "Pilots can create comments" ON forum_comments
+CREATE POLICY "Pilots and admins can create comments" ON forum_comments
   FOR INSERT
   WITH CHECK (
     auth.uid() = author_id AND
     EXISTS (
       SELECT 1 FROM users
       WHERE id = auth.uid()
-      AND categoria = 'FLIGHT'
+      AND (categoria = 'FLIGHT' OR role = 'SUPERADMIN')
     )
   );
 
@@ -146,14 +146,14 @@ CREATE POLICY "Pilots can view likes" ON forum_likes
     )
   );
 
-CREATE POLICY "Pilots can create likes" ON forum_likes
+CREATE POLICY "Pilots and admins can create likes" ON forum_likes
   FOR INSERT
   WITH CHECK (
     auth.uid() = user_id AND
     EXISTS (
       SELECT 1 FROM users
       WHERE id = auth.uid()
-      AND categoria = 'FLIGHT'
+      AND (categoria = 'FLIGHT' OR role = 'SUPERADMIN')
     )
   );
 
