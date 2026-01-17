@@ -56,51 +56,51 @@
   --whatsapp: #25D366;
 }
 
-/* Light mode - subtle gray theme */
+/* Light mode - same as dark (charcoal theme always) */
 .light {
-  --background: #e4e4e7;
-  --foreground: #18181b;
-  --card: #f4f4f5;
-  --card-foreground: #18181b;
-  --popover: #f4f4f5;
-  --popover-foreground: #18181b;
+  --background: #18181b;
+  --foreground: #fafafa;
+  --card: #1f1f23;
+  --card-foreground: #fafafa;
+  --popover: #141414;
+  --popover-foreground: #fafafa;
   --primary: #0066CC;
   --primary-foreground: #ffffff;
-  --secondary: #d4d4d8;
-  --secondary-foreground: #18181b;
-  --muted: #d4d4d8;
-  --muted-foreground: #52525b;
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
+  --muted: #27272a;
+  --muted-foreground: #71717a;
   --accent: #0088FF;
   --accent-foreground: #ffffff;
-  --destructive: #dc2626;
-  --destructive-foreground: #ffffff;
-  --border: #a1a1aa;
-  --input: #a1a1aa;
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --border: #27272a;
+  --input: #27272a;
   --ring: #0066CC;
 
-  /* MCDU Colors - adjusted for light mode */
-  --mcdu-green: #16a34a;
-  --mcdu-cyan: #0891b2;
-  --mcdu-amber: #d97706;
+  /* MCDU Colors */
+  --mcdu-green: #00ff41;
+  --mcdu-cyan: #00ffff;
+  --mcdu-amber: #ffbf00;
 
   /* Status Colors */
-  --status-success: #16a34a;
-  --status-warning: #d97706;
-  --status-error: #dc2626;
+  --status-success: #22c55e;
+  --status-warning: #f59e0b;
+  --status-error: #ef4444;
 
   /* Flight Status */
-  --flight-ontime: #18181b;
-  --flight-delay: #ea580c;
-  --flight-gate-change: #2563eb;
-  --flight-canceled: #dc2626;
+  --flight-ontime: #fafafa;
+  --flight-delay: #FF9500;
+  --flight-gate-change: #007AFF;
+  --flight-canceled: #FF3B30;
 
   /* Airlines */
-  --airline-volaris: #c2185b;
-  --airline-viva: #15803d;
-  --airline-aeromexico: #b91c1c;
+  --airline-volaris: #E91E8C;
+  --airline-viva: #39FF14;
+  --airline-aeromexico: #E31837;
 
   /* WhatsApp */
-  --whatsapp: #16a34a;
+  --whatsapp: #25D366;
 }
 
 @layer base {

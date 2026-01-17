@@ -132,7 +132,7 @@ export function FIDSBoard() {
         ) : (
           // Flight cards
           flights.map((flight) => (
-            <FlightCard key={flight.id} flight={flight} />
+            <FlightCard key={flight.id} flight={flight} onDeleted={refetch} />
           ))
         )}
       </div>

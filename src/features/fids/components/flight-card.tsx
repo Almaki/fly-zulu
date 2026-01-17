@@ -1,15 +1,21 @@
 'use client'
 
+import { useState } from 'react'
 import { format } from 'date-fns'
-import { Plane, Clock, MapPin } from 'lucide-react'
+import { Plane, Clock, MapPin, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '@/shared/lib/utils'
 import { Badge } from '@/shared/components/ui/badge'
+import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent } from '@/shared/components/ui/card'
+import { useAuthStore } from '@/shared/stores/auth-store'
+import { deleteFlight } from '../services'
 import type { Flight } from '../types'
 
 interface FlightCardProps {
   flight: Flight
   onClick?: () => void
+  onDeleted?: () => void
 }
 
 const STATUS_STYLES: Record<string, { badge: string; label: string }> = {
@@ -49,13 +55,36 @@ const AIRLINE_COLORS: Record<string, string> = {
   AM: '#E31837', // Aeromexico
 }
 
-export function FlightCard({ flight, onClick }: FlightCardProps) {
+export function FlightCard({ flight, onClick, onDeleted }: FlightCardProps) {
+  const { user } = useAuthStore()
+  const [isDeleting, setIsDeleting] = useState(false)
+
   const statusStyle = STATUS_STYLES[flight.status]
   const airlineCode = flight.airline.substring(0, 2).toUpperCase()
   const airlineColor = AIRLINE_COLORS[airlineCode] || '#00ff88'
 
   const stdTime = format(new Date(flight.std), 'HH:mm')
   const staTime = format(new Date(flight.sta), 'HH:mm')
+
+  const isSuperAdmin = user?.role === 'SUPERADMIN'
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!confirm(`¿Eliminar vuelo ${flight.flight_number}? Esta acción no se puede deshacer.`)) {
+      return
+    }
+
+    setIsDeleting(true)
+    const result = await deleteFlight(flight.id)
+    setIsDeleting(false)
+
+    if (result.error) {
+      toast.error(result.error)
+    } else {
+      toast.success('Vuelo eliminado')
+      onDeleted?.()
+    }
+  }
 
   return (
     <Card
@@ -78,12 +107,25 @@ export function FlightCard({ flight, onClick }: FlightCardProps) {
             </div>
           </div>
 
-          <Badge className={statusStyle.badge}>
-            {statusStyle.label}
-            {flight.status === 'DELAY' && flight.delay_minutes > 0 && (
-              <span className="ml-1">+{flight.delay_minutes}m</span>
+          <div className="flex items-center gap-2">
+            <Badge className={statusStyle.badge}>
+              {statusStyle.label}
+              {flight.status === 'DELAY' && flight.delay_minutes > 0 && (
+                <span className="ml-1">+{flight.delay_minutes}m</span>
+              )}
+            </Badge>
+            {isSuperAdmin && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-zinc-500 hover:text-[#FF3B30] hover:bg-[#FF3B30]/10"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                <Trash2 className={cn("h-4 w-4", isDeleting && "animate-pulse")} />
+              </Button>
             )}
-          </Badge>
+          </div>
         </div>
 
         <div className="flex items-center justify-between mb-3">
