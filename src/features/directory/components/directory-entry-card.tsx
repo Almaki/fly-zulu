@@ -67,8 +67,10 @@ export function DirectoryEntryCard({ entry, onEdit, onDeleted }: DirectoryEntryC
   const [newRating, setNewRating] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const isAdmin = user?.role === 'SUPERADMIN'
-  const canEdit = (user as { categoria?: string })?.categoria === 'FLIGHT'
+  // Solo admin puede eliminar
+  const isAdmin = user?.role === 'SUPERADMIN' || user?.role === 'ADMIN'
+  // Todos los usuarios autenticados pueden editar
+  const canEdit = !!user
 
   const handleWhatsAppClick = () => {
     const phone = entry.whatsapp || entry.phone
