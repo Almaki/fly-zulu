@@ -50,7 +50,7 @@ export async function getPosts(search?: string): Promise<{ data: ForumPost[] | n
     .eq('user_id', user.id)
     .not('post_id', 'is', null)
 
-  const likedPostIds = new Set((userLikes || []).map(l => l.post_id))
+  const likedPostIds = new Set((userLikes || []).map((l: { post_id: string }) => l.post_id))
 
   // Process posts to handle anonymity
   const processedPosts = (posts || []).map(post => {
@@ -129,8 +129,10 @@ export async function getPost(postId: string): Promise<{ data: ForumPost | null;
     .select('post_id, comment_id')
     .eq('user_id', user.id)
 
-  const likedPostIds = new Set((userLikes || []).filter(l => l.post_id).map(l => l.post_id))
-  const likedCommentIds = new Set((userLikes || []).filter(l => l.comment_id).map(l => l.comment_id))
+  type LikeRow = { post_id: string | null; comment_id: string | null }
+  const likesArray = (userLikes || []) as LikeRow[]
+  const likedPostIds = new Set(likesArray.filter(l => l.post_id).map(l => l.post_id as string))
+  const likedCommentIds = new Set(likesArray.filter(l => l.comment_id).map(l => l.comment_id as string))
 
   // Process post
   const typedPost = post as ForumPost & { author: { id: string; nombre: string; posicion: string } | null }
