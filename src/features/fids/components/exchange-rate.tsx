@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { DollarSign, Users } from 'lucide-react'
+import { DollarSign, Users, Pencil } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { toast } from 'sonner'
 import { createClient } from '@/shared/lib/supabase'
 
@@ -97,7 +99,7 @@ function CompactRateInput({ value, onSave, type }: RateInputProps) {
   return (
     <button
       onClick={handleClick}
-      className="flex items-center gap-0.5 relative"
+      className="flex items-center gap-0.5 relative group"
     >
       <span className={`text-[10px] font-bold ${color} mr-0.5`}>
         {type === 'buy' ? 'C' : 'V'}
@@ -105,6 +107,7 @@ function CompactRateInput({ value, onSave, type }: RateInputProps) {
       <span className="text-sm font-mono font-bold text-[#fafafa]">
         {digits[0] || '0'}{digits[1] || '0'}.{digits[2] || '0'}{digits[3] || '0'}
       </span>
+      <Pencil className="w-2.5 h-2.5 text-zinc-600 opacity-0 group-hover:opacity-100 transition-opacity ml-0.5" />
       {isEditing && (
         <input
           ref={inputRef}
@@ -277,6 +280,14 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
     )
   }
 
+  // Get the most recent update across all rates
+  const lastUpdate = rates.reduce((latest, rate) => {
+    const rateDate = new Date(rate.updated_at)
+    return rateDate > latest.date ? { date: rateDate, by: rate.updated_by_name } : latest
+  }, { date: new Date(0), by: null as string | null })
+
+  const hasValidUpdate = lastUpdate.date.getTime() > 0 && rates.some(r => r.buy_rate > 0 || r.sell_rate > 0)
+
   return (
     <div className="px-3 py-2 bg-zinc-800/40 rounded-lg border border-zinc-700/30">
       {/* Row 1: Header with USD icon and colaborativo badge */}
@@ -316,6 +327,16 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
           )
         })}
       </div>
+
+      {/* Row 3: Last update info */}
+      {hasValidUpdate && (
+        <div className="mt-1.5 pt-1.5 border-t border-zinc-700/30 flex items-center justify-end gap-1">
+          <span className="text-[8px] text-zinc-600">
+            Actualizado {formatDistanceToNow(lastUpdate.date, { addSuffix: true, locale: es })}
+            {lastUpdate.by && ` por ${lastUpdate.by}`}
+          </span>
+        </div>
+      )}
     </div>
   )
 }
