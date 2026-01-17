@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { Suspense, useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Search, ArrowLeft, RefreshCw, MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'
@@ -17,7 +17,7 @@ import {
 import { getPosts } from '@/features/forum/services'
 import type { ForumPost } from '@/features/forum/types'
 
-export default function ForumPage() {
+function ForumContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, isLoading: authLoading } = useAuth()
@@ -181,5 +181,23 @@ export default function ForumPage() {
         </p>
       )}
     </div>
+  )
+}
+
+function ForumLoading() {
+  return (
+    <div className="space-y-4">
+      <Skeleton className="h-10 w-full bg-zinc-800" />
+      <Skeleton className="h-32 w-full bg-zinc-800" />
+      <Skeleton className="h-48 w-full bg-zinc-800" />
+    </div>
+  )
+}
+
+export default function ForumPage() {
+  return (
+    <Suspense fallback={<ForumLoading />}>
+      <ForumContent />
+    </Suspense>
   )
 }
