@@ -12,6 +12,9 @@ import {
   BellOff,
   MessageCircle,
   HeadphonesIcon,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -21,11 +24,13 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Separator } from '@/shared/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar'
 import { useAuth } from '@/features/auth/hooks'
+import { useThemeStore } from '@/shared/stores/theme-store'
 import { NotificationBell, NotificationCenter, CreateTicketDialog, TicketList } from '@/features/support/components'
 
 export default function ProfilePage() {
   const router = useRouter()
   const { user, isLoading, logout } = useAuth()
+  const { mode: themeMode, setMode: setThemeMode } = useThemeStore()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [showSupport, setShowSupport] = useState(false)
@@ -147,23 +152,25 @@ export default function ProfilePage() {
               </AvatarFallback>
             </Avatar>
 
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-semibold">{user.nombre}</h2>
+                <h2 className="text-xl font-semibold truncate">{user.nombre}</h2>
               </div>
-              <p className="text-sm text-zinc-500">{user.email}</p>
-              <div className="flex items-center gap-2 mt-2">
+              <p className="text-sm text-zinc-500 truncate">{user.email}</p>
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
                 <Badge>{user.posicion}</Badge>
                 <Badge variant="outline">{user.categoria}</Badge>
               </div>
             </div>
 
             {/* Notification bell */}
-            <NotificationBell
-              userId={user.id}
-              muted={notificationsMuted}
-              onClick={() => setShowNotifications(true)}
-            />
+            <div className="flex-shrink-0">
+              <NotificationBell
+                userId={user.id}
+                muted={notificationsMuted}
+                onClick={() => setShowNotifications(true)}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -233,6 +240,62 @@ export default function ProfilePage() {
           <div className="flex justify-between">
             <span className="text-sm text-zinc-500">Rol</span>
             <span className="text-sm">{user.role}</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Theme Settings */}
+      <Card className="border-zinc-800 bg-zinc-900/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            {themeMode === 'light' ? (
+              <Sun className="h-4 w-4" />
+            ) : themeMode === 'dark' ? (
+              <Moon className="h-4 w-4" />
+            ) : (
+              <Monitor className="h-4 w-4" />
+            )}
+            Tema de la App
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-xs text-zinc-500 mb-3">
+            Auto cambia según la hora (día 6:00-18:00)
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              onClick={() => setThemeMode('light')}
+              className={`flex flex-col items-center gap-1 p-3 rounded-lg border transition-all ${
+                themeMode === 'light'
+                  ? 'border-[#f59e0b] bg-[#f59e0b]/10 text-[#f59e0b]'
+                  : 'border-zinc-700 text-zinc-500 hover:border-zinc-600'
+              }`}
+            >
+              <Sun className="w-5 h-5" />
+              <span className="text-xs font-medium">Día</span>
+            </button>
+            <button
+              onClick={() => setThemeMode('dark')}
+              className={`flex flex-col items-center gap-1 p-3 rounded-lg border transition-all ${
+                themeMode === 'dark'
+                  ? 'border-[#8b5cf6] bg-[#8b5cf6]/10 text-[#8b5cf6]'
+                  : 'border-zinc-700 text-zinc-500 hover:border-zinc-600'
+              }`}
+            >
+              <Moon className="w-5 h-5" />
+              <span className="text-xs font-medium">Noche</span>
+            </button>
+            <button
+              onClick={() => setThemeMode('auto')}
+              className={`flex flex-col items-center gap-1 p-3 rounded-lg border transition-all ${
+                themeMode === 'auto'
+                  ? 'border-[#22c55e] bg-[#22c55e]/10 text-[#22c55e]'
+                  : 'border-zinc-700 text-zinc-500 hover:border-zinc-600'
+              }`}
+            >
+              <Monitor className="w-5 h-5" />
+              <span className="text-xs font-medium">Auto</span>
+            </button>
           </div>
         </CardContent>
       </Card>

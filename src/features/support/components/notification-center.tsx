@@ -107,8 +107,8 @@ export function NotificationCenter({
   const unreadCount = notifications.filter((n) => !n.read_at).length
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 flex items-end sm:items-center justify-center">
-      <div className="bg-background w-full max-w-md sm:rounded-2xl overflow-hidden animate-in slide-in-from-bottom duration-300 max-h-[85vh] flex flex-col">
+    <div className="fixed inset-0 z-50 bg-black/80 flex items-start sm:items-center justify-center pt-4 pb-20">
+      <div className="bg-background w-full max-w-md rounded-2xl overflow-hidden animate-in slide-in-from-top duration-300 max-h-[calc(100vh-6rem)] flex flex-col mx-4">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-zinc-800">
           <div className="flex items-center gap-2">

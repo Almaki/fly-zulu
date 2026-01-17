@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Phone, MapPin, Star, CheckCircle, MessageCircle, Clock, User, Edit2, Trash2, MoreVertical } from 'lucide-react'
+import { Phone, MapPin, Star, CheckCircle, MessageCircle, Clock, User, Edit2, Trash2, MoreVertical, Users } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from 'sonner'
@@ -248,11 +248,18 @@ export function DirectoryEntryCard({ entry, onEdit, onDeleted }: DirectoryEntryC
                   })}
                 </span>
               </div>
-              <div className="flex items-center gap-1">
-                <User className="h-3 w-3" />
-                <span>
-                  {entry.updated_by_user?.nombre || entry.created_by_user?.nombre || 'Usuario'}
-                </span>
+              <div className="flex items-center gap-3">
+                {/* Colaborativo badge */}
+                <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#22c55e]/10 border border-[#22c55e]/30">
+                  <Users className="h-2.5 w-2.5 text-[#4ade80]" />
+                  <span className="text-[9px] font-medium text-[#4ade80]">Colaborativo</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <User className="h-3 w-3" />
+                  <span>
+                    {entry.updated_by_user?.nombre || entry.created_by_user?.nombre || 'Usuario'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
