@@ -37,7 +37,7 @@ import {
   DialogTitle,
 } from '@/shared/components/ui/dialog'
 import { Separator } from '@/shared/components/ui/separator'
-import { getUsers, addStrike, removeStrike, toggleBan, setUserPremium, deleteUser } from '../services'
+import { getUsers, addStrike, removeStrike, toggleBan, setUserPremium, deleteUser, updateUserRole } from '../services'
 import type { User } from '@/shared/types'
 import type { AdminFilters } from '../types'
 
@@ -57,6 +57,23 @@ const POSITION_COLORS: Record<string, string> = {
   MANTTO: 'from-[#8b5cf6] to-[#a78bfa]',
 }
 
+const CATEGORIA_OPTIONS = [
+  { value: 'FLIGHT', label: 'FLIGHT (Tripulación)' },
+  { value: 'GROUND', label: 'GROUND (Tierra)' },
+]
+
+const POSICION_BY_CATEGORIA: Record<string, Array<{ value: string; label: string }>> = {
+  FLIGHT: [
+    { value: 'PILOT', label: 'Piloto' },
+    { value: 'FA', label: 'Sobrecargo' },
+  ],
+  GROUND: [
+    { value: 'OPS', label: 'Operaciones' },
+    { value: 'TRAFICO', label: 'Tráfico' },
+    { value: 'MANTTO', label: 'Mantenimiento' },
+  ],
+}
+
 export function UsersList() {
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -64,6 +81,9 @@ export function UsersList() {
   const [search, setSearch] = useState('')
   const [expandedPositions, setExpandedPositions] = useState<string[]>([])
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [editCategoria, setEditCategoria] = useState<string>('')
+  const [editPosicion, setEditPosicion] = useState<string>('')
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false)
 
   const fetchUsers = async (newFilters?: AdminFilters) => {
     setIsLoading(true)
@@ -144,6 +164,32 @@ export function UsersList() {
       toast.success('Usuario eliminado')
       fetchUsers()
     }
+  }
+
+  const handleUpdateUserRole = async () => {
+    if (!selectedUser || !editCategoria || !editPosicion) return
+
+    setIsUpdatingRole(true)
+    const result = await updateUserRole(
+      selectedUser.id,
+      editCategoria as 'FLIGHT' | 'GROUND',
+      editPosicion
+    )
+    setIsUpdatingRole(false)
+
+    if (result.error) {
+      toast.error(result.error)
+    } else {
+      toast.success('Rol actualizado')
+      fetchUsers()
+      setSelectedUser(null)
+    }
+  }
+
+  const handleSelectUser = (user: User) => {
+    setSelectedUser(user)
+    setEditCategoria(user.categoria)
+    setEditPosicion(user.posicion)
   }
 
   const togglePosition = (position: string) => {
@@ -332,7 +378,7 @@ export function UsersList() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8"
-                            onClick={() => setSelectedUser(user)}
+                            onClick={() => handleSelectUser(user)}
                           >
                             <Eye className="h-4 w-4 text-zinc-400" />
                           </Button>
@@ -344,7 +390,7 @@ export function UsersList() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => setSelectedUser(user)}>
+                              <DropdownMenuItem onClick={() => handleSelectUser(user)}>
                                 <Eye className="h-4 w-4 mr-2" />
                                 Ver Detalles
                               </DropdownMenuItem>
@@ -501,6 +547,66 @@ export function UsersList() {
                     {selectedUser.role}
                   </p>
                 </div>
+              </div>
+
+              <Separator className="bg-zinc-800" />
+
+              {/* Role Editor */}
+              <div className="space-y-3">
+                <p className="text-xs text-zinc-500 font-medium">Cambiar Rol</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[10px] text-zinc-600 mb-1">Categoría</p>
+                    <Select
+                      value={editCategoria}
+                      onValueChange={(value) => {
+                        setEditCategoria(value)
+                        // Reset position when category changes
+                        const firstPos = POSICION_BY_CATEGORIA[value]?.[0]?.value
+                        if (firstPos) setEditPosicion(firstPos)
+                      }}
+                    >
+                      <SelectTrigger className="h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CATEGORIA_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-zinc-600 mb-1">Posición</p>
+                    <Select
+                      value={editPosicion}
+                      onValueChange={setEditPosicion}
+                    >
+                      <SelectTrigger className="h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(POSICION_BY_CATEGORIA[editCategoria] || []).map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                {(editCategoria !== selectedUser.categoria || editPosicion !== selectedUser.posicion) && (
+                  <Button
+                    size="sm"
+                    className="w-full bg-purple-600 hover:bg-purple-700"
+                    onClick={handleUpdateUserRole}
+                    disabled={isUpdatingRole}
+                  >
+                    {isUpdatingRole ? 'Guardando...' : 'Guardar Cambio de Rol'}
+                  </Button>
+                )}
               </div>
 
               <Separator className="bg-zinc-800" />

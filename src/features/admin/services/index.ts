@@ -298,3 +298,37 @@ export async function deleteDirectoryEntry(
 
   return { error: null }
 }
+
+export async function updateUserRole(
+  userId: string,
+  categoria: 'FLIGHT' | 'GROUND',
+  posicion: string
+): Promise<{ error: string | null }> {
+  const auth = await checkSuperAdmin()
+  if (!auth.authorized) return { error: auth.error }
+
+  const supabase = await createServiceRoleClient()
+
+  // Validate position based on categoria
+  const validPositions = categoria === 'FLIGHT'
+    ? ['PILOT', 'FA']
+    : ['OPS', 'TRAFICO', 'MANTTO']
+
+  if (!validPositions.includes(posicion)) {
+    return { error: `Posición inválida para categoría ${categoria}` }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase.from('users') as any)
+    .update({
+      categoria,
+      posicion,
+    })
+    .eq('id', userId)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  return { error: null }
+}
