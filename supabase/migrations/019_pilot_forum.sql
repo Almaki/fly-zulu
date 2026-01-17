@@ -200,21 +200,37 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Triggers
-DROP TRIGGER IF EXISTS trigger_update_post_likes ON forum_likes;
-CREATE TRIGGER trigger_update_post_likes
-  AFTER INSERT OR DELETE ON forum_likes
+-- Triggers for post likes (separate INSERT and DELETE to avoid NEW/OLD conflict)
+DROP TRIGGER IF EXISTS trigger_insert_post_likes ON forum_likes;
+CREATE TRIGGER trigger_insert_post_likes
+  AFTER INSERT ON forum_likes
   FOR EACH ROW
-  WHEN (NEW.post_id IS NOT NULL OR OLD.post_id IS NOT NULL)
+  WHEN (NEW.post_id IS NOT NULL)
   EXECUTE FUNCTION update_post_likes_count();
 
-DROP TRIGGER IF EXISTS trigger_update_comment_likes ON forum_likes;
-CREATE TRIGGER trigger_update_comment_likes
-  AFTER INSERT OR DELETE ON forum_likes
+DROP TRIGGER IF EXISTS trigger_delete_post_likes ON forum_likes;
+CREATE TRIGGER trigger_delete_post_likes
+  AFTER DELETE ON forum_likes
   FOR EACH ROW
-  WHEN (NEW.comment_id IS NOT NULL OR OLD.comment_id IS NOT NULL)
+  WHEN (OLD.post_id IS NOT NULL)
+  EXECUTE FUNCTION update_post_likes_count();
+
+-- Triggers for comment likes (separate INSERT and DELETE)
+DROP TRIGGER IF EXISTS trigger_insert_comment_likes ON forum_likes;
+CREATE TRIGGER trigger_insert_comment_likes
+  AFTER INSERT ON forum_likes
+  FOR EACH ROW
+  WHEN (NEW.comment_id IS NOT NULL)
   EXECUTE FUNCTION update_comment_likes_count();
 
+DROP TRIGGER IF EXISTS trigger_delete_comment_likes ON forum_likes;
+CREATE TRIGGER trigger_delete_comment_likes
+  AFTER DELETE ON forum_likes
+  FOR EACH ROW
+  WHEN (OLD.comment_id IS NOT NULL)
+  EXECUTE FUNCTION update_comment_likes_count();
+
+-- Trigger for comments count
 DROP TRIGGER IF EXISTS trigger_update_comments_count ON forum_comments;
 CREATE TRIGGER trigger_update_comments_count
   AFTER INSERT OR DELETE ON forum_comments
