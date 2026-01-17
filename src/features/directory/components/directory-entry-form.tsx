@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, X } from 'lucide-react'
+import { Loader2, Star, MessageCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import confetti from 'canvas-confetti'
 
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
@@ -36,50 +37,161 @@ import { createDirectoryEntry, updateDirectoryEntry } from '../services'
 interface DirectoryEntryFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  entry?: DirectoryEntry | null
+  editEntry?: DirectoryEntry | null
   defaultAirport?: string
   onSuccess?: () => void
+}
+
+// Star rating component
+function StarRating({ value, onChange }: { value: number; onChange: (val: number) => void }) {
+  const [hovered, setHovered] = useState(0)
+
+  return (
+    <div className="flex items-center gap-1">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          onClick={() => onChange(star)}
+          onMouseEnter={() => setHovered(star)}
+          onMouseLeave={() => setHovered(0)}
+          className="p-0.5 transition-transform hover:scale-110"
+        >
+          <Star
+            className={`w-6 h-6 transition-colors ${
+              star <= (hovered || value)
+                ? 'fill-[#f59e0b] text-[#f59e0b]'
+                : 'text-zinc-600'
+            }`}
+          />
+        </button>
+      ))}
+      <span className="text-xs text-zinc-500 ml-2">
+        {value > 0 ? `${value} estrella${value > 1 ? 's' : ''}` : 'Tu calificación'}
+      </span>
+    </div>
+  )
+}
+
+// Fire confetti celebration
+function celebrateSuccess() {
+  const count = 200
+  const defaults = {
+    origin: { y: 0.7 },
+    zIndex: 9999,
+  }
+
+  function fire(particleRatio: number, opts: confetti.Options) {
+    confetti({
+      ...defaults,
+      ...opts,
+      particleCount: Math.floor(count * particleRatio),
+    })
+  }
+
+  fire(0.25, {
+    spread: 26,
+    startVelocity: 55,
+  })
+  fire(0.2, {
+    spread: 60,
+  })
+  fire(0.35, {
+    spread: 100,
+    decay: 0.91,
+    scalar: 0.8,
+  })
+  fire(0.1, {
+    spread: 120,
+    startVelocity: 25,
+    decay: 0.92,
+    scalar: 1.2,
+  })
+  fire(0.1, {
+    spread: 120,
+    startVelocity: 45,
+  })
 }
 
 export function DirectoryEntryForm({
   open,
   onOpenChange,
-  entry,
+  editEntry,
   defaultAirport,
   onSuccess,
 }: DirectoryEntryFormProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const isEditing = !!entry
+  const [rating, setRating] = useState(0)
+  const isEditing = !!editEntry
 
   const form = useForm<DirectoryEntryFormData>({
     resolver: zodResolver(directoryEntrySchema),
     defaultValues: {
-      airport_code: entry?.airport_code || defaultAirport || '',
-      category: entry?.category || '',
-      name: entry?.name || '',
-      description: entry?.description || '',
-      phone: entry?.phone || '',
-      whatsapp: entry?.whatsapp || '',
-      address: entry?.address || '',
+      airport_code: editEntry?.airport_code || defaultAirport || '',
+      category: editEntry?.category || '',
+      name: editEntry?.name || '',
+      description: editEntry?.description || '',
+      phone: editEntry?.phone || '',
+      whatsapp: editEntry?.whatsapp || '',
+      address: editEntry?.address || '',
     },
   })
+
+  // Reset form when editEntry changes
+  useEffect(() => {
+    if (editEntry) {
+      form.reset({
+        airport_code: editEntry.airport_code,
+        category: editEntry.category,
+        name: editEntry.name,
+        description: editEntry.description || '',
+        phone: editEntry.phone || '',
+        whatsapp: editEntry.whatsapp || '',
+        address: editEntry.address || '',
+      })
+    } else {
+      form.reset({
+        airport_code: defaultAirport || '',
+        category: '',
+        name: '',
+        description: '',
+        phone: '',
+        whatsapp: '',
+        address: '',
+      })
+    }
+  }, [editEntry, defaultAirport, form])
 
   async function onSubmit(data: DirectoryEntryFormData) {
     setIsLoading(true)
 
     try {
+      // Add initial rating if provided
+      const submitData = {
+        ...data,
+        initial_rating: rating > 0 ? rating : undefined,
+      }
+
       const result = isEditing
-        ? await updateDirectoryEntry(entry.id, data)
-        : await createDirectoryEntry(data)
+        ? await updateDirectoryEntry(editEntry!.id, submitData)
+        : await createDirectoryEntry(submitData)
 
       if (result.error) {
         toast.error(result.error)
         return
       }
 
-      toast.success(isEditing ? 'Contacto actualizado' : 'Contacto agregado')
+      // Fire confetti for new entries
+      if (!isEditing) {
+        celebrateSuccess()
+        toast.success('¡Gracias por colaborar! 🎉')
+      } else {
+        toast.success('Contacto actualizado')
+      }
+
       onOpenChange(false)
       form.reset()
+      setRating(0)
       onSuccess?.()
     } catch {
       toast.error('Error al guardar contacto')
@@ -90,7 +202,7 @@ export function DirectoryEntryForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#141414] border-zinc-800 max-w-md">
+      <DialogContent className="bg-[#141414] border-zinc-800 max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-[#fafafa]">
             {isEditing ? 'Editar contacto' : 'Agregar contacto'}
@@ -185,44 +297,46 @@ export function DirectoryEntryForm({
               )}
             />
 
-            {/* Phone & WhatsApp */}
-            <div className="grid grid-cols-2 gap-3">
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-zinc-400 text-xs">Teléfono</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="55 1234 5678"
-                        className="bg-zinc-900 border-zinc-700"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {/* WhatsApp (Primary) */}
+            <FormField
+              control={form.control}
+              name="whatsapp"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-zinc-400 text-xs flex items-center gap-1">
+                    <MessageCircle className="w-3 h-3 text-[#25D366]" />
+                    WhatsApp
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="52 55 1234 5678"
+                      className="bg-zinc-900 border-zinc-700"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="whatsapp"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-zinc-400 text-xs">WhatsApp (opcional)</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="52 55 1234 5678"
-                        className="bg-zinc-900 border-zinc-700"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            {/* Phone (Optional) */}
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-zinc-400 text-xs">Teléfono (opcional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="55 1234 5678"
+                      className="bg-zinc-900 border-zinc-700"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Address */}
             <FormField
@@ -242,6 +356,14 @@ export function DirectoryEntryForm({
                 </FormItem>
               )}
             />
+
+            {/* Star Rating (only for new entries) */}
+            {!isEditing && (
+              <div className="space-y-2 pt-2 border-t border-zinc-800">
+                <FormLabel className="text-zinc-400 text-xs">¿Qué tan bueno es? (opcional)</FormLabel>
+                <StarRating value={rating} onChange={setRating} />
+              </div>
+            )}
 
             {/* Submit */}
             <div className="flex gap-3 pt-2">

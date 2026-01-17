@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Search, Plus, MapPin, Hotel, Car, Utensils, Plane, Users } from 'lucide-react'
+import { Search, Plus, MapPin, Hotel, Car, Utensils, Plane, Users, Star } from 'lucide-react'
 import { Input } from '@/shared/components/ui/input'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
@@ -12,7 +12,7 @@ import { DirectoryEntryForm } from './directory-entry-form'
 import { useDirectoryStore } from '../store'
 import { getDirectoryEntries } from '../services'
 import { useAuth } from '@/features/auth/hooks'
-import type { DirectoryFilters } from '../types'
+import type { DirectoryFilters, DirectoryEntry } from '../types'
 
 export function DirectoryList() {
   const { entries, filters, isLoading, setEntries, setFilters, setLoading } =
@@ -20,6 +20,7 @@ export function DirectoryList() {
   const { user } = useAuth()
   const [localSearch, setLocalSearch] = useState('')
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [editingEntry, setEditingEntry] = useState<DirectoryEntry | null>(null)
 
   // Solo usuarios FLIGHT (PILOT o FA) pueden agregar entradas
   const canAddEntries = (user as { categoria?: string })?.categoria === 'FLIGHT'
@@ -62,14 +63,29 @@ export function DirectoryList() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
           <Input
-            placeholder="Buscar..."
+            placeholder="Buscar nombre o descripción..."
             value={localSearch}
-            onChange={(e) => setLocalSearch(e.target.value)}
+            onChange={(e) => {
+              setLocalSearch(e.target.value)
+              // Auto-search when clearing the field
+              if (e.target.value === '') {
+                setFilters({ search: undefined })
+                fetchEntries({ ...filters, search: undefined })
+              }
+            }}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            className="pl-10"
+            className="pl-10 pr-10"
           />
+          {localSearch && (
+            <button
+              onClick={handleSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded bg-[#22c55e] hover:bg-[#22c55e]/80 transition-colors"
+            >
+              <Search className="h-3 w-3 text-black" />
+            </button>
+          )}
         </div>
-{canAddEntries && (
+        {canAddEntries && (
           <Button size="icon" variant="outline" onClick={() => setIsFormOpen(true)}>
             <Plus className="h-4 w-4" />
           </Button>
@@ -143,23 +159,23 @@ export function DirectoryList() {
                   : 'Comparte los contactos que te han salvado la vida en pernoctas. Tu experiencia ayuda a todos.'}
               </p>
 
-              {/* Grid de acciones posibles */}
+              {/* Grid de categorías */}
               <div className="grid grid-cols-2 gap-3 mb-6 max-w-sm mx-auto">
                 <div className="flex items-center gap-2 p-3 rounded-lg bg-[#1a1a1a] border border-[#27272a]">
-                  <Hotel className="w-4 h-4 text-[#22c55e]" />
-                  <span className="text-xs text-[#a1a1aa]">Hoteles crew</span>
-                </div>
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-[#1a1a1a] border border-[#27272a]">
-                  <Car className="w-4 h-4 text-[#22c55e]" />
-                  <span className="text-xs text-[#a1a1aa]">Taxis confianza</span>
-                </div>
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-[#1a1a1a] border border-[#27272a]">
                   <Utensils className="w-4 h-4 text-[#22c55e]" />
-                  <span className="text-xs text-[#a1a1aa]">Lugares para comer</span>
+                  <span className="text-xs text-[#a1a1aa]">Radial</span>
                 </div>
                 <div className="flex items-center gap-2 p-3 rounded-lg bg-[#1a1a1a] border border-[#27272a]">
                   <Plane className="w-4 h-4 text-[#22c55e]" />
-                  <span className="text-xs text-[#a1a1aa]">Radial</span>
+                  <span className="text-xs text-[#a1a1aa]">Aeropuerto</span>
+                </div>
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-[#1a1a1a] border border-[#27272a]">
+                  <Car className="w-4 h-4 text-[#22c55e]" />
+                  <span className="text-xs text-[#a1a1aa]">Taxi/Uber</span>
+                </div>
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-[#1a1a1a] border border-[#27272a]">
+                  <Hotel className="w-4 h-4 text-[#22c55e]" />
+                  <span className="text-xs text-[#a1a1aa]">Hotel</span>
                 </div>
               </div>
 
@@ -177,9 +193,6 @@ export function DirectoryList() {
                 </p>
               )}
 
-              <p className="text-xs text-[#52525b] mt-4">
-                Juntos construimos el mejor directorio crew de México
-              </p>
             </div>
 
             {/* Glow effect */}
@@ -187,7 +200,15 @@ export function DirectoryList() {
           </div>
         ) : (
           entries.map((entry) => (
-            <DirectoryEntryCard key={entry.id} entry={entry} />
+            <DirectoryEntryCard
+              key={entry.id}
+              entry={entry}
+              onEdit={(e) => {
+                setEditingEntry(e)
+                setIsFormOpen(true)
+              }}
+              onDeleted={() => fetchEntries()}
+            />
           ))
         )}
       </div>
@@ -201,9 +222,16 @@ export function DirectoryList() {
       {/* Form modal */}
       <DirectoryEntryForm
         open={isFormOpen}
-        onOpenChange={setIsFormOpen}
+        onOpenChange={(open) => {
+          setIsFormOpen(open)
+          if (!open) setEditingEntry(null)
+        }}
         defaultAirport={filters.airport}
-        onSuccess={() => fetchEntries()}
+        editEntry={editingEntry}
+        onSuccess={() => {
+          fetchEntries()
+          setEditingEntry(null)
+        }}
       />
     </div>
   )

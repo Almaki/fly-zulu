@@ -27,9 +27,10 @@ export const directoryEntrySchema = z.object({
   category: z.string().min(1, 'Categoría requerida'),
   name: z.string().min(2, 'Nombre requerido'),
   description: z.string().optional(),
-  phone: z.string().min(10, 'Teléfono requerido'),
-  whatsapp: z.string().optional(),
+  phone: z.string().optional(),
+  whatsapp: z.string().min(10, 'WhatsApp requerido'),
   address: z.string().optional(),
+  initial_rating: z.number().min(1).max(5).optional(),
 })
 
 export type DirectoryEntryFormData = z.infer<typeof directoryEntrySchema>

@@ -46,7 +46,7 @@ const WORK_ROUTES: Record<string, string> = {
   OPS: '/ops/control',
   TRAFICO: '/trafico/tiempos',
   MANTTO: '/mantto/transit',
-  SUPERADMIN: '/admin/metrics',
+  SUPERADMIN: '/pilot/flight', // Admin uses pilot/flight for work, metrics are in admin panel
 }
 
 export function BottomNav() {

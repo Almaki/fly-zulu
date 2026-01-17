@@ -57,12 +57,16 @@ export async function createFlight(formData: FlightFormData): Promise<{ data: Fl
     return { data: null, error: 'No autenticado' }
   }
 
+  // Get user name for collaborative tracking
+  const userName = user.user_metadata?.nombre || user.email?.split('@')[0] || 'Anónimo'
+
   // All authenticated users can add flights (collaborative board)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.from('flights') as any)
     .insert({
       ...formData,
       created_by: user.id,
+      updated_by_name: userName,
       status: 'ON_TIME',
       delay_minutes: 0,
     })
@@ -88,12 +92,16 @@ export async function updateFlight(
     return { data: null, error: 'No autenticado' }
   }
 
+  // Get user name for collaborative tracking
+  const userName = user.user_metadata?.nombre || user.email?.split('@')[0] || 'Anónimo'
+
   // All authenticated users can update flights (collaborative board)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.from('flights') as any)
     .update({
       ...updates,
       updated_at: new Date().toISOString(),
+      updated_by_name: userName,
     })
     .eq('id', id)
     .select()
@@ -120,9 +128,13 @@ export async function updateFlightStatus(
     return { error: 'No autenticado' }
   }
 
+  // Get user name for collaborative tracking
+  const userName = user.user_metadata?.nombre || user.email?.split('@')[0] || 'Anónimo'
+
   const updates: Record<string, unknown> = {
     status,
     updated_at: new Date().toISOString(),
+    updated_by_name: userName,
   }
 
   // Only update delay_minutes if explicitly provided (for DELAY status)

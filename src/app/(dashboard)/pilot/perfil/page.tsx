@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Mail, Phone, Briefcase, Edit2, Check, X, LogOut, Loader2 } from 'lucide-react'
+import { User, Mail, Phone, Briefcase, Edit2, Check, X, LogOut, Loader2, Sun, Moon, Monitor } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/shared/components/ui/button'
@@ -10,12 +10,14 @@ import { Input } from '@/shared/components/ui/input'
 import { createClient } from '@/shared/lib/supabase/client'
 import { useAuth } from '@/features/auth/hooks'
 import { useAuthStore } from '@/features/auth/store'
+import { useThemeStore } from '@/shared/stores/theme-store'
 
 export default function PerfilPage() {
   const router = useRouter()
   const { user, isLoading } = useAuth()
   const setUser = useAuthStore((state) => state.setUser)
   const storeLogout = useAuthStore((state) => state.logout)
+  const { mode: themeMode, setMode: setThemeMode } = useThemeStore()
   const [isEditing, setIsEditing] = useState(false)
   const [newName, setNewName] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -203,6 +205,54 @@ export default function PerfilPage() {
                 {getPositionLabel(user.posicion)}
               </span>
               <span className="text-xs text-[#71717a]">({user.categoria})</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Theme Settings Card */}
+        <div className="mt-4 rounded-xl border border-[#27272a] bg-[#141414] p-4">
+          <div className="space-y-3">
+            <label className="text-xs text-[#71717a] uppercase tracking-wide flex items-center gap-2">
+              {themeMode === 'light' ? <Sun className="w-3 h-3" /> : themeMode === 'dark' ? <Moon className="w-3 h-3" /> : <Monitor className="w-3 h-3" />}
+              Tema de la App
+            </label>
+            <p className="text-xs text-[#52525b]">
+              Auto cambia según la hora (día 6:00-18:00)
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={() => setThemeMode('light')}
+                className={`flex flex-col items-center gap-1 p-3 rounded-lg border transition-all ${
+                  themeMode === 'light'
+                    ? 'border-[#f59e0b] bg-[#f59e0b]/10 text-[#f59e0b]'
+                    : 'border-[#27272a] text-[#71717a] hover:border-[#3f3f46]'
+                }`}
+              >
+                <Sun className="w-5 h-5" />
+                <span className="text-xs font-medium">Día</span>
+              </button>
+              <button
+                onClick={() => setThemeMode('dark')}
+                className={`flex flex-col items-center gap-1 p-3 rounded-lg border transition-all ${
+                  themeMode === 'dark'
+                    ? 'border-[#8b5cf6] bg-[#8b5cf6]/10 text-[#8b5cf6]'
+                    : 'border-[#27272a] text-[#71717a] hover:border-[#3f3f46]'
+                }`}
+              >
+                <Moon className="w-5 h-5" />
+                <span className="text-xs font-medium">Noche</span>
+              </button>
+              <button
+                onClick={() => setThemeMode('auto')}
+                className={`flex flex-col items-center gap-1 p-3 rounded-lg border transition-all ${
+                  themeMode === 'auto'
+                    ? 'border-[#22c55e] bg-[#22c55e]/10 text-[#22c55e]'
+                    : 'border-[#27272a] text-[#71717a] hover:border-[#3f3f46]'
+                }`}
+              >
+                <Monitor className="w-5 h-5" />
+                <span className="text-xs font-medium">Auto</span>
+              </button>
             </div>
           </div>
         </div>

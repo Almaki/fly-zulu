@@ -154,9 +154,14 @@ export function TicketChat({ ticket, userId, isAdmin = false, onBack }: TicketCh
                       : 'bg-zinc-800 text-[#fafafa] rounded-bl-md'
                   }`}
                 >
-                  {!isOwnMessage && msg.is_admin_message && (
-                    <p className="text-xs text-[#00ff88] font-medium mb-1">
-                      Soporte FLY-ZULU
+                  {/* Show sender name */}
+                  {!isOwnMessage && (
+                    <p className={`text-xs font-medium mb-1 ${
+                      msg.is_admin_message ? 'text-[#00ff88]' : 'text-[#0088FF]'
+                    }`}>
+                      {msg.is_admin_message
+                        ? 'Soporte FLY-ZULU'
+                        : (msg.sender_name || ticket.user_name || 'Usuario')}
                     </p>
                   )}
                   <p className="text-sm whitespace-pre-wrap break-words">

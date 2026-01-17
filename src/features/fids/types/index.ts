@@ -22,6 +22,7 @@ export interface Flight {
   created_by: string | null
   created_at: string
   updated_at: string
+  updated_by_name: string | null
   archived_at: string | null
 }
 

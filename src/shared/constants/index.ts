@@ -70,11 +70,10 @@ export const SPECIAL_PAX_CODES = [
 
 // Directory categories
 export const DIRECTORY_CATEGORIES = [
-  { id: 'radial', label: 'Radial', emoji: '✈️' },
-  { id: 'airport', label: 'Aeropuerto', emoji: '🏢' },
-  { id: 'taxi', label: 'Taxi/Uber confianza', emoji: '🚕' },
+  { id: 'radial', label: 'Radial', emoji: '🍽️' },
+  { id: 'airport', label: 'Aeropuerto', emoji: '✈️' },
+  { id: 'taxi', label: 'Taxi/Uber', emoji: '🚕' },
   { id: 'hotel', label: 'Hotel', emoji: '🏨' },
-  { id: 'food', label: 'Comida', emoji: '🍔' },
 ] as const;
 
 // FIDS retention window

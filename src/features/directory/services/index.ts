@@ -26,7 +26,8 @@ export async function getDirectoryEntries(
   }
 
   if (filters?.search) {
-    query = query.ilike('name', `%${filters.search}%`)
+    // Search in both name and description
+    query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
   }
 
   const { data, error } = await query
@@ -61,12 +62,17 @@ export async function createDirectoryEntry(
     return { data: null, error: 'Solo tripulación FLIGHT puede agregar entradas' }
   }
 
+  // Extract initial_rating from form data
+  const { initial_rating, ...entryData } = formData
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.from('directory_entries') as any)
     .insert({
-      ...formData,
-      airport_code: formData.airport_code.toUpperCase(),
+      ...entryData,
+      airport_code: entryData.airport_code.toUpperCase(),
       created_by: user.id,
+      rating: initial_rating || 0,
+      rating_count: initial_rating ? 1 : 0,
     })
     .select()
     .single()

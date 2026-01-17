@@ -310,6 +310,25 @@ export function DigitalBoard({ initialAirport }: DigitalBoardProps) {
               {flights.length} vuelo{flights.length !== 1 ? 's' : ''}
             </span>
           </div>
+          {/* Last collaborator info */}
+          {(() => {
+            const lastUpdatedFlight = flights.reduce((latest, flight) => {
+              const flightDate = new Date(flight.updated_at)
+              return flightDate > new Date(latest.updated_at) ? flight : latest
+            }, flights[0])
+
+            if (lastUpdatedFlight?.updated_by_name) {
+              return (
+                <div className="mt-2 pt-2 border-t border-zinc-800/50 flex items-center justify-center gap-1">
+                  <Users className="w-3 h-3 text-[#f59e0b]" />
+                  <span className="text-[10px] text-zinc-400">
+                    Colaboración de <span className="text-[#f59e0b] font-medium">{lastUpdatedFlight.updated_by_name}</span>
+                  </span>
+                </div>
+              )
+            }
+            return null
+          })()}
         </div>
       )}
 

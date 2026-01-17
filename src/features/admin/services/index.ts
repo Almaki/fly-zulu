@@ -257,3 +257,44 @@ export async function setUserPremium(
 
   return { error: null }
 }
+
+export async function deleteUser(
+  userId: string
+): Promise<{ error: string | null }> {
+  const auth = await checkSuperAdmin()
+  if (!auth.authorized) return { error: auth.error }
+
+  const supabase = await createServiceRoleClient()
+
+  // Delete user from users table (auth user remains but profile is deleted)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase.from('users') as any)
+    .delete()
+    .eq('id', userId)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  return { error: null }
+}
+
+export async function deleteDirectoryEntry(
+  entryId: string
+): Promise<{ error: string | null }> {
+  const auth = await checkSuperAdmin()
+  if (!auth.authorized) return { error: auth.error }
+
+  const supabase = await createServiceRoleClient()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase.from('directory_entries') as any)
+    .delete()
+    .eq('id', entryId)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  return { error: null }
+}
