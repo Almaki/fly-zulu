@@ -1,0 +1,15 @@
+{
+  "name": "esia-scraper",
+  "version": "1.0.0",
+  "description": "Scraper para ESIA GAP - Sistema de información de vuelos",
+  "scripts": {
+    "login": "npx playwright test login.spec.ts --headed",
+    "login:headless": "npx playwright test login.spec.ts",
+    "scrape": "npx playwright test scrape-flights.spec.ts --headed",
+    "scrape:headless": "npx playwright test scrape-flights.spec.ts",
+    "test": "npx playwright test"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.40.0"
+  }
+}
