@@ -5,15 +5,14 @@ import {
   Clock,
   Plane,
   ChevronRight,
-  Users,
   Construction,
   ClipboardList,
   Timer,
   Wrench,
-  Pencil
+  Pencil,
+  BookOpen
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/hooks'
-import { LiveFlightBoard } from '@/features/fids/components'
 
 // Card component reutilizable - versión compacta
 interface FeatureCardProps {
@@ -117,6 +116,14 @@ export default function HomePage() {
                 badge="Offline"
                 badgeColor="bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/30"
               />
+              <FeatureCard
+                title="Directorio"
+                href="/directory"
+                icon={BookOpen}
+                color="from-[#22c55e] to-[#4ade80]"
+                badge="Crew"
+                badgeColor="bg-[#22c55e]/20 text-[#22c55e] border border-[#22c55e]/30"
+              />
               <UnderConstructionCard />
             </>
           )}
@@ -131,6 +138,14 @@ export default function HomePage() {
                 color="from-[#f59e0b] to-[#fbbf24]"
                 badge="Colaborativo"
                 badgeColor="bg-[#f59e0b]/20 text-[#fbbf24] border border-[#f59e0b]/30"
+              />
+              <FeatureCard
+                title="Directorio"
+                href="/directory"
+                icon={BookOpen}
+                color="from-[#22c55e] to-[#4ade80]"
+                badge="Crew"
+                badgeColor="bg-[#22c55e]/20 text-[#22c55e] border border-[#22c55e]/30"
               />
               <UnderConstructionCard />
             </>
@@ -211,16 +226,6 @@ export default function HomePage() {
               <UnderConstructionCard />
             </>
           )}
-        </div>
-
-        {/* Live Flight Board - visible para todos */}
-        <div className="mt-6">
-          <LiveFlightBoard
-            mode="both"
-            maxFlights={4}
-            autoRefresh={true}
-            refreshInterval={5 * 60 * 1000}
-          />
         </div>
       </div>
     </div>
