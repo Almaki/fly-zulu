@@ -8,7 +8,7 @@ import { cn } from '@/shared/lib/utils'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent } from '@/shared/components/ui/card'
-import { useAuthStore } from '@/shared/stores/auth-store'
+import { useAuth } from '@/features/auth/hooks'
 import { deleteFlight } from '../services'
 import type { Flight } from '../types'
 
@@ -56,7 +56,7 @@ const AIRLINE_COLORS: Record<string, string> = {
 }
 
 export function FlightCard({ flight, onClick, onDeleted }: FlightCardProps) {
-  const { user } = useAuthStore()
+  const { user } = useAuth()
   const [isDeleting, setIsDeleting] = useState(false)
 
   const statusStyle = STATUS_STYLES[flight.status]

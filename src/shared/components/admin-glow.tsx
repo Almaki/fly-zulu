@@ -1,9 +1,9 @@
 'use client'
 
-import { useAuthStore } from '@/shared/stores/auth-store'
+import { useAuth } from '@/features/auth/hooks'
 
 export function AdminGlow() {
-  const { user } = useAuthStore()
+  const { user } = useAuth()
 
   // Only show glow for SUPERADMIN users
   if (user?.role !== 'SUPERADMIN') {
