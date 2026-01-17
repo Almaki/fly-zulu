@@ -72,11 +72,11 @@ function UnderConstructionCard() {
 }
 
 export default function HomePage() {
-  const { user, profile } = useAuth()
-  const userPosition = profile?.posicion || user?.posicion
+  const { user } = useAuth()
+  const userPosition = (user as { posicion?: string })?.posicion
 
   // Determinar nombre para saludo
-  const firstName = user?.nombre?.split(' ')[0] || profile?.nombre?.split(' ')[0] || 'Crew'
+  const firstName = (user as { nombre?: string })?.nombre?.split(' ')[0] || 'Crew'
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] p-4 pb-24">

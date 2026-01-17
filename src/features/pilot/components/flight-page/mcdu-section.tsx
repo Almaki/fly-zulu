@@ -138,7 +138,7 @@ export function MCDUSection({
       // Check if flight is complete (only notify once per complete set)
       const allTimesPresent = values.outTime && values.offTime && values.onTime && values.inTime
       const timesValid = allTimesPresent
-        ? validateFlightTimes(values.outTime, values.offTime, values.onTime, values.inTime).valid
+        ? validateFlightTimes(values.outTime!, values.offTime!, values.onTime!, values.inTime!).valid
         : false
       const isComplete = allTimesPresent && timesValid &&
                          values.tail && values.aircraftType && values.dep && values.dest

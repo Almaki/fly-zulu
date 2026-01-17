@@ -9,9 +9,9 @@ const ESIA_STATUS_MAP: Record<string, FlightStatus> = {
   IBK: 'ON_TIME',      // In Block (arrived)
   OBK: 'BOARDING',     // Out Block (boarding/departed)
   DEP: 'DEPARTED',
-  ARR: 'LANDED',
+  ARR: 'ARRIVED',
   CNL: 'CANCELED',
-  DLY: 'DELAYED',
+  DLY: 'DELAY',
 }
 
 // Airline codes mapping

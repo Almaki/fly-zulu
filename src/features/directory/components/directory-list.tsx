@@ -17,12 +17,12 @@ import type { DirectoryFilters } from '../types'
 export function DirectoryList() {
   const { entries, filters, isLoading, setEntries, setFilters, setLoading } =
     useDirectoryStore()
-  const { profile } = useAuth()
+  const { user } = useAuth()
   const [localSearch, setLocalSearch] = useState('')
   const [isFormOpen, setIsFormOpen] = useState(false)
 
   // Solo usuarios FLIGHT (PILOT o FA) pueden agregar entradas
-  const canAddEntries = profile?.categoria === 'FLIGHT'
+  const canAddEntries = (user as { categoria?: string })?.categoria === 'FLIGHT'
 
   const fetchEntries = useCallback(async (newFilters?: DirectoryFilters) => {
     setLoading(true)

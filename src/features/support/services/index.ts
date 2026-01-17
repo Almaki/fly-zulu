@@ -6,7 +6,6 @@ import type {
   TicketMessage,
   UserNotification,
   CreateTicketData,
-  TicketCategory,
   TicketStatus,
 } from '../types'
 
@@ -21,7 +20,8 @@ export async function createTicket(
   const supabase = await createClient()
 
   // Create ticket
-  const { data: ticket, error: ticketError } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: ticket, error: ticketError } = await (supabase as any)
     .from('support_tickets')
     .insert({
       user_id: userId,
@@ -36,7 +36,8 @@ export async function createTicket(
   }
 
   // Add first message
-  const { error: messageError } = await supabase.from('ticket_messages').insert({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error: messageError } = await (supabase as any).from('ticket_messages').insert({
     ticket_id: ticket.id,
     sender_id: userId,
     content: data.message,
@@ -55,7 +56,8 @@ export async function getUserTickets(
 ): Promise<{ data: SupportTicket[] | null; error: string | null }> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from('support_tickets')
     .select('*')
     .eq('user_id', userId)
@@ -73,7 +75,8 @@ export async function getTicketMessages(
 ): Promise<{ data: TicketMessage[] | null; error: string | null }> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from('ticket_messages')
     .select(`
       *,
@@ -86,9 +89,9 @@ export async function getTicketMessages(
     return { data: null, error: error.message }
   }
 
-  const messages = data.map((m) => ({
+  const messages = data.map((m: any) => ({
     ...m,
-    sender_name: (m.sender as { nombre: string } | null)?.nombre || 'Usuario',
+    sender_name: m.sender?.nombre || 'Usuario',
   }))
 
   return { data: messages as TicketMessage[], error: null }
@@ -102,7 +105,8 @@ export async function sendTicketMessage(
 ): Promise<{ error: string | null }> {
   const supabase = await createClient()
 
-  const { error } = await supabase.from('ticket_messages').insert({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any).from('ticket_messages').insert({
     ticket_id: ticketId,
     sender_id: senderId,
     content,
@@ -122,7 +126,8 @@ export async function markMessagesAsRead(
 ): Promise<{ error: string | null }> {
   const supabase = await createClient()
 
-  const { error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any)
     .from('ticket_messages')
     .update({ read_at: new Date().toISOString() })
     .eq('ticket_id', ticketId)
@@ -145,7 +150,8 @@ export async function getUserNotifications(
 ): Promise<{ data: UserNotification[] | null; error: string | null }> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from('user_notifications')
     .select('*')
     .eq('user_id', userId)
@@ -164,7 +170,8 @@ export async function getUnreadNotificationCount(
 ): Promise<{ count: number; error: string | null }> {
   const supabase = await createClient()
 
-  const { count, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { count, error } = await (supabase as any)
     .from('user_notifications')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId)
@@ -182,7 +189,8 @@ export async function markNotificationAsRead(
 ): Promise<{ error: string | null }> {
   const supabase = await createClient()
 
-  const { error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any)
     .from('user_notifications')
     .update({ read_at: new Date().toISOString() })
     .eq('id', notificationId)
@@ -199,7 +207,8 @@ export async function markAllNotificationsAsRead(
 ): Promise<{ error: string | null }> {
   const supabase = await createClient()
 
-  const { error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any)
     .from('user_notifications')
     .update({ read_at: new Date().toISOString() })
     .eq('user_id', userId)
@@ -219,7 +228,8 @@ export async function updateNotificationSettings(
   const supabase = await createClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from('users') as any)
+  const { error } = await (supabase as any)
+    .from('users')
     .update({ notifications_muted: muted })
     .eq('id', userId)
 
@@ -240,7 +250,8 @@ export async function getAllTickets(): Promise<{
 }> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from('support_tickets')
     .select(`
       *,
@@ -252,10 +263,10 @@ export async function getAllTickets(): Promise<{
     return { data: null, error: error.message }
   }
 
-  const tickets = data.map((t) => ({
+  const tickets = data.map((t: any) => ({
     ...t,
-    user_name: (t.user as { nombre: string; email: string } | null)?.nombre,
-    user_email: (t.user as { nombre: string; email: string } | null)?.email,
+    user_name: t.user?.nombre,
+    user_email: t.user?.email,
   }))
 
   return { data: tickets as SupportTicket[], error: null }
@@ -272,7 +283,8 @@ export async function updateTicketStatus(
     updates.resolved_at = new Date().toISOString()
   }
 
-  const { error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any)
     .from('support_tickets')
     .update(updates)
     .eq('id', ticketId)
