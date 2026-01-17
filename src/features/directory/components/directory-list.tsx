@@ -33,6 +33,7 @@ export function DirectoryList() {
     if (result.data) {
       setEntries(result.data)
     }
+    setLoading(false)
   }, [filters, setEntries, setLoading])
 
   useEffect(() => {

@@ -7,7 +7,8 @@ import {
   Clock,
   GraduationCap,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  MessageSquare,
 } from 'lucide-react'
 
 const features = [
@@ -18,6 +19,15 @@ const features = [
     icon: Plane,
     href: '/pilot/mcdu',
     color: 'from-[#0066CC] to-[#0088FF]',
+    available: true,
+  },
+  {
+    id: 'foro',
+    title: 'Crew Lounge',
+    description: 'Foro interno para compartir con la tripulación',
+    icon: MessageSquare,
+    href: '/pilot/foro',
+    color: 'from-[#E91E8C] to-[#ff6eb4]',
     available: true,
   },
   {
