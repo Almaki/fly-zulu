@@ -225,19 +225,25 @@ export async function updateNotificationSettings(
   userId: string,
   muted: boolean
 ): Promise<{ error: string | null }> {
-  const supabase = await createClient()
+  try {
+    const supabase = await createClient()
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
-    .from('users')
-    .update({ notifications_muted: muted })
-    .eq('id', userId)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
+      .from('users')
+      .update({ notifications_muted: muted })
+      .eq('id', userId)
 
-  if (error) {
-    return { error: error.message }
+    if (error) {
+      console.error('Error updating notification settings:', error)
+      return { error: error.message }
+    }
+
+    return { error: null }
+  } catch (err) {
+    console.error('Unexpected error updating notification settings:', err)
+    return { error: 'Error inesperado al actualizar configuración' }
   }
-
-  return { error: null }
 }
 
 // =====================================================
