@@ -12,6 +12,8 @@ import {
   Pencil,
   BookOpen,
   MessageSquare,
+  Users,
+  BarChart3,
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/hooks'
 
@@ -257,20 +259,32 @@ export default function HomePage() {
           {isAdmin && (
             <>
               <FeatureCard
+                title="Usuarios"
+                href="/admin/users"
+                icon={Users}
+                color="from-[#ef4444] to-[#f87171]"
+                badge="Admin"
+                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
+              />
+              <FeatureCard
+                title="Métricas"
+                href="/admin/metrics"
+                icon={BarChart3}
+                color="from-[#8b5cf6] to-[#a78bfa]"
+                badge="Admin"
+                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
+              />
+              <FeatureCard
                 title="Salidas"
                 href="/board"
                 icon={Clock}
                 color="from-[#f59e0b] to-[#fbbf24]"
-                badge="Admin"
-                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
               />
               <FeatureCard
                 title="Directorio"
                 href="/directory"
                 icon={BookOpen}
                 color="from-[#22c55e] to-[#4ade80]"
-                badge="Admin"
-                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
               />
               <FeatureCard
                 title="Flight"
@@ -283,8 +297,6 @@ export default function HomePage() {
                 href="/admin/lounges"
                 icon={MessageSquare}
                 color="from-[#E91E8C] to-[#ff6eb4]"
-                badge="Admin"
-                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
               />
             </>
           )}
