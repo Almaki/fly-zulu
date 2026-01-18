@@ -1,27 +1,36 @@
 'use server'
 
 import { createServerSupabaseClient } from '@/shared/lib/supabase/server'
-import type { ForumPost, ForumComment, CreatePostData, CreateCommentData } from '../types'
+import type { ForumPost, ForumComment, CreatePostData, CreateCommentData, LoungeType } from '../types'
+import { LOUNGE_INFO } from '../types'
+
+// Check if user has access to a specific lounge
+function hasLoungeAccess(posicion: string, role: string, loungeType: LoungeType): boolean {
+  if (role === 'SUPERADMIN') return true
+  return LOUNGE_INFO[loungeType].allowedPositions.includes(posicion)
+}
 
 // Get all posts with author info (respecting anonymity)
-export async function getPosts(search?: string): Promise<{ data: ForumPost[] | null; error: string | null }> {
+export async function getPosts(loungeType: LoungeType = 'CREW', search?: string): Promise<{ data: ForumPost[] | null; error: string | null }> {
   const supabase = await createServerSupabaseClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { data: null, error: 'No autenticado' }
 
-  // Check if user is SUPERADMIN (can see anonymous authors)
+  // Check user profile
   const { data: profile } = await supabase
     .from('users')
-    .select('role, categoria')
+    .select('role, posicion')
     .eq('id', user.id)
     .single()
 
-  const isSuperAdmin = (profile as { role: string } | null)?.role === 'SUPERADMIN'
-  const isPilot = (profile as { categoria: string } | null)?.categoria === 'FLIGHT'
+  const userRole = (profile as { role: string } | null)?.role || ''
+  const userPosicion = (profile as { posicion: string } | null)?.posicion || ''
+  const isSuperAdmin = userRole === 'SUPERADMIN'
 
-  if (!isPilot && !isSuperAdmin) {
-    return { data: null, error: 'Solo pilotos pueden acceder al foro' }
+  // Check lounge access
+  if (!hasLoungeAccess(userPosicion, userRole, loungeType)) {
+    return { data: null, error: `No tienes acceso a ${LOUNGE_INFO[loungeType].name}` }
   }
 
   let query = supabase
@@ -30,6 +39,7 @@ export async function getPosts(search?: string): Promise<{ data: ForumPost[] | n
       *,
       author:users!author_id(id, nombre, posicion)
     `)
+    .eq('lounge_type', loungeType)
     .order('created_at', { ascending: false })
 
   // Apply search filter
@@ -81,18 +91,29 @@ export async function getPost(postId: string): Promise<{ data: ForumPost | null;
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { data: null, comments: null, error: 'No autenticado' }
 
-  // Check if user is SUPERADMIN
+  // Check user profile
   const { data: profile } = await supabase
     .from('users')
-    .select('role, categoria')
+    .select('role, posicion')
     .eq('id', user.id)
     .single()
 
-  const isSuperAdmin = (profile as { role: string } | null)?.role === 'SUPERADMIN'
-  const isPilot = (profile as { categoria: string } | null)?.categoria === 'FLIGHT'
+  const userRole = (profile as { role: string } | null)?.role || ''
+  const userPosicion = (profile as { posicion: string } | null)?.posicion || ''
+  const isSuperAdmin = userRole === 'SUPERADMIN'
 
-  if (!isPilot && !isSuperAdmin) {
-    return { data: null, comments: null, error: 'Solo pilotos pueden acceder al foro' }
+  // First get the post to check lounge_type
+  const { data: postCheck } = await supabase
+    .from('forum_posts')
+    .select('lounge_type')
+    .eq('id', postId)
+    .single()
+
+  if (postCheck) {
+    const loungeType = (postCheck as { lounge_type: LoungeType }).lounge_type || 'CREW'
+    if (!hasLoungeAccess(userPosicion, userRole, loungeType)) {
+      return { data: null, comments: null, error: `No tienes acceso a ${LOUNGE_INFO[loungeType].name}` }
+    }
   }
 
   // Get post
@@ -170,6 +191,20 @@ export async function createPost(data: CreatePostData): Promise<{ data: ForumPos
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { data: null, error: 'No autenticado' }
 
+  // Check user has access to this lounge
+  const { data: profile } = await supabase
+    .from('users')
+    .select('role, posicion')
+    .eq('id', user.id)
+    .single()
+
+  const userRole = (profile as { role: string } | null)?.role || ''
+  const userPosicion = (profile as { posicion: string } | null)?.posicion || ''
+
+  if (!hasLoungeAccess(userPosicion, userRole, data.lounge_type)) {
+    return { data: null, error: `No tienes acceso a ${LOUNGE_INFO[data.lounge_type].name}` }
+  }
+
   // Validate content
   if (!data.content.trim()) {
     return { data: null, error: 'El contenido no puede estar vacío' }
@@ -185,6 +220,7 @@ export async function createPost(data: CreatePostData): Promise<{ data: ForumPos
       author_id: user.id,
       content: data.content.trim(),
       is_anonymous: data.is_anonymous,
+      lounge_type: data.lounge_type,
     })
     .select()
     .single()

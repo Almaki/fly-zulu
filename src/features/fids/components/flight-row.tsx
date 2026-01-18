@@ -295,6 +295,16 @@ export function FlightRow({ flight, direction, airportCode }: FlightRowProps) {
               </button>
             )}
 
+            {/* Contributor name - show who created/updated */}
+            {(flight.updated_by_name || flight.created_by_name) && (
+              <span
+                className="text-[8px] text-zinc-500 italic truncate max-w-[50px]"
+                title={flight.updated_by_name ? `Actualizado por ${flight.updated_by_name}` : `Creado por ${flight.created_by_name}`}
+              >
+                {(flight.updated_by_name || flight.created_by_name)?.split(' ')[0]}
+              </span>
+            )}
+
             {/* Status badges - show in row 2 */}
             <div className="flex items-center gap-1 flex-1 justify-end">
               {showDelayLabel && (

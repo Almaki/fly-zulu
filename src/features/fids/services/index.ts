@@ -57,8 +57,14 @@ export async function createFlight(formData: FlightFormData): Promise<{ data: Fl
     return { data: null, error: 'No autenticado' }
   }
 
-  // Get user name for collaborative tracking
-  const userName = user.user_metadata?.nombre || user.email?.split('@')[0] || 'Anónimo'
+  // Get user name from profile for collaborative tracking
+  const { data: profile } = await supabase
+    .from('users')
+    .select('nombre')
+    .eq('id', user.id)
+    .single()
+
+  const userName = (profile as { nombre: string } | null)?.nombre || user.email?.split('@')[0] || 'Anónimo'
 
   // All authenticated users can add flights (collaborative board)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -66,6 +72,7 @@ export async function createFlight(formData: FlightFormData): Promise<{ data: Fl
     .insert({
       ...formData,
       created_by: user.id,
+      created_by_name: userName,
       updated_by_name: userName,
       status: 'ON_TIME',
       delay_minutes: 0,
