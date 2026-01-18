@@ -220,12 +220,16 @@ export async function toggleBan(
   const supabase = await createServiceRoleClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from('users') as any)
-    .update({ is_banned: ban })
+  const { error, count } = await (supabase.from('users') as any)
+    .update({ is_banned: ban }, { count: 'exact' })
     .eq('id', userId)
 
   if (error) {
-    return { error: error.message }
+    return { error: `Error actualizando usuario: ${error.message}` }
+  }
+
+  if (count === 0) {
+    return { error: 'No se pudo actualizar el usuario - verifica que existe' }
   }
 
   return { error: null }
@@ -253,10 +257,16 @@ export async function setUserPremium(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from('users') as any).update(updates).eq('id', userId)
+  const { error, count } = await (supabase.from('users') as any)
+    .update(updates, { count: 'exact' })
+    .eq('id', userId)
 
   if (error) {
-    return { error: error.message }
+    return { error: `Error actualizando suscripción: ${error.message}` }
+  }
+
+  if (count === 0) {
+    return { error: 'No se pudo actualizar el usuario - verifica que existe' }
   }
 
   return { error: null }
@@ -270,14 +280,29 @@ export async function deleteUser(
 
   const supabase = await createServiceRoleClient()
 
+  // First verify user exists
+  const { data: existingUser } = await supabase
+    .from('users')
+    .select('id, nombre')
+    .eq('id', userId)
+    .single()
+
+  if (!existingUser) {
+    return { error: 'Usuario no encontrado' }
+  }
+
   // Delete user from users table (auth user remains but profile is deleted)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from('users') as any)
-    .delete()
+  const { error, count } = await (supabase.from('users') as any)
+    .delete({ count: 'exact' })
     .eq('id', userId)
 
   if (error) {
-    return { error: error.message }
+    return { error: `Error eliminando usuario: ${error.message}` }
+  }
+
+  if (count === 0) {
+    return { error: 'No se pudo eliminar el usuario - verifica permisos RLS' }
   }
 
   return { error: null }
@@ -323,15 +348,19 @@ export async function updateUserRole(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from('users') as any)
+  const { error, count } = await (supabase.from('users') as any)
     .update({
       categoria,
       posicion,
-    })
+    }, { count: 'exact' })
     .eq('id', userId)
 
   if (error) {
-    return { error: error.message }
+    return { error: `Error actualizando rol: ${error.message}` }
+  }
+
+  if (count === 0) {
+    return { error: 'No se pudo actualizar el usuario - verifica que existe' }
   }
 
   return { error: null }
