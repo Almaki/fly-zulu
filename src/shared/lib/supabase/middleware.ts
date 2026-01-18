@@ -67,6 +67,44 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Check if user is banned (for non-public routes)
+  // Skip check for /banned page to avoid redirect loop
+  if (user && !isPublicRoute(pathname) && pathname !== '/banned') {
+    const { data: profile } = await supabase
+      .from('users')
+      .select('is_banned, role')
+      .eq('id', user.id)
+      .single()
+
+    // If user is banned, redirect to banned page and clear session
+    if (profile?.is_banned) {
+      // Sign out the user
+      await supabase.auth.signOut()
+
+      const response = NextResponse.redirect(new URL('/banned', request.url))
+      // Clear all Supabase cookies
+      request.cookies.getAll().forEach((cookie) => {
+        if (cookie.name.startsWith('sb-')) {
+          response.cookies.delete(cookie.name)
+        }
+      })
+      return response
+    }
+
+    // If user has no profile (deleted), sign out and redirect to login
+    if (!profile) {
+      await supabase.auth.signOut()
+
+      const response = NextResponse.redirect(new URL('/login', request.url))
+      request.cookies.getAll().forEach((cookie) => {
+        if (cookie.name.startsWith('sb-')) {
+          response.cookies.delete(cookie.name)
+        }
+      })
+      return response
+    }
+  }
+
   if (user && isAuthRoute(pathname)) {
     // Only redirect to dashboard if email is confirmed
     if (user.email_confirmed_at) {

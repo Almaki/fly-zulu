@@ -46,6 +46,7 @@ export function isPublicRoute(pathname: string): boolean {
     '/forgot-password',
     '/reset-password',
     '/verify-email',
+    '/banned',
     '/api/auth/callback',
     '/auth/callback',
   ]

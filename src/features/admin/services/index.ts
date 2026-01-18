@@ -291,18 +291,27 @@ export async function deleteUser(
     return { error: 'Usuario no encontrado' }
   }
 
-  // Delete user from users table (auth user remains but profile is deleted)
+  // Delete user from users table first
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error, count } = await (supabase.from('users') as any)
+  const { error: profileError, count } = await (supabase.from('users') as any)
     .delete({ count: 'exact' })
     .eq('id', userId)
 
-  if (error) {
-    return { error: `Error eliminando usuario: ${error.message}` }
+  if (profileError) {
+    return { error: `Error eliminando perfil: ${profileError.message}` }
   }
 
   if (count === 0) {
-    return { error: 'No se pudo eliminar el usuario - verifica permisos RLS' }
+    return { error: 'No se pudo eliminar el perfil - verifica permisos RLS' }
+  }
+
+  // Now delete the auth user completely so they can't login
+  const { error: authError } = await supabase.auth.admin.deleteUser(userId)
+
+  if (authError) {
+    // Profile was deleted but auth user remains - log but don't fail
+    console.error(`Error eliminando auth user ${userId}:`, authError.message)
+    // User won't be able to use the app anyway since profile is gone
   }
 
   return { error: null }
