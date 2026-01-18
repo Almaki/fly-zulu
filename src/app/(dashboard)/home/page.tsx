@@ -14,7 +14,6 @@ import {
   MessageSquare,
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/hooks'
-import { ExchangeRateCollapsible } from '@/features/fids/components'
 
 // Card component reutilizable - versión compacta
 interface FeatureCardProps {
@@ -112,7 +111,6 @@ export default function HomePage() {
                 badge="Colaborativo"
                 badgeColor="bg-[#f59e0b]/20 text-[#fbbf24] border border-[#f59e0b]/30"
               />
-              <ExchangeRateCollapsible airportCode="MEX" />
               <FeatureCard
                 title="Flight"
                 href="/pilot/flight"
@@ -151,7 +149,6 @@ export default function HomePage() {
                 badge="Colaborativo"
                 badgeColor="bg-[#f59e0b]/20 text-[#fbbf24] border border-[#f59e0b]/30"
               />
-              <ExchangeRateCollapsible airportCode="MEX" />
               <FeatureCard
                 title="Directorio"
                 href="/directory"
@@ -182,7 +179,6 @@ export default function HomePage() {
                 badge="Colaborativo"
                 badgeColor="bg-[#f59e0b]/20 text-[#fbbf24] border border-[#f59e0b]/30"
               />
-              <ExchangeRateCollapsible airportCode="MEX" />
               <FeatureCard
                 title="Control"
                 href="/ops/control"
@@ -211,7 +207,6 @@ export default function HomePage() {
                 badge="Colaborativo"
                 badgeColor="bg-[#f59e0b]/20 text-[#fbbf24] border border-[#f59e0b]/30"
               />
-              <ExchangeRateCollapsible airportCode="MEX" />
               <FeatureCard
                 title="Control Tiempos"
                 href="/trafico/tiempos"
@@ -241,7 +236,6 @@ export default function HomePage() {
                 badge="Colaborativo"
                 badgeColor="bg-[#f59e0b]/20 text-[#fbbf24] border border-[#f59e0b]/30"
               />
-              <ExchangeRateCollapsible airportCode="MEX" />
               <FeatureCard
                 title="Transit Check"
                 href="/mantto/transit"
@@ -270,7 +264,6 @@ export default function HomePage() {
                 badge="Admin"
                 badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
               />
-              <ExchangeRateCollapsible airportCode="MEX" />
               <FeatureCard
                 title="Directorio"
                 href="/directory"

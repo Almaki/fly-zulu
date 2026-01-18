@@ -20,10 +20,10 @@ import { LOUNGE_INFO } from '@/features/forum/types'
 
 interface PostDetailPageProps {
   loungeType: LoungeType
-  backUrl: string
+  loungeUrl: string
 }
 
-export function PostDetailPage({ loungeType, backUrl }: PostDetailPageProps) {
+export function PostDetailPage({ loungeType, loungeUrl }: PostDetailPageProps) {
   const router = useRouter()
   const params = useParams()
   const postId = params.postId as string
@@ -34,7 +34,6 @@ export function PostDetailPage({ loungeType, backUrl }: PostDetailPageProps) {
   const [isLoading, setIsLoading] = useState(true)
 
   const loungeInfo = LOUNGE_INFO[loungeType]
-  const loungeUrl = `${backUrl}/lounge`
 
   const fetchPost = useCallback(async () => {
     setIsLoading(true)

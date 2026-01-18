@@ -22,16 +22,17 @@ interface ExchangeRateData {
 }
 
 // Airports with exchange rate display
-const EXCHANGE_AIRPORTS: Record<string, { locations: { key: string; label: string }[] }> = {
+const EXCHANGE_AIRPORTS: Record<string, { locations: { key: string; label: string; color: string }[] }> = {
   MEX: {
     locations: [
-      { key: 'terminal', label: 'DENTRO TERMINAL' },
+      { key: 'toro_shop', label: 'Toro Shop', color: 'from-[#f59e0b] to-[#fbbf24]' },
+      { key: 'gates', label: 'Gates', color: 'from-[#3b82f6] to-[#60a5fa]' },
     ],
   },
   TIJ: {
     locations: [
-      { key: 'terminal', label: 'DENTRO TERMINAL' },
-      { key: 'entrada', label: 'ENTRADA' },
+      { key: 'toro_shop', label: 'Toro Shop', color: 'from-[#f59e0b] to-[#fbbf24]' },
+      { key: 'gates', label: 'Gates', color: 'from-[#3b82f6] to-[#60a5fa]' },
     ],
   },
 }
@@ -288,50 +289,97 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
 
   const hasValidUpdate = lastUpdate.date.getTime() > 0 && rates.some(r => r.buy_rate > 0 || r.sell_rate > 0)
 
+  // Get rates by location
+  const toroShopRate = rates.find(r => r.location === 'toro_shop')
+  const gatesRate = rates.find(r => r.location === 'gates')
+
   return (
-    <div className="px-3 py-2 bg-zinc-800/40 rounded-lg border border-zinc-700/30">
-      {/* Row 1: Header with USD icon and colaborativo badge */}
-      <div className="flex items-center justify-between mb-1.5">
-        <div className="flex items-center gap-1.5">
-          <DollarSign className="w-3.5 h-3.5 text-[#22c55e]" />
-          <span className="text-[10px] font-bold text-zinc-400">TIPO DE CAMBIO USD</span>
+    <div className="py-4 bg-zinc-800/40 rounded-lg border border-zinc-700/30">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 mb-4">
+        <div className="flex items-center gap-2">
+          <DollarSign className="w-4 h-4 text-[#22c55e]" />
+          <span className="text-xs font-bold text-zinc-300">TIPO DE CAMBIO USD</span>
         </div>
-        <button className="flex items-center gap-1 opacity-60 hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1">
           <Users className="w-3 h-3 text-[#f59e0b]" />
-          <span className="text-[8px] text-[#f59e0b] font-medium">COLAB</span>
-        </button>
+          <span className="text-[9px] text-[#f59e0b] font-medium">COLABORATIVO</span>
+        </div>
       </div>
 
-      {/* Row 2: Rates by Location - responsive grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-        {rates.map((rate) => {
-          const locConfig = getLocationConfig(rate.location)
-          return (
-            <div key={rate.id} className="flex items-center justify-between bg-zinc-900/50 rounded px-2 py-1">
-              <span className="text-[9px] font-bold text-zinc-500 uppercase truncate mr-2">
-                {locConfig?.label}
-              </span>
-              <div className="flex items-center gap-3">
-                <CompactRateInput
-                  value={rate.buy_rate}
-                  onSave={(val) => saveRate(rate, 'buy', val)}
-                  type="buy"
-                />
-                <CompactRateInput
-                  value={rate.sell_rate}
-                  onSave={(val) => saveRate(rate, 'sell', val)}
-                  type="sell"
-                />
+      {/* Two columns: Toro Shop | Gates */}
+      <div className="grid grid-cols-2 gap-4 px-4">
+        {/* Toro Shop Column */}
+        <div className="bg-gradient-to-br from-[#f59e0b]/10 to-[#f59e0b]/5 rounded-xl p-4 border border-[#f59e0b]/20">
+          <h3 className="text-sm font-bold text-[#fbbf24] mb-4 text-center">Toro Shop</h3>
+
+          {toroShopRate && (
+            <div className="space-y-3">
+              {/* Compra */}
+              <div className="text-center">
+                <span className="text-[10px] text-zinc-500 uppercase tracking-wider block mb-1">Compra</span>
+                <div className="bg-zinc-900/60 rounded-lg py-2 px-3">
+                  <CompactRateInput
+                    value={toroShopRate.buy_rate}
+                    onSave={(val) => saveRate(toroShopRate, 'buy', val)}
+                    type="buy"
+                  />
+                </div>
+              </div>
+
+              {/* Venta */}
+              <div className="text-center">
+                <span className="text-[10px] text-zinc-500 uppercase tracking-wider block mb-1">Venta</span>
+                <div className="bg-zinc-900/60 rounded-lg py-2 px-3">
+                  <CompactRateInput
+                    value={toroShopRate.sell_rate}
+                    onSave={(val) => saveRate(toroShopRate, 'sell', val)}
+                    type="sell"
+                  />
+                </div>
               </div>
             </div>
-          )
-        })}
+          )}
+        </div>
+
+        {/* Gates Column */}
+        <div className="bg-gradient-to-br from-[#3b82f6]/10 to-[#3b82f6]/5 rounded-xl p-4 border border-[#3b82f6]/20">
+          <h3 className="text-sm font-bold text-[#60a5fa] mb-4 text-center">Gates</h3>
+
+          {gatesRate && (
+            <div className="space-y-3">
+              {/* Compra */}
+              <div className="text-center">
+                <span className="text-[10px] text-zinc-500 uppercase tracking-wider block mb-1">Compra</span>
+                <div className="bg-zinc-900/60 rounded-lg py-2 px-3">
+                  <CompactRateInput
+                    value={gatesRate.buy_rate}
+                    onSave={(val) => saveRate(gatesRate, 'buy', val)}
+                    type="buy"
+                  />
+                </div>
+              </div>
+
+              {/* Venta */}
+              <div className="text-center">
+                <span className="text-[10px] text-zinc-500 uppercase tracking-wider block mb-1">Venta</span>
+                <div className="bg-zinc-900/60 rounded-lg py-2 px-3">
+                  <CompactRateInput
+                    value={gatesRate.sell_rate}
+                    onSave={(val) => saveRate(gatesRate, 'sell', val)}
+                    type="sell"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Row 3: Last update info */}
+      {/* Last update info */}
       {hasValidUpdate && (
-        <div className="mt-1.5 pt-1.5 border-t border-zinc-700/30 flex items-center justify-end gap-1">
-          <span className="text-[9px] text-zinc-400">
+        <div className="mt-4 pt-3 mx-4 border-t border-zinc-700/30 flex items-center justify-center gap-1">
+          <span className="text-[10px] text-zinc-400">
             Actualizado {formatDistanceToNow(lastUpdate.date, { addSuffix: true, locale: es })}
             {lastUpdate.by && <span className="text-[#f59e0b]"> por {lastUpdate.by}</span>}
           </span>
