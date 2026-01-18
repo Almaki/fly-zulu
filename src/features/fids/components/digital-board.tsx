@@ -16,7 +16,7 @@ import { useAuth } from '@/features/auth/hooks'
 import { FlightRow } from './flight-row'
 import { AddFlightSheet } from './add-flight-sheet'
 import { AirportSearch } from './airport-search'
-import { ExchangeRate } from './exchange-rate'
+import { ExchangeRateCollapsible } from './exchange-rate-collapsible'
 import { searchAirports, getCityName, type Airport } from '../constants/airports'
 import type { FIDSFilters } from '../types'
 
@@ -153,10 +153,10 @@ export function DigitalBoard({ initialAirport }: DigitalBoardProps) {
           </button>
         </div>
 
-        {/* Exchange Rate - Only for MEX and TIJ */}
+        {/* Exchange Rate - Only for MEX and TIJ - Collapsible Card */}
         {selectedAirport && (selectedAirport === 'MEX' || selectedAirport === 'TIJ') && (
           <div className="px-4 pb-3">
-            <ExchangeRate airportCode={selectedAirport} />
+            <ExchangeRateCollapsible airportCode={selectedAirport} />
           </div>
         )}
 
