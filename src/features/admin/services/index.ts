@@ -8,17 +8,21 @@ async function checkSuperAdmin() {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) return { authorized: false, error: 'No autenticado' }
+  if (!user) return { authorized: false, error: 'No autenticado - Inicia sesión primero' }
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('users')
-    .select('role')
+    .select('role, email')
     .eq('id', user.id)
     .single()
 
-  const userRole = (profile as { role: string } | null)?.role
+  if (profileError) {
+    return { authorized: false, error: `Error obteniendo perfil: ${profileError.message}` }
+  }
+
+  const userRole = (profile as { role: string; email: string } | null)?.role
   if (userRole !== 'SUPERADMIN') {
-    return { authorized: false, error: 'No autorizado' }
+    return { authorized: false, error: `No autorizado - Tu rol es "${userRole || 'sin rol'}"` }
   }
 
   return { authorized: true, error: null }

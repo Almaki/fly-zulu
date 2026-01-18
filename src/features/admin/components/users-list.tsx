@@ -77,6 +77,7 @@ const POSICION_BY_CATEGORIA: Record<string, Array<{ value: string; label: string
 export function UsersList() {
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<AdminFilters>({})
   const [search, setSearch] = useState('')
   const [expandedPositions, setExpandedPositions] = useState<string[]>([])
@@ -87,8 +88,12 @@ export function UsersList() {
 
   const fetchUsers = async (newFilters?: AdminFilters) => {
     setIsLoading(true)
+    setError(null)
     const result = await getUsers(newFilters || filters)
-    if (result.data) {
+    if (result.error) {
+      setError(result.error)
+      setUsers([])
+    } else if (result.data) {
       setUsers(result.data)
     }
     setIsLoading(false)
@@ -282,13 +287,26 @@ export function UsersList() {
         </Select>
       </div>
 
+      {/* Error message */}
+      {error && (
+        <Card className="border-[#FF3B30]/50 bg-[#FF3B30]/10">
+          <CardContent className="py-4 text-center">
+            <AlertTriangle className="h-8 w-8 text-[#FF3B30] mx-auto mb-2" />
+            <p className="text-[#FF3B30] font-medium">{error}</p>
+            <p className="text-xs text-zinc-500 mt-1">
+              Verifica que tienes permisos de SUPERADMIN
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Users grouped by position */}
       <div className="space-y-3">
         {isLoading ? (
           Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} className="h-16 w-full bg-zinc-800" />
           ))
-        ) : users.length === 0 ? (
+        ) : error ? null : users.length === 0 ? (
           <Card className="border-zinc-800 bg-zinc-900/50">
             <CardContent className="py-8 text-center text-zinc-500">
               No se encontraron usuarios
