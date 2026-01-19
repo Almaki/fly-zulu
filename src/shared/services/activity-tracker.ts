@@ -19,7 +19,8 @@ export async function updateUserActivity(params?: ActivityParams): Promise<{ err
     }
 
     // Call the database function to update activity with geolocation
-    const { error } = await supabase.rpc('update_user_activity', {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any).rpc('update_user_activity', {
       p_user_id: user.id,
       p_location: params?.location || null,
       p_latitude: params?.latitude || null,

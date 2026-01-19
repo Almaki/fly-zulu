@@ -8,7 +8,8 @@ export async function getDirectoryEntries(
 ): Promise<{ data: DirectoryEntry[] | null; error: string | null }> {
   const supabase = await createServerSupabaseClient()
 
-  let query = supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let query = (supabase as any)
     .from('directory_entries')
     .select(`
       *,
@@ -91,7 +92,8 @@ export async function createDirectoryEntry(
       rating_count: initial_rating ? 1 : 0,
     }
 
-    const { data, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
       .from('directory_entries')
       .insert(insertData)
       .select()
@@ -144,7 +146,8 @@ export async function updateDirectoryEntry(
       updated_at: new Date().toISOString(),
     }
 
-    const { data, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
       .from('directory_entries')
       .update(cleanedData)
       .eq('id', entryId)
@@ -176,7 +179,8 @@ export async function rateDirectoryEntry(
   }
 
   // Get current entry
-  const { data: entryData } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: entryData } = await (supabase as any)
     .from('directory_entries')
     .select('rating, rating_count')
     .eq('id', entryId)
@@ -191,7 +195,8 @@ export async function rateDirectoryEntry(
   const newCount = entry.rating_count + 1
   const newRating = ((entry.rating * entry.rating_count) + rating) / newCount
 
-  const { error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any)
     .from('directory_entries')
     .update({
       rating: Math.round(newRating * 10) / 10,

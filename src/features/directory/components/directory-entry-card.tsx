@@ -74,6 +74,7 @@ export function DirectoryEntryCard({ entry, onEdit, onDeleted }: DirectoryEntryC
 
   const handleWhatsAppClick = () => {
     const phone = entry.whatsapp || entry.phone
+    if (!phone) return
     const cleanPhone = phone.replace(/\D/g, '')
     const message = encodeURIComponent(
       "Hola! Soy tripulación, ¿Habrá oportunidad de apoyo para una comanda? Llegamos en el vuelo..."
@@ -82,6 +83,7 @@ export function DirectoryEntryCard({ entry, onEdit, onDeleted }: DirectoryEntryC
   }
 
   const handlePhoneClick = () => {
+    if (!entry.phone) return
     window.open(`tel:${entry.phone}`, '_self')
   }
 
