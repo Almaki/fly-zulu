@@ -66,13 +66,14 @@ export async function createDirectoryEntry(
   const { initial_rating, ...entryData } = formData
 
   // Convert empty strings to null for optional fields
+  // Note: phone is optional (nullable in DB), whatsapp is the primary contact
   const insertData = {
     airport_code: entryData.airport_code.toUpperCase(),
     category: entryData.category,
     name: entryData.name,
     description: entryData.description || null,
     phone: entryData.phone || null,
-    whatsapp: entryData.whatsapp,
+    whatsapp: entryData.whatsapp || null,
     address: entryData.address || null,
     created_by: user.id,
     rating: initial_rating || 0,
@@ -115,7 +116,7 @@ export async function updateDirectoryEntry(
     name: updateData.name,
     description: updateData.description || null,
     phone: updateData.phone || null,
-    whatsapp: updateData.whatsapp,
+    whatsapp: updateData.whatsapp || null,
     address: updateData.address || null,
     updated_by: user.id,
     updated_at: new Date().toISOString(),
