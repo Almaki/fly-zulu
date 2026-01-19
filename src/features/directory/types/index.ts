@@ -7,7 +7,7 @@ export interface DirectoryEntry {
   category: string
   name: string
   description: string | null
-  phone: string
+  phone: string | null
   whatsapp: string | null
   address: string | null
   rating: number

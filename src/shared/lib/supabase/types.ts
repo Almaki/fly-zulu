@@ -291,12 +291,13 @@ export type Database = {
           category: string
           name: string
           description: string | null
-          phone: string
+          phone: string | null
           whatsapp: string | null
           address: string | null
           rating: number
           rating_count: number
           created_by: string
+          updated_by: string | null
           is_verified: boolean
           created_at: string
           updated_at: string
@@ -307,12 +308,13 @@ export type Database = {
           category: string
           name: string
           description?: string | null
-          phone: string
+          phone?: string | null
           whatsapp?: string | null
           address?: string | null
           rating?: number
           rating_count?: number
           created_by: string
+          updated_by?: string | null
           is_verified?: boolean
           created_at?: string
           updated_at?: string
@@ -323,12 +325,13 @@ export type Database = {
           category?: string
           name?: string
           description?: string | null
-          phone?: string
+          phone?: string | null
           whatsapp?: string | null
           address?: string | null
           rating?: number
           rating_count?: number
           created_by?: string
+          updated_by?: string | null
           is_verified?: boolean
           created_at?: string
           updated_at?: string
