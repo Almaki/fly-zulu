@@ -9,6 +9,7 @@ import confetti from 'canvas-confetti'
 
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
+import { Label } from '@/shared/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -172,11 +173,16 @@ export function DirectoryEntryForm({
         initial_rating: rating > 0 ? rating : undefined,
       }
 
+      console.log('Submitting directory entry:', submitData)
+
       const result = isEditing
         ? await updateDirectoryEntry(editEntry!.id, submitData)
         : await createDirectoryEntry(submitData)
 
+      console.log('Server action result:', result)
+
       if (result.error) {
+        console.error('Server returned error:', result.error)
         toast.error(result.error)
         return
       }
@@ -193,8 +199,10 @@ export function DirectoryEntryForm({
       form.reset()
       setRating(0)
       onSuccess?.()
-    } catch {
-      toast.error('Error al guardar contacto')
+    } catch (err) {
+      console.error('Unexpected error in form submit:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido al guardar'
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -360,7 +368,7 @@ export function DirectoryEntryForm({
             {/* Star Rating (only for new entries) */}
             {!isEditing && (
               <div className="space-y-2 pt-2 border-t border-zinc-800">
-                <FormLabel className="text-zinc-400 text-xs">¿Qué tan bueno es? (opcional)</FormLabel>
+                <Label className="text-zinc-400 text-xs">¿Qué tan bueno es? (opcional)</Label>
                 <StarRating value={rating} onChange={setRating} />
               </div>
             )}

@@ -5,6 +5,8 @@ export interface RecentUser {
   nombre: string
   last_seen_at: string
   last_location: string | null
+  last_latitude: number | null
+  last_longitude: number | null
 }
 
 export interface AdminMetrics {

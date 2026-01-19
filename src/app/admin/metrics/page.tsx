@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { MetricsDashboard } from '@/features/admin/components'
+import { MetricsDashboard, LiveMap } from '@/features/admin/components'
 
 export const metadata: Metadata = {
   title: 'Admin - Metricas',
@@ -8,5 +8,10 @@ export const metadata: Metadata = {
 }
 
 export default function AdminMetricsPage() {
-  return <MetricsDashboard />
+  return (
+    <div className="space-y-4">
+      <MetricsDashboard />
+      <LiveMap refreshInterval={30000} />
+    </div>
+  )
 }

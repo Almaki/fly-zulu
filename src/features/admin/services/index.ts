@@ -65,11 +65,11 @@ export async function getAdminMetrics(): Promise<{
     .gte('std', `${today}T00:00:00`)
     .lte('std', `${today}T23:59:59`)
 
-  // Users active in the last hour
+  // Users active in the last hour (including geolocation)
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
   const { data: activeUsersData } = await supabase
     .from('users')
-    .select('id, nombre, last_seen_at, last_location')
+    .select('id, nombre, last_seen_at, last_location, last_latitude, last_longitude')
     .gte('last_seen_at', oneHourAgo)
     .order('last_seen_at', { ascending: false })
 
@@ -78,6 +78,8 @@ export async function getAdminMetrics(): Promise<{
     nombre: string
     last_seen_at: string
     last_location: string | null
+    last_latitude: number | null
+    last_longitude: number | null
   }>
 
   const metrics: AdminMetrics = {

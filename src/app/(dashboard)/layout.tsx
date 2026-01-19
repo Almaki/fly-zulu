@@ -1,4 +1,4 @@
-import { Header, BottomNav, SyncIndicator, AdminGlow } from '@/shared/components'
+import { Header, BottomNav, SyncIndicator, AdminGlow, ActivityTracker } from '@/shared/components'
 
 export default function DashboardLayout({
   children,
@@ -9,6 +9,7 @@ export default function DashboardLayout({
     <div className="min-h-screen flex flex-col">
       <AdminGlow />
       <SyncIndicator />
+      <ActivityTracker />
       <Header />
       <main className="flex-1 pb-nav">
         <div className="max-w-[500px] mx-auto px-4 py-4">
