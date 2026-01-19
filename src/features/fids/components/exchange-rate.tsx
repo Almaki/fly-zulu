@@ -106,15 +106,22 @@ function CompactRateInput({ value, onSave, type, isHighlighted }: RateInputProps
   return (
     <button
       onClick={handleClick}
-      className="flex items-center justify-center gap-0.5 relative group w-full"
+      className="flex flex-col items-center justify-center relative group w-full py-1"
     >
-      <Pencil className="w-2.5 h-2.5 text-zinc-500 group-hover:text-zinc-300 transition-colors mr-0.5" />
-      <span className={`text-[10px] font-bold ${color} mr-0.5`}>
-        {type === 'buy' ? 'C' : 'V'}
-      </span>
-      <span className={`text-base font-mono font-bold transition-colors ${isHighlighted ? 'text-[#00ff88]' : 'text-[#fafafa]'}`}>
-        {digits[0] || '0'}{digits[1] || '0'}.{digits[2] || '0'}{digits[3] || '0'}{digits[4] || '0'}
-      </span>
+      {/* Rate display - centered */}
+      <div className="flex items-center justify-center gap-1">
+        <span className={`text-[10px] font-bold ${color}`}>
+          {type === 'buy' ? 'C' : 'V'}
+        </span>
+        <span className={`text-lg font-mono font-bold transition-colors ${isHighlighted ? 'text-[#00ff88]' : 'text-[#fafafa]'}`}>
+          {digits[0] || '0'}{digits[1] || '0'}.{digits[2] || '0'}{digits[3] || '0'}{digits[4] || '0'}
+        </span>
+      </div>
+      {/* Edit hint - always visible */}
+      <div className="flex items-center gap-1 mt-0.5 opacity-60 group-hover:opacity-100 transition-opacity">
+        <Pencil className="w-2.5 h-2.5 text-zinc-400" />
+        <span className="text-[8px] text-zinc-400">toca para editar</span>
+      </div>
       {isEditing && (
         <input
           ref={inputRef}

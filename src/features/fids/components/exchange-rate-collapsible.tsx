@@ -8,7 +8,7 @@ interface ExchangeRateCollapsibleProps {
   airportCode: string
 }
 
-const AUTO_COLLAPSE_DELAY = 4000 // 4 seconds
+const AUTO_COLLAPSE_DELAY = 5000 // 5 seconds
 
 export function ExchangeRateCollapsible({ airportCode }: ExchangeRateCollapsibleProps) {
   const [isOpen, setIsOpen] = useState(false)
