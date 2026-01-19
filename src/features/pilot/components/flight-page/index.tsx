@@ -15,6 +15,7 @@ import {
   completeDutySession,
   updateDutySession,
   createFlight,
+  updateFlight,
   getFlightsByDutySession,
   getCurrentState,
   updateCurrentState,
@@ -61,6 +62,9 @@ export function FlightPage() {
     blockTime: string
     data: MCDUFormData
   } | null>(null)
+
+  // Edit flight state
+  const [editingFlightId, setEditingFlightId] = useState<string | null>(null)
 
   // Load initial data
   useEffect(() => {
@@ -156,9 +160,71 @@ export function FlightPage() {
     await saveCurrentFlightProgress(data as Partial<FlightEntry>)
   }, [])
 
+  // Handle save edited flight
+  const handleSaveEditedFlight = useCallback(async (data: MCDUFormData) => {
+    if (!editingFlightId) return
+
+    try {
+      const flightMinutes = calculateMinutesBetween(data.offTime!, data.onTime!)
+      const blockMinutes = calculateMinutesBetween(data.outTime!, data.inTime!)
+
+      await updateFlight(editingFlightId, {
+        date: data.date,
+        tail: data.tail,
+        aircraftType: data.aircraftType,
+        dep: data.dep,
+        dest: data.dest,
+        outTime: data.outTime!,
+        offTime: data.offTime!,
+        onTime: data.onTime!,
+        inTime: data.inTime!,
+        flightMinutes,
+        blockMinutes,
+      })
+
+      // Update flights list
+      setFlights(prev =>
+        prev.map(f =>
+          f.id === editingFlightId
+            ? {
+                ...f,
+                date: data.date,
+                tail: data.tail,
+                aircraftType: data.aircraftType,
+                dep: data.dep,
+                dest: data.dest,
+                outTime: data.outTime!,
+                offTime: data.offTime!,
+                onTime: data.onTime!,
+                inTime: data.inTime!,
+                flightMinutes,
+                blockMinutes,
+              }
+            : f
+        )
+      )
+
+      // Clear edit mode
+      setEditingFlightId(null)
+      setCurrentFlightData(null)
+      await clearCurrentFlight()
+
+      toast.success('Vuelo actualizado')
+    } catch (error) {
+      console.error('Error updating flight:', error)
+      toast.error('Error al actualizar vuelo')
+    }
+  }, [editingFlightId])
+
   // Handle flight complete (all 4 times entered)
   const handleFlightComplete = useCallback((data: MCDUFormData) => {
     if (!data.outTime || !data.offTime || !data.onTime || !data.inTime) return
+
+    // If editing, save directly without dialog
+    if (editingFlightId) {
+      handleSaveEditedFlight(data)
+      return
+    }
 
     const flightMinutes = calculateMinutesBetween(data.offTime, data.onTime)
     const blockMinutes = calculateMinutesBetween(data.outTime, data.inTime)
@@ -171,7 +237,7 @@ export function FlightPage() {
       data,
     })
     setShowEndDialog(true)
-  }, [])
+  }, [editingFlightId, handleSaveEditedFlight])
 
   // Handle add another flight
   const handleAddAnother = async () => {
@@ -266,6 +332,31 @@ export function FlightPage() {
     }
   }
 
+  // Handle edit flight from history
+  const handleEditFlight = useCallback((flight: FlightEntry) => {
+    setEditingFlightId(flight.id)
+    setCurrentFlightData({
+      date: flight.date,
+      tail: flight.tail,
+      aircraftType: flight.aircraftType,
+      dep: flight.dep,
+      dest: flight.dest,
+      outTime: flight.outTime,
+      offTime: flight.offTime,
+      onTime: flight.onTime,
+      inTime: flight.inTime,
+    })
+    // Scroll to top to show the form
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
+  // Handle cancel edit
+  const handleCancelEdit = useCallback(() => {
+    setEditingFlightId(null)
+    setCurrentFlightData(null)
+    clearCurrentFlight()
+  }, [])
+
   // Get last IN time for duty end calculation
   const lastInTime = flights.length > 0
     ? flights[flights.length - 1].inTime
@@ -304,15 +395,17 @@ export function FlightPage() {
         lastDest={lastDest}
         lastTail={lastTail}
         lastAircraftType={lastAircraftType}
+        editingFlightId={editingFlightId}
         onFormChange={handleFormChange}
         onFlightComplete={handleFlightComplete}
+        onCancelEdit={handleCancelEdit}
       />
 
       {/* Flight Summary */}
       <FlightSummary flights={flights} />
 
       {/* History Section (48h local, forever on server) */}
-      <HistorySection userId={effectiveUserId} />
+      <HistorySection userId={effectiveUserId} onEditFlight={handleEditFlight} />
 
       {/* End Flight Dialog */}
       {completedFlightSummary && (

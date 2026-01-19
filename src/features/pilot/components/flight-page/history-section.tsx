@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { History, ChevronDown, ChevronUp, Clock, Plane, Calendar, Cloud, CloudOff } from 'lucide-react'
+import { History, ChevronDown, ChevronUp, Clock, Plane, Calendar, Cloud, CloudOff, Pencil } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { formatDurationHHMM } from '@/shared/lib/time'
 import {
@@ -14,11 +14,12 @@ import {
 
 interface HistorySectionProps {
   userId: string
+  onEditFlight?: (flight: FlightEntry) => void
 }
 
 type SessionWithFlights = DutySession & { flightEntries: FlightEntry[] }
 
-export function HistorySection({ userId }: HistorySectionProps) {
+export function HistorySection({ userId, onEditFlight }: HistorySectionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [sessions, setSessions] = useState<SessionWithFlights[]>([])
   const [stats, setStats] = useState<{
@@ -179,7 +180,7 @@ export function HistorySection({ userId }: HistorySectionProps) {
                         {session.flightEntries.map((flight, index) => (
                           <div
                             key={flight.id}
-                            className="flex items-center justify-between py-2 px-3 bg-[#141414] rounded"
+                            className="flex items-center justify-between py-2 px-3 bg-[#141414] rounded group"
                           >
                             <div className="flex items-center gap-3">
                               <span className="text-xs text-[#52525b]">#{index + 1}</span>
@@ -188,7 +189,7 @@ export function HistorySection({ userId }: HistorySectionProps) {
                                 {flight.dep} → {flight.dest}
                               </span>
                             </div>
-                            <div className="flex items-center gap-3 text-xs">
+                            <div className="flex items-center gap-2 text-xs">
                               <span className="text-[#71717a]">
                                 <Clock className="w-3 h-3 inline mr-1" />
                                 {formatDurationHHMM(flight.flightMinutes)}
@@ -196,6 +197,18 @@ export function HistorySection({ userId }: HistorySectionProps) {
                               <span className="text-[#52525b] font-mono text-[10px]">
                                 {flight.tail}
                               </span>
+                              {onEditFlight && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    onEditFlight(flight)
+                                  }}
+                                  className="p-1.5 rounded hover:bg-[#27272a] transition-colors opacity-0 group-hover:opacity-100"
+                                  title="Editar vuelo"
+                                >
+                                  <Pencil className="w-3 h-3 text-[#f59e0b]" />
+                                </button>
+                              )}
                             </div>
                           </div>
                         ))}

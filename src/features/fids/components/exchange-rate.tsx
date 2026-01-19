@@ -1,14 +1,16 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { DollarSign, Users, Pencil } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from 'sonner'
+import confetti from 'canvas-confetti'
 import { createClient } from '@/shared/lib/supabase'
 
 interface ExchangeRateProps {
   airportCode: string
+  onAllFieldsComplete?: () => void
 }
 
 interface ExchangeRateData {
@@ -21,15 +23,17 @@ interface ExchangeRateData {
   updated_at: string
 }
 
-// Airports with exchange rate display
-const EXCHANGE_AIRPORTS: Record<string, { locations: { key: string; label: string; color: string }[] }> = {
+// Airports with exchange rate display - with centered titles
+const EXCHANGE_AIRPORTS: Record<string, { title: string; locations: { key: string; label: string; color: string }[] }> = {
   MEX: {
+    title: 'Centro de Cambio CDMX',
     locations: [
       { key: 'toro_shop', label: 'Toro Shop', color: 'from-[#f59e0b] to-[#fbbf24]' },
       { key: 'gates', label: 'Gates', color: 'from-[#3b82f6] to-[#60a5fa]' },
     ],
   },
   TIJ: {
+    title: 'Centro de Cambio Tijuana',
     locations: [
       { key: 'toro_shop', label: 'Toro Shop', color: 'from-[#f59e0b] to-[#fbbf24]' },
       { key: 'gates', label: 'Gates', color: 'from-[#3b82f6] to-[#60a5fa]' },
@@ -37,44 +41,46 @@ const EXCHANGE_AIRPORTS: Record<string, { locations: { key: string; label: strin
   },
 }
 
-// Compact rate input
+// Compact rate input - Format: XX.XXX (decena, unidad, centavos)
 interface RateInputProps {
   value: number
   onSave: (newValue: number) => void
   type: 'buy' | 'sell'
+  isHighlighted?: boolean
 }
 
-function CompactRateInput({ value, onSave, type }: RateInputProps) {
-  const [digits, setDigits] = useState<string[]>(['', '', '', ''])
+function CompactRateInput({ value, onSave, type, isHighlighted }: RateInputProps) {
+  const [digits, setDigits] = useState<string[]>(['', '', '', '', ''])
   const [isEditing, setIsEditing] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (value > 0 && !isEditing) {
-      const formatted = value.toFixed(2).replace('.', '')
-      const paddedDigits = formatted.padStart(4, '0').slice(-4).split('')
+      // Format: XX.XXX (5 digits total)
+      const formatted = value.toFixed(3).replace('.', '')
+      const paddedDigits = formatted.padStart(5, '0').slice(-5).split('')
       setDigits(paddedDigits)
     } else if (!isEditing) {
-      setDigits(['0', '0', '0', '0'])
+      setDigits(['0', '0', '0', '0', '0'])
     }
   }, [value, isEditing])
 
   const handleClick = () => {
     setIsEditing(true)
-    setDigits(['', '', '', ''])
+    setDigits(['', '', '', '', ''])
     setTimeout(() => inputRef.current?.focus(), 50)
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value.replace(/\D/g, '').slice(0, 4)
+    const input = e.target.value.replace(/\D/g, '').slice(0, 5)
     const newDigits = input.split('')
-    while (newDigits.length < 4) {
+    while (newDigits.length < 5) {
       newDigits.unshift('')
     }
     setDigits(newDigits)
 
-    if (input.length === 4) {
-      const finalValue = parseFloat(input.slice(0, 2) + '.' + input.slice(2, 4))
+    if (input.length === 5) {
+      const finalValue = parseFloat(input.slice(0, 2) + '.' + input.slice(2, 5))
       if (!isNaN(finalValue) && finalValue > 0) {
         onSave(finalValue)
         setIsEditing(false)
@@ -85,8 +91,8 @@ function CompactRateInput({ value, onSave, type }: RateInputProps) {
   const handleBlur = () => {
     if (isEditing) {
       const fullInput = digits.join('')
-      if (fullInput.length >= 4) {
-        const finalValue = parseFloat(fullInput.slice(0, 2) + '.' + fullInput.slice(2, 4))
+      if (fullInput.length >= 5) {
+        const finalValue = parseFloat(fullInput.slice(0, 2) + '.' + fullInput.slice(2, 5))
         if (!isNaN(finalValue) && finalValue > 0) {
           onSave(finalValue)
         }
@@ -100,14 +106,14 @@ function CompactRateInput({ value, onSave, type }: RateInputProps) {
   return (
     <button
       onClick={handleClick}
-      className="flex items-center gap-0.5 relative group"
+      className="flex items-center justify-center gap-0.5 relative group w-full"
     >
       <Pencil className="w-2.5 h-2.5 text-zinc-500 group-hover:text-zinc-300 transition-colors mr-0.5" />
       <span className={`text-[10px] font-bold ${color} mr-0.5`}>
         {type === 'buy' ? 'C' : 'V'}
       </span>
-      <span className="text-sm font-mono font-bold text-[#fafafa]">
-        {digits[0] || '0'}{digits[1] || '0'}.{digits[2] || '0'}{digits[3] || '0'}
+      <span className={`text-base font-mono font-bold transition-colors ${isHighlighted ? 'text-[#00ff88]' : 'text-[#fafafa]'}`}>
+        {digits[0] || '0'}{digits[1] || '0'}.{digits[2] || '0'}{digits[3] || '0'}{digits[4] || '0'}
       </span>
       {isEditing && (
         <input
@@ -130,11 +136,33 @@ function CompactRateInput({ value, onSave, type }: RateInputProps) {
   )
 }
 
-export function ExchangeRate({ airportCode }: ExchangeRateProps) {
+export function ExchangeRate({ airportCode, onAllFieldsComplete }: ExchangeRateProps) {
   const [rates, setRates] = useState<ExchangeRateData[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [hasTriggeredConfetti, setHasTriggeredConfetti] = useState(false)
 
   const config = EXCHANGE_AIRPORTS[airportCode]
+
+  // Check if all fields are complete and trigger confetti
+  const checkAllFieldsComplete = useCallback((currentRates: ExchangeRateData[]) => {
+    const toroShop = currentRates.find(r => r.location === 'toro_shop')
+    const gates = currentRates.find(r => r.location === 'gates')
+
+    const allComplete =
+      toroShop && toroShop.buy_rate > 0 && toroShop.sell_rate > 0 &&
+      gates && gates.buy_rate > 0 && gates.sell_rate > 0
+
+    if (allComplete && !hasTriggeredConfetti) {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      })
+      toast.success('¡Gracias por actualizar los tipos de cambio! 🎉')
+      setHasTriggeredConfetti(true)
+      onAllFieldsComplete?.()
+    }
+  }, [hasTriggeredConfetti, onAllFieldsComplete])
 
   useEffect(() => {
     if (!config) {
@@ -249,22 +277,22 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
         if (error) throw error
       }
 
-      setRates((prev) =>
-        prev.map((r) =>
-          r.id === rate.id
-            ? { ...r, [updateField]: newValue, updated_by_name: userName, updated_at: new Date().toISOString() }
-            : r
-        )
+      const updatedRates = rates.map((r) =>
+        r.id === rate.id
+          ? { ...r, [updateField]: newValue, updated_by_name: userName, updated_at: new Date().toISOString() }
+          : r
       )
+      setRates(updatedRates)
+      checkAllFieldsComplete(updatedRates)
       toast.success('Tipo de cambio actualizado')
     } catch {
-      setRates((prev) =>
-        prev.map((r) =>
-          r.id === rate.id
-            ? { ...r, [updateField]: newValue, updated_at: new Date().toISOString() }
-            : r
-        )
+      const updatedRates = rates.map((r) =>
+        r.id === rate.id
+          ? { ...r, [updateField]: newValue, updated_at: new Date().toISOString() }
+          : r
       )
+      setRates(updatedRates)
+      checkAllFieldsComplete(updatedRates)
       toast.success('Tipo de cambio actualizado (local)')
     }
   }
@@ -293,6 +321,20 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
   const toroShopRate = rates.find(r => r.location === 'toro_shop')
   const gatesRate = rates.find(r => r.location === 'gates')
 
+  // Determine which location has the cheapest sell rate (best for customer)
+  const getCheapestSellLocation = (): 'toro_shop' | 'gates' | null => {
+    const toroSell = toroShopRate?.sell_rate || 0
+    const gatesSell = gatesRate?.sell_rate || 0
+
+    if (toroSell <= 0 && gatesSell <= 0) return null
+    if (toroSell <= 0) return 'gates'
+    if (gatesSell <= 0) return 'toro_shop'
+
+    return toroSell < gatesSell ? 'toro_shop' : 'gates'
+  }
+
+  const cheapestLocation = getCheapestSellLocation()
+
   return (
     <div className="py-4 bg-zinc-800/40 rounded-lg border border-zinc-700/30">
       {/* Header */}
@@ -310,8 +352,19 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
       {/* Two columns: Toro Shop | Gates */}
       <div className="grid grid-cols-2 gap-4 px-4">
         {/* Toro Shop Column */}
-        <div className="bg-gradient-to-br from-[#f59e0b]/10 to-[#f59e0b]/5 rounded-xl p-4 border border-[#f59e0b]/20">
+        <div className={`bg-gradient-to-br from-[#f59e0b]/10 to-[#f59e0b]/5 rounded-xl p-4 border transition-all duration-500 ${
+          cheapestLocation === 'toro_shop'
+            ? 'border-[#22c55e]/60 shadow-[0_0_15px_rgba(34,197,94,0.3)] animate-pulse'
+            : 'border-[#f59e0b]/20'
+        }`}>
           <h3 className="text-sm font-bold text-[#fbbf24] mb-4 text-center">Toro Shop</h3>
+          {cheapestLocation === 'toro_shop' && (
+            <div className="text-center mb-2">
+              <span className="text-[9px] bg-[#22c55e]/20 text-[#22c55e] px-2 py-0.5 rounded-full font-medium">
+                MEJOR PRECIO
+              </span>
+            </div>
+          )}
 
           {toroShopRate && (
             <div className="space-y-3">
@@ -330,11 +383,16 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
               {/* Venta */}
               <div className="text-center">
                 <span className="text-[10px] text-zinc-500 uppercase tracking-wider block mb-1">Venta</span>
-                <div className="bg-zinc-900/60 rounded-lg py-2 px-3">
+                <div className={`rounded-lg py-2 px-3 transition-all ${
+                  cheapestLocation === 'toro_shop'
+                    ? 'bg-[#22c55e]/20 border border-[#22c55e]/40'
+                    : 'bg-zinc-900/60'
+                }`}>
                   <CompactRateInput
                     value={toroShopRate.sell_rate}
                     onSave={(val) => saveRate(toroShopRate, 'sell', val)}
                     type="sell"
+                    isHighlighted={cheapestLocation === 'toro_shop'}
                   />
                 </div>
               </div>
@@ -343,8 +401,19 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
         </div>
 
         {/* Gates Column */}
-        <div className="bg-gradient-to-br from-[#3b82f6]/10 to-[#3b82f6]/5 rounded-xl p-4 border border-[#3b82f6]/20">
+        <div className={`bg-gradient-to-br from-[#3b82f6]/10 to-[#3b82f6]/5 rounded-xl p-4 border transition-all duration-500 ${
+          cheapestLocation === 'gates'
+            ? 'border-[#22c55e]/60 shadow-[0_0_15px_rgba(34,197,94,0.3)] animate-pulse'
+            : 'border-[#3b82f6]/20'
+        }`}>
           <h3 className="text-sm font-bold text-[#60a5fa] mb-4 text-center">Gates</h3>
+          {cheapestLocation === 'gates' && (
+            <div className="text-center mb-2">
+              <span className="text-[9px] bg-[#22c55e]/20 text-[#22c55e] px-2 py-0.5 rounded-full font-medium">
+                MEJOR PRECIO
+              </span>
+            </div>
+          )}
 
           {gatesRate && (
             <div className="space-y-3">
@@ -363,11 +432,16 @@ export function ExchangeRate({ airportCode }: ExchangeRateProps) {
               {/* Venta */}
               <div className="text-center">
                 <span className="text-[10px] text-zinc-500 uppercase tracking-wider block mb-1">Venta</span>
-                <div className="bg-zinc-900/60 rounded-lg py-2 px-3">
+                <div className={`rounded-lg py-2 px-3 transition-all ${
+                  cheapestLocation === 'gates'
+                    ? 'bg-[#22c55e]/20 border border-[#22c55e]/40'
+                    : 'bg-zinc-900/60'
+                }`}>
                   <CompactRateInput
                     value={gatesRate.sell_rate}
                     onSave={(val) => saveRate(gatesRate, 'sell', val)}
                     type="sell"
+                    isHighlighted={cheapestLocation === 'gates'}
                   />
                 </div>
               </div>

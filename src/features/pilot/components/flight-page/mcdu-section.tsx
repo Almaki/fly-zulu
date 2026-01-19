@@ -55,8 +55,10 @@ interface MCDUSectionProps {
   lastDest?: string
   lastTail?: string
   lastAircraftType?: string
+  editingFlightId?: string | null
   onFormChange: (data: Partial<MCDUFormData>) => void
   onFlightComplete: (data: MCDUFormData) => void
+  onCancelEdit?: () => void
 }
 
 export function MCDUSection({
@@ -64,8 +66,10 @@ export function MCDUSection({
   lastDest,
   lastTail,
   lastAircraftType,
+  editingFlightId,
   onFormChange,
   onFlightComplete,
+  onCancelEdit,
 }: MCDUSectionProps) {
   const [flightTime, setFlightTime] = useState<string | null>(null)
   const [blockTime, setBlockTime] = useState<string | null>(null)
@@ -199,11 +203,21 @@ export function MCDUSection({
     <div className="bg-background border-2 border-[#27272a] rounded-xl overflow-hidden">
       {/* MCDU Header */}
       <div className="bg-[#141414] px-4 py-2 border-b border-[#27272a]">
-        <div className="flex items-center gap-2">
-          <Plane className="w-4 h-4 text-[#00ffff]" />
-          <span className="text-sm font-mono text-[#00ffff] uppercase tracking-wider">
-            Flight Log
-          </span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Plane className="w-4 h-4 text-[#00ffff]" />
+            <span className="text-sm font-mono text-[#00ffff] uppercase tracking-wider">
+              {editingFlightId ? 'Editar Vuelo' : 'Flight Log'}
+            </span>
+          </div>
+          {editingFlightId && onCancelEdit && (
+            <button
+              onClick={onCancelEdit}
+              className="text-xs text-[#f59e0b] hover:text-[#fbbf24] transition-colors"
+            >
+              Cancelar
+            </button>
+          )}
         </div>
       </div>
 
