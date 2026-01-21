@@ -1,16 +1,16 @@
 import type { Metadata } from 'next'
-import { notFound, redirect } from 'next/navigation'
-import { getDirectoryEntryById } from '@/features/directory/services'
+import { notFound } from 'next/navigation'
+import { getDirectoryEntryBySlug } from '@/features/directory/services'
 import { DIRECTORY_CATEGORIES } from '@/shared/constants'
 import { DirectoryEntryDetail } from '@/features/directory/components/directory-entry-detail'
 
 interface PageProps {
-  params: Promise<{ id: string }>
+  params: Promise<{ airport: string; slug: string }>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { id } = await params
-  const { data: entry } = await getDirectoryEntryById(id)
+  const { airport, slug } = await params
+  const { data: entry } = await getDirectoryEntryBySlug(airport.toUpperCase(), slug)
 
   if (!entry) {
     return {
@@ -41,8 +41,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function DirectoryEntryPage({ params }: PageProps) {
-  const { id } = await params
-  const { data: entry, error } = await getDirectoryEntryById(id)
+  const { airport, slug } = await params
+  const { data: entry, error } = await getDirectoryEntryBySlug(airport.toUpperCase(), slug)
 
   if (error || !entry) {
     notFound()

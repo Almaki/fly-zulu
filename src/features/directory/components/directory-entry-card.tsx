@@ -23,7 +23,7 @@ import {
 } from '@/shared/components/ui/dialog'
 import { DIRECTORY_CATEGORIES, COLORS } from '@/shared/constants'
 import { useAuth } from '@/features/auth/hooks'
-import { rateDirectoryEntry } from '../services'
+import { rateDirectoryEntry, createSlug } from '../services'
 import { deleteDirectoryEntry } from '@/features/admin/services'
 import type { DirectoryEntry } from '../types'
 
@@ -125,7 +125,8 @@ export function DirectoryEntryCard({ entry, onEdit, onDeleted }: DirectoryEntryC
   }
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/directory/${entry.id}`
+    const slug = createSlug(entry.name)
+    const shareUrl = `${window.location.origin}/directory/${entry.airport_code.toLowerCase()}/${slug}`
     const shareData = {
       title: `${entry.name} - FLY-ZULU`,
       text: `${category?.emoji} ${entry.name} en ${entry.airport_code}. App colaborativa para tripulaciones.`,

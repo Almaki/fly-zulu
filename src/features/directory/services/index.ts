@@ -40,6 +40,18 @@ export async function getDirectoryEntries(
   return { data: data as DirectoryEntry[], error: null }
 }
 
+// Helper function to create URL-friendly slugs
+export function createSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove accents
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single
+    .trim()
+}
+
 export async function getDirectoryEntryById(
   id: string
 ): Promise<{ data: DirectoryEntry | null; error: string | null }> {
@@ -61,6 +73,37 @@ export async function getDirectoryEntryById(
   }
 
   return { data: data as DirectoryEntry, error: null }
+}
+
+export async function getDirectoryEntryBySlug(
+  airportCode: string,
+  slug: string
+): Promise<{ data: DirectoryEntry | null; error: string | null }> {
+  const supabase = await createServerSupabaseClient()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from('directory_entries')
+    .select(`
+      *,
+      created_by_user:users!directory_entries_created_by_fkey(nombre),
+      updated_by_user:users!directory_entries_updated_by_fkey(nombre)
+    `)
+    .eq('airport_code', airportCode.toUpperCase())
+
+  if (error) {
+    return { data: null, error: error.message }
+  }
+
+  // Find the entry that matches the slug
+  const entries = data as DirectoryEntry[]
+  const entry = entries.find((e) => createSlug(e.name) === slug)
+
+  if (!entry) {
+    return { data: null, error: 'Servicio no encontrado' }
+  }
+
+  return { data: entry, error: null }
 }
 
 export async function createDirectoryEntry(
