@@ -99,3 +99,6 @@ export interface UserAuditMetrics {
   last_7d: number
   last_activity: string | null
 }
+
+// Re-export analytics types
+export * from './analytics'
