@@ -1,6 +1,7 @@
 'use server'
 
 import { createServerSupabaseClient } from '@/shared/lib/supabase/server'
+import { createSlug } from '@/shared/utils'
 import type { DirectoryEntry, DirectoryEntryFormData, DirectoryFilters } from '../types'
 
 export async function getDirectoryEntries(
@@ -38,18 +39,6 @@ export async function getDirectoryEntries(
   }
 
   return { data: data as DirectoryEntry[], error: null }
-}
-
-// Helper function to create URL-friendly slugs
-export function createSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove accents
-    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .replace(/-+/g, '-') // Replace multiple hyphens with single
-    .trim()
 }
 
 export async function getDirectoryEntryById(

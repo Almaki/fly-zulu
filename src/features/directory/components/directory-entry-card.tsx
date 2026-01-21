@@ -22,8 +22,9 @@ import {
   DialogTitle,
 } from '@/shared/components/ui/dialog'
 import { DIRECTORY_CATEGORIES, COLORS } from '@/shared/constants'
+import { createSlug } from '@/shared/utils'
 import { useAuth } from '@/features/auth/hooks'
-import { rateDirectoryEntry, createSlug } from '../services'
+import { rateDirectoryEntry } from '../services'
 import { deleteDirectoryEntry } from '@/features/admin/services'
 import type { DirectoryEntry } from '../types'
 
