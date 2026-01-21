@@ -40,6 +40,29 @@ export async function getDirectoryEntries(
   return { data: data as DirectoryEntry[], error: null }
 }
 
+export async function getDirectoryEntryById(
+  id: string
+): Promise<{ data: DirectoryEntry | null; error: string | null }> {
+  const supabase = await createServerSupabaseClient()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from('directory_entries')
+    .select(`
+      *,
+      created_by_user:users!directory_entries_created_by_fkey(nombre),
+      updated_by_user:users!directory_entries_updated_by_fkey(nombre)
+    `)
+    .eq('id', id)
+    .single()
+
+  if (error) {
+    return { data: null, error: error.message }
+  }
+
+  return { data: data as DirectoryEntry, error: null }
+}
+
 export async function createDirectoryEntry(
   formData: DirectoryEntryFormData
 ): Promise<{ data: DirectoryEntry | null; error: string | null }> {

@@ -1,0 +1,36 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0a0a0a"/>
+
+  <!-- Gradient definitions -->
+  <defs>
+    <linearGradient id="logoGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0088FF"/>
+      <stop offset="50%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#0088FF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Decorative elements -->
+  <circle cx="600" cy="315" r="350" stroke="url(#logoGlow)" stroke-width="2" fill="none" opacity="0.15"/>
+  <circle cx="600" cy="315" r="280" stroke="url(#logoGlow)" stroke-width="1" fill="none" opacity="0.1"/>
+
+  <!-- Logo circle -->
+  <circle cx="600" cy="250" r="120" stroke="#0088FF" stroke-width="6" fill="none"/>
+
+  <!-- FZ Letters -->
+  <text x="538" y="290" font-family="Arial Black, sans-serif" font-size="110" font-weight="900" fill="#fafafa">F</text>
+  <text x="600" y="290" font-family="Arial Black, sans-serif" font-size="110" font-weight="900" fill="#0088FF">Z</text>
+
+  <!-- Airplane icon -->
+  <path d="M600 140 L612 165 L640 165 L618 182 L628 210 L600 192 L572 210 L582 182 L560 165 L588 165 Z" fill="#22c55e"/>
+
+  <!-- App name -->
+  <text x="600" y="430" font-family="Arial Black, sans-serif" font-size="72" font-weight="900" fill="#fafafa" text-anchor="middle">FLY-ZULU</text>
+
+  <!-- Tagline -->
+  <text x="600" y="490" font-family="Arial, sans-serif" font-size="32" fill="#22c55e" text-anchor="middle">App Colaborativa para Tripulaciones</text>
+
+  <!-- Bottom accent -->
+  <rect x="0" y="620" width="1200" height="10" fill="url(#logoGlow)"/>
+</svg>

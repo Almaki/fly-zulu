@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Phone, MapPin, Star, CheckCircle, MessageCircle, Clock, User, Edit2, Trash2, MoreVertical, Users } from 'lucide-react'
+import { Phone, MapPin, Star, CheckCircle, MessageCircle, Clock, User, Edit2, Trash2, MoreVertical, Users, Share2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from 'sonner'
@@ -124,6 +124,29 @@ export function DirectoryEntryCard({ entry, onEdit, onDeleted }: DirectoryEntryC
     }
   }
 
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/directory/${entry.id}`
+    const shareData = {
+      title: `${entry.name} - FLY-ZULU`,
+      text: `${category?.emoji} ${entry.name} en ${entry.airport_code}. App colaborativa para tripulaciones.`,
+      url: shareUrl,
+    }
+
+    try {
+      if (navigator.share && navigator.canShare(shareData)) {
+        await navigator.share(shareData)
+      } else {
+        await navigator.clipboard.writeText(shareUrl)
+        toast.success('Link copiado al portapapeles')
+      }
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        await navigator.clipboard.writeText(shareUrl)
+        toast.success('Link copiado al portapapeles')
+      }
+    }
+  }
+
   return (
     <>
       <Card className="border-zinc-800 bg-zinc-900/50">
@@ -147,23 +170,29 @@ export function DirectoryEntryCard({ entry, onEdit, onDeleted }: DirectoryEntryC
                 {entry.airport_code}
               </Badge>
 
-              {(canEdit || isAdmin) && (
-                <DropdownMenu>
+              <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8">
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleShare}>
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Compartir
+                    </DropdownMenuItem>
                     {canEdit && onEdit && (
-                      <DropdownMenuItem onClick={() => onEdit(entry)}>
-                        <Edit2 className="h-4 w-4 mr-2" />
-                        Editar
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => onEdit(entry)}>
+                          <Edit2 className="h-4 w-4 mr-2" />
+                          Editar
+                        </DropdownMenuItem>
+                      </>
                     )}
                     {isAdmin && (
                       <>
-                        {canEdit && onEdit && <DropdownMenuSeparator />}
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={handleDelete}
                           className="text-[#FF3B30] focus:text-[#FF3B30]"
@@ -175,7 +204,6 @@ export function DirectoryEntryCard({ entry, onEdit, onDeleted }: DirectoryEntryC
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
             </div>
           </div>
 
