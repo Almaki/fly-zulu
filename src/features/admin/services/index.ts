@@ -376,3 +376,101 @@ export async function updateUserRole(
 
   return { error: null }
 }
+
+// =====================================================
+// INVITACIONES
+// =====================================================
+
+export interface InviteUserData {
+  email: string
+  categoria: 'FLIGHT' | 'GROUND'
+  posicion: string
+  nombre?: string
+}
+
+export async function inviteUser(
+  data: InviteUserData
+): Promise<{ error: string | null }> {
+  const auth = await checkSuperAdmin()
+  if (!auth.authorized) return { error: auth.error }
+
+  const supabase = await createServiceRoleClient()
+
+  // Validar posición según categoría
+  const validPositions = data.categoria === 'FLIGHT'
+    ? ['PILOT', 'FA']
+    : ['OPS', 'TRAFICO', 'MANTTO']
+
+  if (!validPositions.includes(data.posicion)) {
+    return { error: `Posición inválida para categoría ${data.categoria}` }
+  }
+
+  // Verificar si el email ya existe
+  const { data: existingUser } = await supabase
+    .from('users')
+    .select('id, email')
+    .eq('email', data.email.toLowerCase())
+    .single()
+
+  if (existingUser) {
+    return { error: 'Este email ya está registrado en el sistema' }
+  }
+
+  // Generar invitación usando Supabase Auth Admin
+  const { error: inviteError } = await supabase.auth.admin.inviteUserByEmail(
+    data.email,
+    {
+      data: {
+        nombre: data.nombre || '',
+        categoria: data.categoria,
+        posicion: data.posicion,
+        invited_by_admin: true
+      },
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://flyzulu.vercel.app'}/auth/callback`
+    }
+  )
+
+  if (inviteError) {
+    return { error: `Error enviando invitación: ${inviteError.message}` }
+  }
+
+  return { error: null }
+}
+
+export async function generateMagicLink(
+  email: string
+): Promise<{ error: string | null; link?: string }> {
+  const auth = await checkSuperAdmin()
+  if (!auth.authorized) return { error: auth.error }
+
+  const supabase = await createServiceRoleClient()
+
+  // Verificar si el usuario existe
+  const { data: existingUser } = await supabase
+    .from('users')
+    .select('id, email, nombre')
+    .eq('email', email.toLowerCase())
+    .single()
+
+  if (!existingUser) {
+    return { error: 'Este email no está registrado. Usa "Invitar Usuario" para nuevos usuarios.' }
+  }
+
+  // Generar magic link
+  const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+    type: 'magiclink',
+    email: email,
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://flyzulu.vercel.app'}/auth/callback`
+    }
+  })
+
+  if (linkError) {
+    return { error: `Error generando link: ${linkError.message}` }
+  }
+
+  return {
+    error: null,
+    link: linkData.properties.action_link
+  }
+}

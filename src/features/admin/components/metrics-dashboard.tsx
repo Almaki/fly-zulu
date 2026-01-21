@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Users, Crown, Plane, TrendingUp, AlertTriangle, RefreshCw, Activity, MapPin, MessageCircle, ChevronRight } from 'lucide-react'
+import { Users, Crown, Plane, TrendingUp, AlertTriangle, RefreshCw, Activity, MapPin, MessageCircle, ChevronRight, UserPlus } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -186,25 +186,42 @@ export function MetricsDashboard() {
         </CardContent>
       </Card>
 
-      {/* Support Tickets Link */}
-      <Link href="/admin/tickets">
-        <Card className="border-[#E91E8C]/30 bg-[#E91E8C]/5 hover:bg-[#E91E8C]/10 transition-colors cursor-pointer">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+      {/* Quick Links */}
+      <div className="grid grid-cols-2 gap-3">
+        {/* Support Tickets Link */}
+        <Link href="/admin/tickets">
+          <Card className="border-[#E91E8C]/30 bg-[#E91E8C]/5 hover:bg-[#E91E8C]/10 transition-colors cursor-pointer h-full">
+            <CardContent className="p-4">
+              <div className="flex flex-col items-center text-center gap-2">
                 <div className="w-10 h-10 rounded-full bg-[#E91E8C]/20 flex items-center justify-center">
                   <MessageCircle className="h-5 w-5 text-[#E91E8C]" />
                 </div>
                 <div>
-                  <p className="font-medium text-[#fafafa]">Tickets de Soporte</p>
-                  <p className="text-xs text-zinc-500">Ver mensajes de usuarios</p>
+                  <p className="font-medium text-[#fafafa] text-sm">Tickets</p>
+                  <p className="text-xs text-zinc-500">Soporte</p>
                 </div>
               </div>
-              <ChevronRight className="h-5 w-5 text-zinc-500" />
-            </div>
-          </CardContent>
-        </Card>
-      </Link>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Invite Users Link */}
+        <Link href="/admin/invites">
+          <Card className="border-green-500/30 bg-green-500/5 hover:bg-green-500/10 transition-colors cursor-pointer h-full">
+            <CardContent className="p-4">
+              <div className="flex flex-col items-center text-center gap-2">
+                <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <UserPlus className="h-5 w-5 text-green-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-[#fafafa] text-sm">Invitar</p>
+                  <p className="text-xs text-zinc-500">Usuarios</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
     </div>
   )
 }

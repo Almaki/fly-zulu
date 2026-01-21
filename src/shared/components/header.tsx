@@ -37,6 +37,7 @@ const ROUTE_TITLES: Record<string, string> = {
   '/admin/metrics': 'Métricas',
   '/admin/fids': 'Histórico FIDS',
   '/admin/activity': 'Actividad',
+  '/admin/invites': 'Invitaciones',
 }
 
 export function Header() {
