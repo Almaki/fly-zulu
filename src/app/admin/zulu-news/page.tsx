@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Plus, Pencil, Trash2, Eye, EyeOff, Zap, Newspaper } from 'lucide-react'
+import { ArrowLeft, Plus, Pencil, Trash2, Eye, EyeOff, Zap, Newspaper, Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { cn } from '@/shared/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { createBrowserSupabaseClient } from '@/shared/lib/supabase/client'
 import {
   getZuluNewsAdmin,
   createZuluNews,
@@ -18,17 +19,20 @@ import { ZULU_NEWS_CATEGORIES, type ZuluNewsItem } from '@/features/news/types'
 
 export default function ZuluNewsAdminPage() {
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [news, setNews] = useState<ZuluNewsItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingNews, setEditingNews] = useState<ZuluNewsItem | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
 
   // Form state
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [content, setContent] = useState('')
   const [imageUrl, setImageUrl] = useState('')
+  const [imagePreview, setImagePreview] = useState('')
   const [category, setCategory] = useState<string>('general')
   const [isBreaking, setIsBreaking] = useState(false)
 
@@ -50,6 +54,7 @@ export default function ZuluNewsAdminPage() {
     setDescription('')
     setContent('')
     setImageUrl('')
+    setImagePreview('')
     setCategory('general')
     setIsBreaking(false)
     setEditingNews(null)
@@ -62,9 +67,73 @@ export default function ZuluNewsAdminPage() {
     setDescription(item.description)
     setContent(item.content || '')
     setImageUrl(item.image_url || '')
+    setImagePreview(item.image_url || '')
     setCategory(item.category)
     setIsBreaking(item.is_breaking)
     setShowForm(true)
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Solo se permiten imágenes')
+      return
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('La imagen no puede superar 5MB')
+      return
+    }
+
+    setIsUploading(true)
+
+    try {
+      const supabase = createBrowserSupabaseClient()
+
+      // Generate unique filename
+      const ext = file.name.split('.').pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
+      const filePath = `news/${fileName}`
+
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('zulu-news')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (error) {
+        console.error('Upload error:', error)
+        alert('Error al subir imagen: ' + error.message)
+        return
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('zulu-news')
+        .getPublicUrl(filePath)
+
+      setImageUrl(urlData.publicUrl)
+      setImagePreview(urlData.publicUrl)
+    } catch (error) {
+      console.error('Upload error:', error)
+      alert('Error al subir imagen')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleRemoveImage = () => {
+    setImageUrl('')
+    setImagePreview('')
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }
 
   const handleSubmit = async () => {
@@ -190,13 +259,72 @@ export default function ZuluNewsAdminPage() {
               />
             </div>
 
+            {/* Image Upload Section */}
             <div>
-              <label className="text-xs text-zinc-500 mb-1 block">URL de imagen (opcional)</label>
+              <label className="text-xs text-zinc-500 mb-2 block">Imagen</label>
+
+              {/* Image Preview */}
+              {imagePreview ? (
+                <div className="relative mb-3">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-48 object-cover rounded-lg border border-zinc-700"
+                  />
+                  <button
+                    onClick={handleRemoveImage}
+                    className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 hover:bg-black text-white"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className={cn(
+                    "border-2 border-dashed border-zinc-700 rounded-lg p-6 text-center cursor-pointer transition-colors mb-3",
+                    "hover:border-[#E91E8C]/50 hover:bg-zinc-800/50",
+                    isUploading && "pointer-events-none opacity-50"
+                  )}
+                >
+                  {isUploading ? (
+                    <div className="flex flex-col items-center">
+                      <Loader2 className="w-8 h-8 text-[#E91E8C] animate-spin mb-2" />
+                      <p className="text-sm text-zinc-400">Subiendo imagen...</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center">
+                      <ImageIcon className="w-8 h-8 text-zinc-600 mb-2" />
+                      <p className="text-sm text-zinc-400">Click para subir imagen</p>
+                      <p className="text-xs text-zinc-600 mt-1">JPG, PNG, WebP, GIF (max 5MB)</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+
+              {/* URL Manual Option */}
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-px bg-zinc-800" />
+                <span className="text-xs text-zinc-600">o pega una URL</span>
+                <div className="flex-1 h-px bg-zinc-800" />
+              </div>
+
               <Input
                 value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
+                onChange={(e) => {
+                  setImageUrl(e.target.value)
+                  setImagePreview(e.target.value)
+                }}
                 placeholder="https://ejemplo.com/imagen.jpg"
-                className="bg-zinc-800 border-zinc-700"
+                className="bg-zinc-800 border-zinc-700 mt-2"
               />
             </div>
 
@@ -241,7 +369,7 @@ export default function ZuluNewsAdminPage() {
             <div className="flex gap-2 pt-2">
               <Button
                 onClick={handleSubmit}
-                disabled={!title.trim() || !description.trim() || isSubmitting}
+                disabled={!title.trim() || !description.trim() || isSubmitting || isUploading}
                 className="flex-1 bg-[#E91E8C] hover:bg-[#E91E8C]/90"
               >
                 {isSubmitting ? 'Guardando...' : (editingNews ? 'Actualizar' : 'Publicar')}
