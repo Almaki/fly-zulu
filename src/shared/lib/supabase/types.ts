@@ -1,3 +1,6 @@
+// Supabase Database Types - Auto-generated with custom tables
+// Last updated: 2025-01-22 - Added news_comments and zulu_news tables
+
 export type Json =
   | string
   | number
