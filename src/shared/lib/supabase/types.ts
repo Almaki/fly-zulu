@@ -375,6 +375,82 @@ export type Database = {
           updated_at?: string
         }
       }
+      news_comments: {
+        Row: {
+          id: string
+          news_id: string
+          news_title: string
+          news_source: string
+          content: string
+          user_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          news_id: string
+          news_title: string
+          news_source: string
+          content: string
+          user_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          news_id?: string
+          news_title?: string
+          news_source?: string
+          content?: string
+          user_id?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      zulu_news: {
+        Row: {
+          id: string
+          title: string
+          description: string
+          content: string | null
+          image_url: string | null
+          category: 'aviacion' | 'operaciones' | 'seguridad' | 'anuncios' | 'general'
+          is_breaking: boolean
+          is_published: boolean
+          author_id: string | null
+          created_at: string
+          updated_at: string
+          published_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description: string
+          content?: string | null
+          image_url?: string | null
+          category?: 'aviacion' | 'operaciones' | 'seguridad' | 'anuncios' | 'general'
+          is_breaking?: boolean
+          is_published?: boolean
+          author_id?: string | null
+          created_at?: string
+          updated_at?: string
+          published_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string
+          content?: string | null
+          image_url?: string | null
+          category?: 'aviacion' | 'operaciones' | 'seguridad' | 'anuncios' | 'general'
+          is_breaking?: boolean
+          is_published?: boolean
+          author_id?: string | null
+          created_at?: string
+          updated_at?: string
+          published_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -389,6 +465,7 @@ export type Database = {
       flight_status: 'ON_TIME' | 'DELAY' | 'GATE_CHANGE' | 'CANCELED'
       subscription_tier: 'FREE' | 'PREMIUM'
       sync_status: 'synced' | 'pending' | 'syncing' | 'error'
+      zulu_news_category: 'aviacion' | 'operaciones' | 'seguridad' | 'anuncios' | 'general'
     }
     CompositeTypes: {
       [_ in never]: never
