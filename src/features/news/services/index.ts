@@ -1,7 +1,13 @@
 'use server'
 
 import { createServerSupabaseClient } from '@/shared/lib/supabase/server'
+import type { Database } from '@/shared/lib/supabase/types'
 import type { NewsItem, NewsComment, NewsSource, ZuluNewsItem } from '../types'
+
+// Type helpers for Supabase tables
+type NewsCommentInsert = Database['public']['Tables']['news_comments']['Insert']
+type ZuluNewsInsert = Database['public']['Tables']['zulu_news']['Insert']
+type ZuluNewsUpdate = Database['public']['Tables']['zulu_news']['Update']
 
 // Generate stable ID from URL
 function generateNewsId(url: string): string {
@@ -185,15 +191,17 @@ export async function addNewsComment(
     return { data: null, error: 'No autenticado' }
   }
 
+  const insertData: NewsCommentInsert = {
+    news_id: newsId,
+    news_title: newsTitle,
+    news_source: newsSource,
+    content,
+    user_id: user.id,
+  }
+
   const { data, error } = await supabase
     .from('news_comments')
-    .insert({
-      news_id: newsId,
-      news_title: newsTitle,
-      news_source: newsSource,
-      content,
-      user_id: user.id,
-    })
+    .insert(insertData)
     .select(`
       *,
       user:users!news_comments_user_id_fkey(nombre, posicion)
@@ -408,14 +416,21 @@ export async function createZuluNews(
     return { data: null, error: 'No autenticado' }
   }
 
+  const insertData: ZuluNewsInsert = {
+    title: newsData.title,
+    description: newsData.description,
+    content: newsData.content,
+    image_url: newsData.image_url,
+    category: newsData.category as ZuluNewsInsert['category'],
+    is_breaking: newsData.is_breaking,
+    author_id: user.id,
+    is_published: true,
+    published_at: new Date().toISOString(),
+  }
+
   const { data, error } = await supabase
     .from('zulu_news')
-    .insert({
-      ...newsData,
-      author_id: user.id,
-      is_published: true,
-      published_at: new Date().toISOString(),
-    })
+    .insert(insertData)
     .select(`
       *,
       author:users!zulu_news_author_id_fkey(nombre, posicion)
@@ -444,9 +459,19 @@ export async function updateZuluNews(
 ): Promise<{ data: ZuluNewsItem | null; error: string | null }> {
   const supabase = await createServerSupabaseClient()
 
+  const updateData: ZuluNewsUpdate = {
+    title: newsData.title,
+    description: newsData.description,
+    content: newsData.content,
+    image_url: newsData.image_url,
+    category: newsData.category as ZuluNewsUpdate['category'],
+    is_breaking: newsData.is_breaking,
+    is_published: newsData.is_published,
+  }
+
   const { data, error } = await supabase
     .from('zulu_news')
-    .update(newsData)
+    .update(updateData)
     .eq('id', id)
     .select(`
       *,
