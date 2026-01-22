@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "rm -rf .next node_modules/.cache && npm run build",
+  "buildCommand": "rm -rf .next node_modules/.cache && TURBOPACK=0 npm run build",
   "devCommand": "npm run dev",
   "installCommand": "rm -rf node_modules && npm install",
   "framework": "nextjs",
