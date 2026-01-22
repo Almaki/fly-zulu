@@ -29,7 +29,8 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
-  turbopack: {},
+  // Disable Turbopack for production builds (use webpack)
+  // turbopack: {},
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
