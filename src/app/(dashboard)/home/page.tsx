@@ -14,6 +14,10 @@ import {
   MessageSquare,
   Users,
   BarChart3,
+  Megaphone,
+  MapPin,
+  Radio,
+  Newspaper,
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/hooks'
 
@@ -77,7 +81,7 @@ export default function HomePage() {
   const { user } = useAuth()
   const userPosition = (user as { posicion?: string })?.posicion
   const userRole = (user as { role?: string })?.role
-  const isAdmin = userRole === 'SUPERADMIN' || userRole === 'ADMIN'
+  const isSuperAdmin = userRole === 'SUPERADMIN'
 
   // Determinar nombre para saludo
   const firstName = (user as { nombre?: string })?.nombre?.split(' ')[0] || 'Crew'
@@ -130,12 +134,20 @@ export default function HomePage() {
                 badgeColor="bg-[#22c55e]/20 text-[#22c55e] border border-[#22c55e]/30"
               />
               <FeatureCard
-                title="Crew Lounge"
-                href="/pilot/foro"
-                icon={MessageSquare}
+                title="Aviso de Ocasión"
+                href="/aviso-ocasion"
+                icon={Megaphone}
                 color="from-[#E91E8C] to-[#ff6eb4]"
                 badge="Crew"
                 badgeColor="bg-[#E91E8C]/20 text-[#E91E8C] border border-[#E91E8C]/30"
+              />
+              <FeatureCard
+                title="Noticias"
+                href="/news"
+                icon={Radio}
+                color="from-[#ef4444] to-[#f87171]"
+                badge="Live"
+                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
               />
             </>
           )}
@@ -160,12 +172,20 @@ export default function HomePage() {
                 badgeColor="bg-[#22c55e]/20 text-[#22c55e] border border-[#22c55e]/30"
               />
               <FeatureCard
-                title="Crew Lounge"
-                href="/pilot/foro"
-                icon={MessageSquare}
+                title="Aviso de Ocasión"
+                href="/aviso-ocasion"
+                icon={Megaphone}
                 color="from-[#E91E8C] to-[#ff6eb4]"
                 badge="Crew"
                 badgeColor="bg-[#E91E8C]/20 text-[#E91E8C] border border-[#E91E8C]/30"
+              />
+              <FeatureCard
+                title="Noticias"
+                href="/news"
+                icon={Radio}
+                color="from-[#ef4444] to-[#f87171]"
+                badge="Live"
+                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
               />
             </>
           )}
@@ -256,7 +276,7 @@ export default function HomePage() {
           )}
 
           {/* === ADMIN / SUPERADMIN === */}
-          {isAdmin && (
+          {isSuperAdmin && (
             <>
               <FeatureCard
                 title="Usuarios"
@@ -267,10 +287,26 @@ export default function HomePage() {
                 badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
               />
               <FeatureCard
+                title="Mapa Usuarios"
+                href="/admin/mapa"
+                icon={MapPin}
+                color="from-[#22c55e] to-[#4ade80]"
+                badge="Admin"
+                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
+              />
+              <FeatureCard
                 title="Métricas"
                 href="/admin/metrics"
                 icon={BarChart3}
                 color="from-[#8b5cf6] to-[#a78bfa]"
+                badge="Admin"
+                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
+              />
+              <FeatureCard
+                title="Zulu News"
+                href="/admin/zulu-news"
+                icon={Newspaper}
+                color="from-[#E91E8C] to-[#ff6eb4]"
                 badge="Admin"
                 badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
               />
@@ -302,7 +338,7 @@ export default function HomePage() {
           )}
 
           {/* === FALLBACK (sin rol definido) === */}
-          {!userPosition && !isAdmin && (
+          {!userPosition && !isSuperAdmin && (
             <>
               <FeatureCard
                 title="Salidas"

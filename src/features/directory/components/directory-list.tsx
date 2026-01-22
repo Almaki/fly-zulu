@@ -1,14 +1,14 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Search, Plus, MapPin, Hotel, Car, Utensils, Plane, Users, Star } from 'lucide-react'
-import { Input } from '@/shared/components/ui/input'
+import { Plus, MapPin, Hotel, Car, Utensils, Plane, Users, ArrowLeft } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
-import { DIRECTORY_CATEGORIES } from '@/shared/constants'
+import { DIRECTORY_CATEGORIES, getAirportByCode, type Airport } from '@/shared/constants'
 import { DirectoryEntryCard } from './directory-entry-card'
 import { DirectoryEntryForm } from './directory-entry-form'
+import { AirportSearch } from './airport-search'
 import { useDirectoryStore } from '../store'
 import { getDirectoryEntries } from '../services'
 import { useAuth } from '@/features/auth/hooks'
@@ -18,9 +18,9 @@ export function DirectoryList() {
   const { entries, filters, isLoading, setEntries, setFilters, setLoading } =
     useDirectoryStore()
   const { user } = useAuth()
-  const [localSearch, setLocalSearch] = useState('')
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingEntry, setEditingEntry] = useState<DirectoryEntry | null>(null)
+  const [selectedAirport, setSelectedAirport] = useState<Airport | null>(null)
 
   // Solo usuarios FLIGHT (PILOT o FA) pueden agregar entradas
   const canAddEntries = (user as { categoria?: string })?.categoria === 'FLIGHT'
@@ -36,13 +36,16 @@ export function DirectoryList() {
     setLoading(false)
   }, [filters, setEntries, setLoading])
 
+  // Load entries when airport is selected
   useEffect(() => {
-    fetchEntries()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    if (selectedAirport) {
+      setFilters({ airport: selectedAirport.code })
+      fetchEntries({ airport: selectedAirport.code })
+    }
+  }, [selectedAirport]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleSearch = () => {
-    setFilters({ search: localSearch || undefined })
-    fetchEntries({ ...filters, search: localSearch || undefined })
+  const handleAirportSelect = (airport: Airport) => {
+    setSelectedAirport(airport)
   }
 
   const handleCategoryChange = (category: string) => {
@@ -51,58 +54,93 @@ export function DirectoryList() {
     fetchEntries({ ...filters, category: newCategory })
   }
 
-  const handleAirportChange = (airport: string) => {
-    const newAirport = airport || undefined
-    setFilters({ airport: newAirport })
-    fetchEntries({ ...filters, airport: newAirport })
+  const handleBack = () => {
+    setSelectedAirport(null)
+    setEntries([])
+    setFilters({})
   }
 
+  // Vista inicial: solo buscador
+  if (!selectedAirport) {
+    return (
+      <div className="min-h-[70vh] flex flex-col">
+        {/* Header */}
+        <div className="text-center mb-8 pt-8">
+          <div className="inline-flex p-4 rounded-full bg-[#22c55e]/10 mb-4">
+            <MapPin className="h-10 w-10 text-[#22c55e]" />
+          </div>
+          <h1 className="text-2xl font-bold text-[#fafafa] mb-2">
+            Directorio de Servicios
+          </h1>
+          <p className="text-[#71717a] text-sm max-w-xs mx-auto">
+            Encuentra hoteles, transporte, restaurantes y más cerca de cada aeropuerto
+          </p>
+        </div>
+
+        {/* Search */}
+        <div className="flex-1 flex flex-col items-center px-4">
+          <AirportSearch
+            onSelect={handleAirportSelect}
+            className="max-w-md w-full"
+          />
+
+          {/* Quick access chips */}
+          <div className="flex flex-wrap gap-2 mt-6 justify-center max-w-md">
+            {['MEX', 'GDL', 'MTY', 'CUN', 'TIJ', 'BJX'].map(code => {
+              const airport = getAirportByCode(code)
+              if (!airport) return null
+              return (
+                <button
+                  key={code}
+                  onClick={() => handleAirportSelect(airport)}
+                  className="px-4 py-2 rounded-full bg-[#1a1a1a] border border-[#27272a] text-sm text-[#a1a1aa] hover:border-[#22c55e] hover:text-[#22c55e] transition-colors"
+                >
+                  {code}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Footer collaboration text */}
+        <div className="text-center py-8 border-t border-[#1f1f1f] mt-auto">
+          <div className="flex items-center justify-center gap-2 text-[#71717a] text-sm">
+            <Users className="w-4 h-4" />
+            <span>Directorio colaborativo por y para tripulaciones</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Vista con aeropuerto seleccionado: mostrar resultados
   return (
     <div className="space-y-4">
-      {/* Search and add */}
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-          <Input
-            placeholder="Buscar nombre o descripción..."
-            value={localSearch}
-            onChange={(e) => {
-              setLocalSearch(e.target.value)
-              // Auto-search when clearing the field
-              if (e.target.value === '') {
-                setFilters({ search: undefined })
-                fetchEntries({ ...filters, search: undefined })
-              }
-            }}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            className="pl-10 pr-10"
-          />
-          {localSearch && (
-            <button
-              onClick={handleSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded bg-[#22c55e] hover:bg-[#22c55e]/80 transition-colors"
-            >
-              <Search className="h-3 w-3 text-black" />
-            </button>
-          )}
+      {/* Header with back button */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={handleBack}
+          className="p-2 rounded-lg bg-[#1a1a1a] border border-[#27272a] hover:border-[#3f3f46] transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5 text-[#a1a1aa]" />
+        </button>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-[#22c55e] text-xl">{selectedAirport.code}</span>
+            <span className="text-[#fafafa] font-medium">{selectedAirport.city}</span>
+          </div>
+          <p className="text-xs text-[#71717a]">{selectedAirport.state}</p>
         </div>
         {canAddEntries && (
-          <Button size="icon" variant="outline" onClick={() => setIsFormOpen(true)}>
-            <Plus className="h-4 w-4" />
+          <Button
+            size="sm"
+            className="bg-[#22c55e] hover:bg-[#22c55e]/90 text-black"
+            onClick={() => setIsFormOpen(true)}
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Agregar
           </Button>
         )}
-      </div>
-
-      {/* Airport filter */}
-      <div className="flex items-center gap-2">
-        <MapPin className="h-4 w-4 text-zinc-500" />
-        <Input
-          placeholder="Aeropuerto (MEX)"
-          value={filters.airport || ''}
-          onChange={(e) => handleAirportChange(e.target.value.toUpperCase())}
-          maxLength={3}
-          className="w-24 uppercase"
-        />
       </div>
 
       {/* Category tabs */}
@@ -114,7 +152,7 @@ export function DirectoryList() {
         <TabsList className="w-full h-auto flex-wrap gap-1 bg-transparent p-0">
           <TabsTrigger
             value="all"
-            className="text-xs data-[state=active]:bg-[#00ff88] data-[state=active]:text-black"
+            className="text-xs data-[state=active]:bg-[#22c55e] data-[state=active]:text-black"
           >
             Todos
           </TabsTrigger>
@@ -122,7 +160,7 @@ export function DirectoryList() {
             <TabsTrigger
               key={cat.id}
               value={cat.id}
-              className="text-xs data-[state=active]:bg-[#00ff88] data-[state=active]:text-black"
+              className="text-xs data-[state=active]:bg-[#22c55e] data-[state=active]:text-black"
             >
               {cat.emoji} {cat.label}
             </TabsTrigger>
@@ -150,14 +188,10 @@ export function DirectoryList() {
               </div>
 
               <h3 className="text-xl font-semibold text-[#fafafa] mb-2">
-                {filters.airport
-                  ? `¡Comparte tu conocimiento de ${filters.airport}!`
-                  : '¡Sé el primero en colaborar!'}
+                ¡Comparte tu conocimiento de {selectedAirport.code}!
               </h3>
               <p className="text-sm text-[#a1a1aa] mb-6 max-w-xs mx-auto">
-                {filters.airport
-                  ? 'Ayuda a otros tripulantes compartiendo contactos útiles de este aeropuerto.'
-                  : 'Comparte los contactos que te han salvado la vida en pernoctas. Tu experiencia ayuda a todos.'}
+                Ayuda a otros tripulantes compartiendo contactos útiles de este aeropuerto.
               </p>
 
               {/* Grid de categorías */}
@@ -180,7 +214,7 @@ export function DirectoryList() {
                 </div>
               </div>
 
-{canAddEntries ? (
+              {canAddEntries ? (
                 <Button
                   className="bg-[#22c55e] hover:bg-[#22c55e]/90 text-black font-semibold px-6"
                   onClick={() => setIsFormOpen(true)}
@@ -193,7 +227,6 @@ export function DirectoryList() {
                   Solo tripulación FLIGHT puede agregar contactos
                 </p>
               )}
-
             </div>
 
             {/* Glow effect */}
@@ -220,6 +253,14 @@ export function DirectoryList() {
         </p>
       )}
 
+      {/* Footer collaboration text */}
+      <div className="text-center py-4 border-t border-[#1f1f1f]">
+        <div className="flex items-center justify-center gap-2 text-[#71717a] text-xs">
+          <Users className="w-3 h-3" />
+          <span>Directorio colaborativo por y para tripulaciones</span>
+        </div>
+      </div>
+
       {/* Form modal */}
       <DirectoryEntryForm
         open={isFormOpen}
@@ -227,7 +268,7 @@ export function DirectoryList() {
           setIsFormOpen(open)
           if (!open) setEditingEntry(null)
         }}
-        defaultAirport={filters.airport}
+        defaultAirport={selectedAirport.code}
         editEntry={editingEntry}
         onSuccess={() => {
           fetchEntries()

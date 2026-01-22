@@ -1,4 +1,4 @@
-import type { User, FlightStatus } from '@/shared/types'
+import type { User, FlightStatus, CiudadBase } from '@/shared/types'
 
 export interface RecentUser {
   id: string
@@ -7,6 +7,30 @@ export interface RecentUser {
   last_location: string | null
   last_latitude: number | null
   last_longitude: number | null
+}
+
+// User data for city-based map
+export interface CityUser {
+  id: string
+  nombre: string
+  posicion: string
+  empresa: string | null
+  ciudad_base: CiudadBase | null
+  last_seen_at: string | null
+  last_location: string | null
+  is_online: boolean // Active in last 15 minutes
+}
+
+// Aggregated city data for map display
+export interface CityUsersData {
+  ciudad_code: CiudadBase
+  city_name: string
+  state: string
+  lat: number
+  lng: number
+  users: CityUser[]
+  online_count: number
+  recent_count: number // Last 24h
 }
 
 export interface AdminMetrics {

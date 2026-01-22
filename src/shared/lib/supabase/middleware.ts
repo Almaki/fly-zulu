@@ -2,6 +2,13 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { getDashboardRoute, isPublicRoute, isAuthRoute } from '@/shared/utils'
 
+// Admin routes that require SUPERADMIN role
+const ADMIN_ROUTES = ['/admin']
+
+function isAdminRoute(pathname: string): boolean {
+  return ADMIN_ROUTES.some(route => pathname.startsWith(route))
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -102,6 +109,17 @@ export async function updateSession(request: NextRequest) {
         }
       })
       return response
+    }
+
+    // SECURITY: Block non-SUPERADMIN users from accessing admin routes
+    if (isAdminRoute(pathname)) {
+      const isSuperAdmin = profile?.role === 'SUPERADMIN'
+      if (!isSuperAdmin) {
+        // Redirect non-admin users to home with a silent redirect (no error message to avoid info leak)
+        const url = request.nextUrl.clone()
+        url.pathname = '/home'
+        return NextResponse.redirect(url)
+      }
     }
   }
 

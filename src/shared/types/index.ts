@@ -9,6 +9,9 @@ export type FlightStatus = 'ON_TIME' | 'DELAY' | 'GATE_CHANGE' | 'CANCELED' | 'B
 // Subscription tier
 export type SubscriptionTier = 'FREE' | 'PREMIUM';
 
+// Ciudad base (6 main hubs)
+export type CiudadBase = 'TIJ' | 'BJX' | 'GDL' | 'MTY' | 'MEX' | 'CUN';
+
 // Base user interface
 export interface User {
   id: string;
@@ -27,6 +30,8 @@ export interface User {
   notifications_muted: boolean;
   last_seen_at: string | null;
   last_location: string | null;
+  ciudad_base: CiudadBase | null;
+  empresa: string | null;
   created_at: string;
   updated_at: string;
 }

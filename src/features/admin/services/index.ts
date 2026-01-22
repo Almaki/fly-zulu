@@ -1,8 +1,8 @@
 'use server'
 
 import { createServerSupabaseClient, createServiceRoleClient } from '@/shared/lib/supabase/server'
-import type { AdminMetrics, AdminFilters } from '../types'
-import type { User } from '@/shared/types'
+import type { AdminMetrics, AdminFilters, CityUser, CityUsersData } from '../types'
+import type { User, CiudadBase } from '@/shared/types'
 
 async function checkSuperAdmin() {
   const supabase = await createServerSupabaseClient()
@@ -473,4 +473,102 @@ export async function generateMagicLink(
     error: null,
     link: linkData.properties.action_link
   }
+}
+
+// =====================================================
+// USERS BY CITY MAP
+// =====================================================
+
+const CIUDADES_INFO: Record<CiudadBase, { city: string; state: string; lat: number; lng: number }> = {
+  TIJ: { city: 'Tijuana', state: 'BC', lat: 32.5411, lng: -116.9706 },
+  BJX: { city: 'León/Bajío', state: 'GTO', lat: 20.9935, lng: -101.4806 },
+  GDL: { city: 'Guadalajara', state: 'JAL', lat: 20.5218, lng: -103.3112 },
+  MTY: { city: 'Monterrey', state: 'NL', lat: 25.7785, lng: -100.1069 },
+  MEX: { city: 'Ciudad de México', state: 'CDMX', lat: 19.4363, lng: -99.0721 },
+  CUN: { city: 'Cancún', state: 'QR', lat: 21.0365, lng: -86.8771 },
+}
+
+export async function getUsersByCity(): Promise<{
+  data: CityUsersData[] | null
+  error: string | null
+}> {
+  const auth = await checkSuperAdmin()
+  if (!auth.authorized) return { data: null, error: auth.error }
+
+  const supabase = await createServiceRoleClient()
+
+  // Get users with activity in last 24 hours or with ciudad_base set
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString()
+
+  const { data: usersData, error } = await supabase
+    .from('users')
+    .select('id, nombre, posicion, empresa, ciudad_base, last_seen_at, last_location')
+    .eq('is_banned', false)
+    .order('last_seen_at', { ascending: false })
+
+  if (error) {
+    return { data: null, error: error.message }
+  }
+
+  const users = usersData as Array<{
+    id: string
+    nombre: string
+    posicion: string
+    empresa: string | null
+    ciudad_base: CiudadBase | null
+    last_seen_at: string | null
+    last_location: string | null
+  }>
+
+  // Group users by city
+  const citiesMap = new Map<CiudadBase, CityUser[]>()
+
+  // Initialize all cities
+  const allCities: CiudadBase[] = ['TIJ', 'BJX', 'GDL', 'MTY', 'MEX', 'CUN']
+  allCities.forEach(city => citiesMap.set(city, []))
+
+  // Assign users to their city
+  users.forEach(user => {
+    const isOnline = user.last_seen_at ? new Date(user.last_seen_at) >= new Date(fifteenMinutesAgo) : false
+    const cityUser: CityUser = {
+      id: user.id,
+      nombre: user.nombre,
+      posicion: user.posicion,
+      empresa: user.empresa,
+      ciudad_base: user.ciudad_base,
+      last_seen_at: user.last_seen_at,
+      last_location: user.last_location,
+      is_online: isOnline,
+    }
+
+    // If user has ciudad_base, use that
+    if (user.ciudad_base) {
+      citiesMap.get(user.ciudad_base)?.push(cityUser)
+    }
+  })
+
+  // Build result array
+  const result: CityUsersData[] = allCities.map(ciudadCode => {
+    const info = CIUDADES_INFO[ciudadCode]
+    const cityUsers = citiesMap.get(ciudadCode) || []
+    const onlineCount = cityUsers.filter(u => u.is_online).length
+    const recentCount = cityUsers.filter(u => {
+      if (!u.last_seen_at) return false
+      return new Date(u.last_seen_at) >= new Date(twentyFourHoursAgo)
+    }).length
+
+    return {
+      ciudad_code: ciudadCode,
+      city_name: info.city,
+      state: info.state,
+      lat: info.lat,
+      lng: info.lng,
+      users: cityUsers,
+      online_count: onlineCount,
+      recent_count: recentCount,
+    }
+  })
+
+  return { data: result, error: null }
 }

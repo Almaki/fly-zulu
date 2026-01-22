@@ -38,6 +38,7 @@ const ROUTE_TITLES: Record<string, string> = {
   '/admin/fids': 'Histórico FIDS',
   '/admin/activity': 'Actividad',
   '/admin/invites': 'Invitaciones',
+  '/admin/zulu-news': 'Zulu News',
 }
 
 export function Header() {

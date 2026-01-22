@@ -102,6 +102,9 @@ export const DUTY_LIMITS = {
   WARNING_THRESHOLD_HOURS: 12,
 } as const;
 
+// Re-export airports
+export * from './airports'
+
 // Routes by role
 export const ROLE_ROUTES = {
   PILOT: ['/pilot/mcdu', '/pilot/duty', '/pilot/academy', '/pilot/copilot', '/pilot/crewmind'],

@@ -57,7 +57,8 @@ export function useAnalytics() {
     const { category = 'interaction', data = {} } = options
 
     try {
-      await supabase.from('app_events').insert({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from('app_events').insert({
         user_id: user?.id || null,
         event_type: eventType,
         event_category: category,

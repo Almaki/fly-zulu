@@ -313,16 +313,19 @@ export default function ProfilePage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <button
+          <div
             onClick={() => setShowNotifications(true)}
-            className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-zinc-800/50 transition-colors"
+            className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-zinc-800/50 transition-colors cursor-pointer"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && setShowNotifications(true)}
           >
             <span className="text-sm text-zinc-400">Ver notificaciones</span>
             <NotificationBell
               userId={user.id}
               muted={notificationsMuted}
             />
-          </button>
+          </div>
         </CardContent>
       </Card>
 
