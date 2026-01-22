@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { ArrowLeft, Radio, Newspaper, Zap } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { ArrowLeft, Radio, Newspaper, Zap, RefreshCw } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { cn } from '@/shared/lib/utils'
 import { NewsCard } from '@/features/news/components'
 import { fetchAllNews } from '@/features/news/services'
+import { createClient } from '@/shared/lib/supabase/client'
 import type { NewsItem } from '@/features/news/types'
 import { ZULU_NEWS_CATEGORIES } from '@/features/news/types'
 
@@ -28,18 +29,47 @@ export default function NewsPage() {
   const [news, setNews] = useState<NewsItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<Category>('all')
+  const [hasNewContent, setHasNewContent] = useState(false)
 
-  useEffect(() => {
-    const loadNews = async () => {
-      setIsLoading(true)
-      const category = selectedCategory === 'all' ? undefined : selectedCategory
-      const { data } = await fetchAllNews(category)
-      setNews(data || [])
-      setIsLoading(false)
-    }
-
-    loadNews()
+  const loadNews = useCallback(async () => {
+    setIsLoading(true)
+    setHasNewContent(false)
+    const category = selectedCategory === 'all' ? undefined : selectedCategory
+    const { data } = await fetchAllNews(category)
+    setNews(data || [])
+    setIsLoading(false)
   }, [selectedCategory])
+
+  // Initial load and category change
+  useEffect(() => {
+    loadNews()
+  }, [loadNews])
+
+  // Real-time subscription for zulu_news changes
+  useEffect(() => {
+    const supabase = createClient()
+
+    const channel = supabase
+      .channel('zulu_news_realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'zulu_news',
+        },
+        (payload) => {
+          console.log('📰 Zulu News update:', payload.eventType)
+          // Show refresh indicator instead of auto-refresh to avoid jarring UX
+          setHasNewContent(true)
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-background p-4 pb-24">
@@ -66,6 +96,17 @@ export default function NewsPage() {
             <p className="text-xs text-[#71717a]">Noticias de aviación en tiempo real</p>
           </div>
         </div>
+
+        {/* New Content Banner */}
+        {hasNewContent && (
+          <button
+            onClick={loadNews}
+            className="w-full mb-3 py-2 px-4 bg-[#E91E8C]/10 border border-[#E91E8C]/30 rounded-xl flex items-center justify-center gap-2 text-[#E91E8C] text-sm font-medium animate-pulse hover:bg-[#E91E8C]/20 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Nuevas noticias disponibles - Toca para actualizar
+          </button>
+        )}
 
         {/* Category Chips */}
         <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
