@@ -196,7 +196,8 @@ export async function getNewsComments(
 ): Promise<{ data: NewsComment[] | null; error: string | null }> {
   const supabase = await createServerSupabaseClient()
 
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from('news_comments')
     .select(`
       *,
@@ -235,7 +236,8 @@ export async function addNewsComment(
     user_id: user.id,
   }
 
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from('news_comments')
     .insert(insertData)
     .select(`
@@ -257,7 +259,8 @@ export async function deleteNewsComment(
 ): Promise<{ error: string | null }> {
   const supabase = await createServerSupabaseClient()
 
-  const { error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any)
     .from('news_comments')
     .delete()
     .eq('id', commentId)
@@ -291,7 +294,8 @@ export async function getLatestHeadline(): Promise<{ data: NewsItem | null; erro
 export async function getZuluNews(): Promise<{ data: ZuluNewsItem[] | null; error: string | null }> {
   const supabase = await createServerSupabaseClient()
 
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from('zulu_news')
     .select(`
       *,
@@ -311,7 +315,8 @@ export async function getZuluNews(): Promise<{ data: ZuluNewsItem[] | null; erro
 export async function getZuluNewsBreaking(): Promise<{ data: NewsItem | null; error: string | null }> {
   const supabase = await createServerSupabaseClient()
 
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from('zulu_news')
     .select(`
       *,
@@ -352,7 +357,8 @@ export async function getZuluNewsById(
 ): Promise<{ data: ZuluNewsItem | null; error: string | null }> {
   const supabase = await createServerSupabaseClient()
 
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from('zulu_news')
     .select(`
       *,
@@ -464,7 +470,8 @@ export async function createZuluNews(
     published_at: new Date().toISOString(),
   }
 
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from('zulu_news')
     .insert(insertData)
     .select(`
@@ -505,7 +512,8 @@ export async function updateZuluNews(
     is_published: newsData.is_published,
   }
 
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from('zulu_news')
     .update(updateData)
     .eq('id', id)
@@ -528,7 +536,8 @@ export async function deleteZuluNews(
 ): Promise<{ error: string | null }> {
   const supabase = await createServerSupabaseClient()
 
-  const { error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any)
     .from('zulu_news')
     .delete()
     .eq('id', id)
@@ -540,7 +549,8 @@ export async function deleteZuluNews(
 export async function getZuluNewsAdmin(): Promise<{ data: ZuluNewsItem[] | null; error: string | null }> {
   const supabase = await createServerSupabaseClient()
 
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from('zulu_news')
     .select(`
       *,
