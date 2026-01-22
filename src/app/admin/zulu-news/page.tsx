@@ -8,7 +8,7 @@ import { Input } from '@/shared/components/ui/input'
 import { cn } from '@/shared/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { createBrowserSupabaseClient } from '@/shared/lib/supabase/client'
+import { createClient } from '@/shared/lib/supabase/client'
 import {
   getZuluNewsAdmin,
   createZuluNews,
@@ -92,7 +92,7 @@ export default function ZuluNewsAdminPage() {
     setIsUploading(true)
 
     try {
-      const supabase = createBrowserSupabaseClient()
+      const supabase = createClient()
 
       // Generate unique filename
       const ext = file.name.split('.').pop()
