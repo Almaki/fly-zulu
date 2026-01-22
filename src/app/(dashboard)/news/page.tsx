@@ -29,23 +29,31 @@ export default function NewsPage() {
   const [news, setNews] = useState<NewsItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<Category>('all')
-  const [hasNewContent, setHasNewContent] = useState(false)
 
-  const loadNews = useCallback(async () => {
-    setIsLoading(true)
-    setHasNewContent(false)
+  const loadNews = useCallback(async (silent = false) => {
+    if (!silent) setIsLoading(true)
     const category = selectedCategory === 'all' ? undefined : selectedCategory
     const { data } = await fetchAllNews(category)
     setNews(data || [])
-    setIsLoading(false)
+    if (!silent) setIsLoading(false)
   }, [selectedCategory])
 
   // Initial load and category change
   useEffect(() => {
     loadNews()
+  }, [selectedCategory]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-refresh RSS feeds every 60 seconds for live updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log('🔄 Auto-refreshing news feeds...')
+      loadNews(true) // Silent refresh
+    }, 60000) // Every 60 seconds
+
+    return () => clearInterval(interval)
   }, [loadNews])
 
-  // Real-time subscription for zulu_news changes
+  // Real-time subscription for zulu_news changes (instant updates for breaking news)
   useEffect(() => {
     const supabase = createClient()
 
@@ -60,8 +68,8 @@ export default function NewsPage() {
         },
         (payload) => {
           console.log('📰 Zulu News update:', payload.eventType)
-          // Show refresh indicator instead of auto-refresh to avoid jarring UX
-          setHasNewContent(true)
+          // Immediately refresh when breaking news is published
+          loadNews(true)
         }
       )
       .subscribe()
@@ -69,7 +77,7 @@ export default function NewsPage() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [])
+  }, [loadNews])
 
   return (
     <div className="min-h-screen bg-background p-4 pb-24">
@@ -97,16 +105,26 @@ export default function NewsPage() {
           </div>
         </div>
 
-        {/* New Content Banner */}
-        {hasNewContent && (
+        {/* Live indicator */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2 text-xs text-[#71717a]">
+            <div className="flex items-center gap-1">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22c55e] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#22c55e]"></span>
+              </span>
+              <span className="text-[#22c55e] font-medium">EN VIVO</span>
+            </div>
+            <span>• Actualización automática</span>
+          </div>
           <button
-            onClick={loadNews}
-            className="w-full mb-3 py-2 px-4 bg-[#E91E8C]/10 border border-[#E91E8C]/30 rounded-xl flex items-center justify-center gap-2 text-[#E91E8C] text-sm font-medium animate-pulse hover:bg-[#E91E8C]/20 transition-colors"
+            onClick={() => loadNews()}
+            className="p-1.5 rounded-lg hover:bg-[#27272a] transition-colors"
+            title="Actualizar ahora"
           >
-            <RefreshCw className="w-4 h-4" />
-            Nuevas noticias disponibles - Toca para actualizar
+            <RefreshCw className="w-4 h-4 text-[#71717a]" />
           </button>
-        )}
+        </div>
 
         {/* Category Chips */}
         <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
