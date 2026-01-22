@@ -1,13 +1,49 @@
 'use server'
 
 import { createServerSupabaseClient } from '@/shared/lib/supabase/server'
-import type { Database } from '@/shared/lib/supabase/types'
 import type { NewsItem, NewsComment, NewsSource, ZuluNewsItem } from '../types'
 
-// Type helpers for Supabase tables
-type NewsCommentInsert = Database['public']['Tables']['news_comments']['Insert']
-type ZuluNewsInsert = Database['public']['Tables']['zulu_news']['Insert']
-type ZuluNewsUpdate = Database['public']['Tables']['zulu_news']['Update']
+// Inline types to avoid Turbopack resolution issues
+type NewsCommentInsert = {
+  id?: string
+  news_id: string
+  news_title: string
+  news_source: string
+  content: string
+  user_id: string
+  created_at?: string
+  updated_at?: string
+}
+
+type ZuluNewsInsert = {
+  id?: string
+  title: string
+  description: string
+  content?: string | null
+  image_url?: string | null
+  category?: 'aviacion' | 'operaciones' | 'seguridad' | 'anuncios' | 'general'
+  is_breaking?: boolean
+  is_published?: boolean
+  author_id?: string | null
+  created_at?: string
+  updated_at?: string
+  published_at?: string
+}
+
+type ZuluNewsUpdate = {
+  id?: string
+  title?: string
+  description?: string
+  content?: string | null
+  image_url?: string | null
+  category?: 'aviacion' | 'operaciones' | 'seguridad' | 'anuncios' | 'general'
+  is_breaking?: boolean
+  is_published?: boolean
+  author_id?: string | null
+  created_at?: string
+  updated_at?: string
+  published_at?: string
+}
 
 // Generate stable ID from URL
 function generateNewsId(url: string): string {
@@ -421,7 +457,7 @@ export async function createZuluNews(
     description: newsData.description,
     content: newsData.content,
     image_url: newsData.image_url,
-    category: newsData.category as ZuluNewsInsert['category'],
+    category: newsData.category as 'aviacion' | 'operaciones' | 'seguridad' | 'anuncios' | 'general',
     is_breaking: newsData.is_breaking,
     author_id: user.id,
     is_published: true,
@@ -464,7 +500,7 @@ export async function updateZuluNews(
     description: newsData.description,
     content: newsData.content,
     image_url: newsData.image_url,
-    category: newsData.category as ZuluNewsUpdate['category'],
+    category: newsData.category as 'aviacion' | 'operaciones' | 'seguridad' | 'anuncios' | 'general' | undefined,
     is_breaking: newsData.is_breaking,
     is_published: newsData.is_published,
   }
