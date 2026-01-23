@@ -156,13 +156,7 @@ export default function NewsPage() {
           ) : (
             news.map((item) => (
               <div key={item.id} className="relative">
-                {/* Zulu News Badge */}
-                {item.isZuluNews && (
-                  <div className="absolute -top-1 -left-1 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#E91E8C] text-white text-[9px] font-bold">
-                    <Zap className="w-2.5 h-2.5 fill-current" />
-                    ZULU
-                  </div>
-                )}
+                {/* Zulu News Badge - Temporalmente oculto */}
                 <NewsCard news={item} />
               </div>
             ))

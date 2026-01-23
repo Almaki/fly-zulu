@@ -12,6 +12,10 @@ interface BreakingNewsBannerProps {
 }
 
 export function BreakingNewsBanner({ className }: BreakingNewsBannerProps) {
+  // Temporalmente oculto hasta que el portal de noticias esté listo
+  return null
+
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   const [headline, setHeadline] = useState<NewsItem | null>(null)
   const [isVisible, setIsVisible] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
