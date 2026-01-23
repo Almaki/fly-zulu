@@ -172,7 +172,7 @@ export default function NewsPage() {
         {/* Footer */}
         <div className="text-center py-4 border-t border-[#1f1f1f] mt-6">
           <p className="text-[10px] text-[#52525b]">
-            <span className="text-[#E91E8C]">Zulu News</span> + BBC, CNN, Milenio, Bloomberg
+            <span className="text-[#E91E8C]">Zulu News</span> + Simple Flying, AeroTime, Airways, FlightGlobal
           </p>
         </div>
       </div>

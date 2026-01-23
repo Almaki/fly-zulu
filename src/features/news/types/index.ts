@@ -69,11 +69,19 @@ export const NEWS_SOURCES: NewsSource[] = [
   { name: 'BBC Mundo', url: 'https://feeds.bbci.co.uk/mundo/rss.xml', category: 'world' },
   { name: 'CNN', url: 'https://rss.cnn.com/rss/edition_world.rss', category: 'world' },
 
-  // Noticias México
+  // Noticias México - Múltiples fuentes
   { name: 'Milenio', url: 'https://www.milenio.com/rss', category: 'mexico' },
+  { name: 'El Universal', url: 'https://www.eluniversal.com.mx/rss.xml', category: 'mexico' },
+  { name: 'Excélsior', url: 'https://www.excelsior.com.mx/rss.xml', category: 'mexico' },
+  { name: 'El Financiero', url: 'https://www.elfinanciero.com.mx/arc/outboundfeeds/rss/', category: 'mexico' },
+  { name: 'Reforma', url: 'https://www.reforma.com/rss/portada.xml', category: 'mexico' },
 
-  // Aviación (usando fuente más limpia)
+  // Aviación - Múltiples fuentes para cobertura completa
   { name: 'Simple Flying', url: 'https://simpleflying.com/feed/', category: 'aviation' },
+  { name: 'AeroTime', url: 'https://www.aerotime.aero/feed', category: 'aviation' },
+  { name: 'Airways Magazine', url: 'https://airwaysmag.com/feed/', category: 'aviation' },
+  { name: 'Aviation24', url: 'https://www.aviation24.be/feed/', category: 'aviation' },
+  { name: 'FlightGlobal', url: 'https://www.flightglobal.com/rss', category: 'aviation' },
 
   // Negocios
   { name: 'Bloomberg', url: 'https://feeds.bloomberg.com/markets/news.rss', category: 'business' },
