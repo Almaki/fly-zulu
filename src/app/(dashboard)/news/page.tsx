@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { ArrowLeft, Radio, Newspaper, Zap, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Newspaper, Zap, RefreshCw } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { cn } from '@/shared/lib/utils'
@@ -9,16 +9,12 @@ import { NewsCard } from '@/features/news/components'
 import { fetchAllNews } from '@/features/news/services'
 import { createClient } from '@/shared/lib/supabase/client'
 import type { NewsItem } from '@/features/news/types'
-import { ZULU_NEWS_CATEGORIES } from '@/features/news/types'
 
-type Category = 'all' | 'world' | 'aviation' | 'mexico' | 'business' | 'aviacion' | 'operaciones' | 'seguridad' | 'anuncios' | 'general'
+type Category = 'all' | 'aviation' | 'world' | 'mexico' | 'business'
 
 const CATEGORIES: { id: Category; label: string; emoji: string }[] = [
   { id: 'all', label: 'Todas', emoji: '🌐' },
-  { id: 'aviacion', label: 'Aviación', emoji: '✈️' },
-  { id: 'operaciones', label: 'Operaciones', emoji: '🛫' },
-  { id: 'seguridad', label: 'Seguridad', emoji: '🛡️' },
-  { id: 'anuncios', label: 'Anuncios', emoji: '📢' },
+  { id: 'aviation', label: 'Aviación', emoji: '✈️' },
   { id: 'world', label: 'Mundial', emoji: '🌍' },
   { id: 'mexico', label: 'México', emoji: '🇲🇽' },
   { id: 'business', label: 'Negocios', emoji: '💼' },

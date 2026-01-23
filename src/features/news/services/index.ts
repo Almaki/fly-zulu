@@ -374,6 +374,17 @@ export async function getZuluNewsById(
   return { data: data as ZuluNewsItem, error: null }
 }
 
+// Mapeo de categorías Zulu News -> categorías UI
+// Zulu News usa: aviacion, operaciones, seguridad, anuncios, general
+// UI usa: aviation, world, mexico, business
+const ZULU_TO_UI_CATEGORY: Record<string, string> = {
+  'aviacion': 'aviation',
+  'operaciones': 'aviation', // Operaciones es parte de aviación
+  'seguridad': 'aviation',   // Seguridad aérea es parte de aviación
+  'anuncios': 'aviation',    // Anuncios de la app son de aviación
+  'general': 'world',        // General va a mundial
+}
+
 // Combinar noticias RSS + Zulu News
 export async function fetchAllNews(
   category?: string
@@ -390,8 +401,11 @@ export async function fetchAllNews(
     // Agregar noticias de Zulu News (convertidas a NewsItem)
     if (zuluResult.data) {
       for (const zulu of zuluResult.data) {
+        // Mapear categoría de Zulu News a categoría UI
+        const mappedCategory = ZULU_TO_UI_CATEGORY[zulu.category || 'general'] || 'world'
+
         // Filtrar por categoría si se especifica
-        if (category && zulu.category !== category) continue
+        if (category && mappedCategory !== category) continue
 
         allNews.push({
           id: zulu.id,
@@ -402,7 +416,7 @@ export async function fetchAllNews(
           source: 'Zulu News',
           sourceUrl: '/news',
           imageUrl: zulu.image_url,
-          category: zulu.category,
+          category: mappedCategory, // Usar categoría mapeada para consistencia
           isZuluNews: true,
           isBreaking: zulu.is_breaking,
           content: zulu.content,
