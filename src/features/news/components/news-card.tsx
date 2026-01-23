@@ -1,7 +1,6 @@
 'use client'
 
-import Link from 'next/link'
-import { Clock, ExternalLink, MessageCircle } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -33,33 +32,24 @@ export function NewsCard({ news, compact = false }: NewsCardProps) {
 
   if (compact) {
     return (
-      <Link
-        href={`/news/${news.id}`}
-        className="flex items-start gap-3 p-3 rounded-lg bg-[#141414] border border-[#27272a] hover:border-[#3f3f46] transition-colors group"
-      >
+      <div className="flex items-start gap-3 p-3 rounded-lg bg-[#141414] border border-[#27272a] transition-colors">
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-[#fafafa] line-clamp-2 group-hover:text-[#E91E8C] transition-colors">
+          <p className="text-sm font-medium text-[#fafafa] line-clamp-2">
             {news.title}
           </p>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-[10px] text-[#71717a]">{news.source}</span>
-            {timeAgo && (
-              <>
-                <span className="text-[#3f3f46]">•</span>
-                <span className="text-[10px] text-[#52525b]">{timeAgo}</span>
-              </>
-            )}
-          </div>
+          {timeAgo && (
+            <div className="flex items-center gap-1 mt-1">
+              <span className="text-[10px] text-[#52525b]">{timeAgo}</span>
+            </div>
+          )}
         </div>
-        <ExternalLink className="w-3.5 h-3.5 text-[#52525b] group-hover:text-[#E91E8C] flex-shrink-0 mt-0.5" />
-      </Link>
+      </div>
     )
   }
 
   return (
-    <Link
-      href={`/news/${news.id}`}
-      className="block rounded-xl bg-[#141414] border border-[#27272a] hover:border-[#3f3f46] overflow-hidden transition-colors group"
+    <div
+      className="block rounded-xl bg-[#141414] border border-[#27272a] overflow-hidden transition-colors"
     >
       {/* Image placeholder */}
       {news.imageUrl && (
@@ -87,7 +77,7 @@ export function NewsCard({ news, compact = false }: NewsCardProps) {
         )}
 
         {/* Title */}
-        <h3 className="font-semibold text-[#fafafa] text-base line-clamp-2 group-hover:text-[#E91E8C] transition-colors">
+        <h3 className="font-semibold text-[#fafafa] text-base line-clamp-2">
           {news.title}
         </h3>
 
@@ -98,23 +88,16 @@ export function NewsCard({ news, compact = false }: NewsCardProps) {
           </p>
         )}
 
-        {/* Footer */}
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#1f1f1f]">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-[#71717a] font-medium">{news.source}</span>
-            {timeAgo && (
-              <span className="flex items-center gap-1 text-[10px] text-[#52525b]">
-                <Clock className="w-3 h-3" />
-                {timeAgo}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-1 text-[#52525b]">
-            <MessageCircle className="w-3.5 h-3.5" />
-            <span className="text-[10px]">Opinar</span>
-          </div>
+        {/* Footer - Solo tiempo */}
+        <div className="flex items-center mt-3 pt-3 border-t border-[#1f1f1f]">
+          {timeAgo && (
+            <span className="flex items-center gap-1 text-[10px] text-[#52525b]">
+              <Clock className="w-3 h-3" />
+              {timeAgo}
+            </span>
+          )}
         </div>
       </div>
-    </Link>
+    </div>
   )
 }
