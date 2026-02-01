@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, Truck, Dog, PawPrint, Ban, Check, Car, Home, Building2, User } from 'lucide-react'
+import { Calendar, Truck, Dog, PawPrint, Ban, Check, Car, Home, Building2, User, Globe, Pin } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Textarea } from '@/shared/components/ui/textarea'
@@ -75,6 +75,9 @@ export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFo
     // Taxi seguro
     nombre_conductor: '',
     tipo_auto_taxi: undefined,
+    // Web y permanente
+    pagina_web: '',
+    solicita_permanente: false,
   })
 
   const needsDireccion = categoriaNecesitaDireccion(formData.categoria)
@@ -193,6 +196,8 @@ export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFo
       servicio_domicilio: false,
       nombre_conductor: '',
       tipo_auto_taxi: undefined,
+      pagina_web: '',
+      solicita_permanente: false,
     })
 
     onOpenChange(false)
@@ -530,6 +535,41 @@ export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFo
             </div>
           )}
 
+          {/* ========== PÁGINA WEB / LINK ========== */}
+          <div>
+            <label className="text-sm text-[#a1a1aa] mb-1.5 block flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              Página web o link (opcional)
+            </label>
+            <Input
+              value={formData.pagina_web || ''}
+              onChange={(e) => setFormData({ ...formData, pagina_web: e.target.value })}
+              placeholder="https://..."
+              type="url"
+              className="bg-[#141414] border-[#27272a]"
+            />
+          </div>
+
+          {/* ========== SOLICITAR PERMANENTE ========== */}
+          <div className="flex items-center gap-3 p-3 rounded-lg border border-[#27272a]">
+            <Checkbox
+              id="solicita_permanente"
+              checked={formData.solicita_permanente}
+              onCheckedChange={(checked) => setFormData({ ...formData, solicita_permanente: !!checked })}
+            />
+            <div className="flex items-center gap-2">
+              <Pin className="w-4 h-4 text-[#71717a]" />
+              <label htmlFor="solicita_permanente" className="text-sm text-[#a1a1aa] cursor-pointer">
+                Solicitar aviso permanente
+              </label>
+            </div>
+          </div>
+          {formData.solicita_permanente && (
+            <p className="text-xs text-[#f59e0b] bg-[#f59e0b]/10 px-3 py-2 rounded-lg">
+              Se notificará al administrador para aprobar tu aviso como permanente. Mientras tanto, expira en 30 días.
+            </p>
+          )}
+
           {/* Contacto WhatsApp - Requerido para todos */}
           <div className="grid grid-cols-2 gap-2">
             <div>
@@ -561,7 +601,9 @@ export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFo
 
           {/* Note */}
           <p className="text-xs text-[#52525b]">
-            Tu aviso estará visible por 30 días. Solo tripulaciones verificadas podrán verlo.
+            {formData.solicita_permanente
+              ? 'Tu aviso se publicará por 30 días. Si el admin aprueba, será permanente.'
+              : 'Tu aviso estará visible por 30 días. Solo tripulaciones verificadas podrán verlo.'}
           </p>
 
           {/* Buttons */}

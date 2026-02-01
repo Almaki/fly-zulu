@@ -42,6 +42,7 @@ export type AdminEventType =
   | 'directory_deleted'
   | 'flight_created'
   | 'ticket_created'
+  | 'aviso_permanente_request'
 
 export interface AnalyticsData {
   totalEvents: number

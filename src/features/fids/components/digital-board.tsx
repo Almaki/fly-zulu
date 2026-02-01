@@ -222,7 +222,7 @@ export function DigitalBoard({ initialAirport }: DigitalBoardProps) {
                 </div>
               </div>
 
-              <h3 className="text-xl font-bold text-[#fafafa] mb-2">
+              <h3 className="text-xl font-bold text-[#fafafa] mb-2 animate-nudge">
                 ¡Sé el primero en colaborar!
               </h3>
               <p className="text-sm text-zinc-400 max-w-xs mx-auto mb-6">

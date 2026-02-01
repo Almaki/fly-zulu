@@ -9,6 +9,7 @@ export type AvisoCategoria =
   | 'renta_auto'       // Rento auto
   | 'roomie'           // Busco/ofrezco roomie
   | 'servicios'        // Ofrezco servicios
+  | 'medico'           // Servicios médicos
   | 'taxi_seguro'      // Taxi seguro para tripulaciones
   | 'otro'
 
@@ -60,6 +61,12 @@ export interface Aviso {
   nombre_conductor: string | null
   tipo_auto_taxi: TipoAutoTaxi | null
 
+  // Página web / link
+  pagina_web: string | null
+
+  // Solicitud de aviso permanente
+  solicita_permanente: boolean
+
   // Joined data - información del responsable de la publicación
   created_by_user?: {
     nombre: string
@@ -99,6 +106,12 @@ export interface AvisoFormData {
   // Campos para taxi seguro
   nombre_conductor?: string
   tipo_auto_taxi?: TipoAutoTaxi
+
+  // Página web / link
+  pagina_web?: string
+
+  // Solicitud de aviso permanente
+  solicita_permanente?: boolean
 }
 
 export interface AvisoFilters {
@@ -115,6 +128,7 @@ export const AVISO_CATEGORIAS: { id: AvisoCategoria; label: string; emoji: strin
   { id: 'roomie', label: 'Roomie', emoji: '👥', description: 'Busco/ofrezco roomie' },
   { id: 'taxi_seguro', label: 'Taxi Seguro', emoji: '🚕', description: 'Transporte seguro para tripulaciones' },
   { id: 'servicios', label: 'Servicios', emoji: '🔧', description: 'Ofrezco servicios' },
+  { id: 'medico', label: 'Médico', emoji: '🩺', description: 'Servicios médicos' },
   { id: 'otro', label: 'Otro', emoji: '📌', description: 'Otros avisos' },
 ]
 

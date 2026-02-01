@@ -76,7 +76,7 @@ export function FIDSBoard() {
               </div>
             </div>
 
-            <h3 className="text-xl font-semibold text-[#fafafa] mb-2">
+            <h3 className={`text-xl font-semibold text-[#fafafa] mb-2 ${!filters.airport ? 'animate-nudge' : ''}`}>
               {filters.airport
                 ? `No hay vuelos para ${filters.airport}`
                 : '¡Sé el primero en colaborar!'}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { X, UserPlus, UserMinus, Ban, CreditCard, FolderPlus, FolderEdit, Trash2, Bell } from 'lucide-react'
+import { X, UserPlus, UserMinus, Ban, CreditCard, FolderPlus, FolderEdit, Trash2, Bell, Pin } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useAdminNotifications } from '../hooks'
@@ -17,7 +17,8 @@ const EVENT_ICONS: Record<AdminEventType, React.ReactNode> = {
   directory_updated: <FolderEdit className="h-5 w-5 text-blue-300" />,
   directory_deleted: <Trash2 className="h-5 w-5 text-red-400" />,
   flight_created: <Bell className="h-5 w-5 text-purple-400" />,
-  ticket_created: <Bell className="h-5 w-5 text-orange-400" />
+  ticket_created: <Bell className="h-5 w-5 text-orange-400" />,
+  aviso_permanente_request: <Pin className="h-5 w-5 text-yellow-400" />
 }
 
 const EVENT_COLORS: Record<AdminEventType, string> = {
@@ -30,7 +31,8 @@ const EVENT_COLORS: Record<AdminEventType, string> = {
   directory_updated: 'border-blue-400/50 bg-blue-400/10',
   directory_deleted: 'border-red-400/50 bg-red-400/10',
   flight_created: 'border-purple-500/50 bg-purple-500/10',
-  ticket_created: 'border-orange-500/50 bg-orange-500/10'
+  ticket_created: 'border-orange-500/50 bg-orange-500/10',
+  aviso_permanente_request: 'border-yellow-500/50 bg-yellow-500/10'
 }
 
 export function AdminNotifications() {

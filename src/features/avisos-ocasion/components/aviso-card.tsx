@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Phone, MessageCircle, Clock, Trash2, MapPin, Calendar, Dog, PawPrint, Truck, Wifi, Droplets, Zap, Wrench, Flame, Package, Ban, Home, Building2, Car, User } from 'lucide-react'
+import { Phone, MessageCircle, Clock, Trash2, MapPin, Calendar, Dog, PawPrint, Truck, Wifi, Droplets, Zap, Wrench, Flame, Package, Ban, Home, Building2, Car, User, Globe, Pin } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/utils'
 import { useAuth } from '@/features/auth/hooks'
@@ -172,6 +172,33 @@ export function AvisoCard({ aviso, onDeleted }: AvisoCardProps) {
         </p>
       </div>
 
+      {/* Website link */}
+      {aviso.pagina_web && (
+        <div className="px-4 pb-2">
+          <a
+            href={aviso.pagina_web.startsWith('http') ? aviso.pagina_web : `https://${aviso.pagina_web}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs text-[#3b82f6] hover:text-[#60a5fa] transition-colors"
+          >
+            <Globe className="w-3 h-3" />
+            <span className="underline truncate max-w-[250px]">
+              {aviso.pagina_web.replace(/^https?:\/\//, '')}
+            </span>
+          </a>
+        </div>
+      )}
+
+      {/* Permanent badge */}
+      {aviso.solicita_permanente && (
+        <div className="px-4 pb-2">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-[#f59e0b]/10 text-[#f59e0b] font-medium">
+            <Pin className="w-2.5 h-2.5" />
+            Solicita permanente
+          </span>
+        </div>
+      )}
+
       {/* Additional Info for Inmuebles/Roomie */}
       {(needsDireccion || isRoomie || aviso.servicio_domicilio) && (
         <div className="px-4 pb-3 space-y-2">
@@ -301,6 +328,9 @@ export function AvisoCard({ aviso, onDeleted }: AvisoCardProps) {
         <div className="flex items-center gap-2 text-xs text-[#52525b]">
           <Clock className="w-3 h-3" />
           <span>Expira en {Math.max(0, Math.ceil((new Date(aviso.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} días</span>
+          {aviso.solicita_permanente && (
+            <span className="text-[#f59e0b]">• Pendiente aprobación</span>
+          )}
         </div>
 
         <div className="flex items-center gap-2">

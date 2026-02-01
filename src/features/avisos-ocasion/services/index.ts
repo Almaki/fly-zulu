@@ -102,6 +102,9 @@ export async function createAviso(
     // Campos para taxi seguro
     nombre_conductor: formData.nombre_conductor || null,
     tipo_auto_taxi: formData.tipo_auto_taxi || null,
+    // Página web y permanente
+    pagina_web: formData.pagina_web || null,
+    solicita_permanente: formData.solicita_permanente || false,
     created_by: user.id,
   }
 
@@ -115,6 +118,27 @@ export async function createAviso(
   if (error) {
     console.error('Error creating aviso:', error)
     return { data: null, error: error.message }
+  }
+
+  // Send admin notification if requesting permanent
+  if (formData.solicita_permanente) {
+    const userName = user.user_metadata?.nombre || user.email || 'Usuario'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any).from('admin_notifications').insert({
+      event_type: 'aviso_permanente_request',
+      title: 'Solicitud de aviso permanente',
+      message: `${userName} solicita que su aviso "${formData.titulo}" en ${formData.ciudad_code} sea permanente.`,
+      user_id: user.id,
+      user_name: userName,
+      metadata: {
+        aviso_id: (data as Aviso).id,
+        ciudad_code: formData.ciudad_code,
+        categoria: formData.categoria,
+        titulo: formData.titulo,
+      },
+    }).then(({ error: notifError }: { error: { message: string } | null }) => {
+      if (notifError) console.error('Error sending admin notification:', notifError)
+    })
   }
 
   return { data: data as Aviso, error: null }

@@ -359,9 +359,9 @@ export function ExchangeRate({ airportCode, onAllFieldsComplete }: ExchangeRateP
       {/* Two location cards stacked */}
       <div className="space-y-3">
         {/* Toro Shop Card */}
-        <div className={`rounded-xl border transition-all duration-500 ${
+        <div className={`rounded-xl border ${
           cheapestLocation === 'toro_shop'
-            ? 'border-[#22c55e]/60 shadow-[0_0_15px_rgba(34,197,94,0.3)]'
+            ? 'animate-breathe-glow'
             : 'border-[#f59e0b]/20'
         } bg-gradient-to-br from-[#f59e0b]/10 to-[#f59e0b]/5`}>
           <div className="flex items-center justify-between px-4 pt-3 pb-2">
@@ -408,9 +408,9 @@ export function ExchangeRate({ airportCode, onAllFieldsComplete }: ExchangeRateP
         </div>
 
         {/* Gates Card */}
-        <div className={`rounded-xl border transition-all duration-500 ${
+        <div className={`rounded-xl border ${
           cheapestLocation === 'gates'
-            ? 'border-[#22c55e]/60 shadow-[0_0_15px_rgba(34,197,94,0.3)]'
+            ? 'animate-breathe-glow'
             : 'border-[#3b82f6]/20'
         } bg-gradient-to-br from-[#3b82f6]/10 to-[#3b82f6]/5`}>
           <div className="flex items-center justify-between px-4 pt-3 pb-2">
