@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Clock, MapPin, Wifi, WifiOff, RefreshCw } from 'lucide-react'
+import { Clock, Pencil, Wifi, WifiOff, RefreshCw } from 'lucide-react'
 import { Input } from '@/shared/components/ui/input'
 import {
   getCurrentZuluTime,
@@ -109,8 +109,8 @@ export function FlightHeader({ selectedAirport, onAirportChange }: FlightHeaderP
 
       {/* Local Time Search */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 flex-1">
-          <MapPin className="w-4 h-4 text-[#71717a]" />
+        <div className="flex items-center gap-2 flex-1 animate-breathe-glow rounded-lg px-2 py-1 border border-[#22c55e]/40">
+          <Pencil className="w-4 h-4 text-[#22c55e]" />
           <Input
             placeholder="MEX"
             value={airportInput}
@@ -118,22 +118,22 @@ export function FlightHeader({ selectedAirport, onAirportChange }: FlightHeaderP
             onBlur={handleAirportSubmit}
             onKeyDown={(e) => e.key === 'Enter' && handleAirportSubmit()}
             maxLength={3}
-            className="w-20 uppercase text-center bg-background border-[#27272a] font-mono"
+            className="w-20 uppercase text-center bg-transparent border-none font-mono text-[#22c55e] placeholder:text-[#22c55e]/40 focus-visible:ring-0 focus-visible:ring-offset-0"
           />
         </div>
 
         {localTime ? (
-          <div className="text-right">
-            <div className="text-lg font-mono text-[#fafafa]">
+          <div className="text-right animate-breathe-glow rounded-lg px-3 py-1 border border-[#22c55e]/40">
+            <div className="text-lg font-mono text-[#22c55e]">
               {localTime.time.slice(0, 5)}
             </div>
-            <div className="text-xs text-[#71717a]">
+            <div className="text-xs text-[#22c55e]/70">
               {selectedAirport} ({localTime.offset})
             </div>
           </div>
         ) : (
-          <div className="text-xs text-[#71717a]">
-            Ingresa código IATA
+          <div className="text-xs text-[#22c55e]/70 animate-breathe-glow rounded-lg px-3 py-1.5 border border-[#22c55e]/40">
+            Escribe código IATA ✈️
           </div>
         )}
       </div>

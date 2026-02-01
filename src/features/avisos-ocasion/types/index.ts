@@ -162,7 +162,7 @@ export const CIUDADES_INFO: Record<CiudadCode, { city: string; state: string }> 
 
 // Helper para saber si la categoría requiere dirección
 export function categoriaNecesitaDireccion(categoria: AvisoCategoria): boolean {
-  return ['renta_inmueble', 'venta_inmueble', 'roomie', 'venta', 'renta_auto', 'otro'].includes(categoria)
+  return ['renta_inmueble', 'venta_inmueble', 'roomie', 'venta', 'renta_auto', 'medico', 'otro'].includes(categoria)
 }
 
 // Helper para saber si la categoría es de roomie

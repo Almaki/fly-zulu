@@ -407,7 +407,7 @@ export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFo
               {/* Dirección con autocompletado */}
               <div>
                 <label className="text-sm text-[#a1a1aa] mb-1.5 block">
-                  Dirección del inmueble
+                  {isInmueble || isRoomie ? 'Dirección del inmueble' : 'Dirección / Ubicación'}
                 </label>
                 <AddressAutocomplete
                   value={formData.direccion}
@@ -420,20 +420,22 @@ export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFo
                 </p>
               </div>
 
-              {/* Fecha de disponibilidad */}
-              <div>
-                <label className="text-sm text-[#a1a1aa] mb-1.5 block flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Fecha de disponibilidad
-                </label>
-                <Input
-                  type="date"
-                  value={formData.fecha_disponibilidad || ''}
-                  onChange={(e) => setFormData({ ...formData, fecha_disponibilidad: e.target.value })}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="bg-[#141414] border-[#27272a]"
-                />
-              </div>
+              {/* Fecha de disponibilidad (solo inmuebles y roomie) */}
+              {(isInmueble || isRoomie) && (
+                <div>
+                  <label className="text-sm text-[#a1a1aa] mb-1.5 block flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Fecha de disponibilidad
+                  </label>
+                  <Input
+                    type="date"
+                    value={formData.fecha_disponibilidad || ''}
+                    onChange={(e) => setFormData({ ...formData, fecha_disponibilidad: e.target.value })}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="bg-[#141414] border-[#27272a]"
+                  />
+                </div>
+              )}
             </>
           )}
 

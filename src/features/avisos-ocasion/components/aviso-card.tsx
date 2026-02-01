@@ -65,11 +65,7 @@ export function AvisoCard({ aviso, onDeleted }: AvisoCardProps) {
   const handleWhatsApp = () => {
     if (!aviso.whatsapp) return
     const phone = aviso.whatsapp.replace(/\D/g, '')
-    const message = encodeURIComponent(
-      isTaxi
-        ? `Hola ${aviso.nombre_conductor || ''}, vi tu servicio de taxi en FLY-ZULU y me interesa.`
-        : `Hola, vi tu aviso "${aviso.titulo}" en FLY-ZULU y me interesa.`
-    )
+    const message = encodeURIComponent('Hola soy de Volaris, ¿Me puede ayudar?')
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank')
   }
 
