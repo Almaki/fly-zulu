@@ -4,8 +4,6 @@ import { createServerSupabaseClient } from '@/shared/lib/supabase/server'
 
 interface ActivityParams {
   location?: string
-  latitude?: number
-  longitude?: number
 }
 
 export async function updateUserActivity(params?: ActivityParams): Promise<{ error: string | null }> {
@@ -18,13 +16,13 @@ export async function updateUserActivity(params?: ActivityParams): Promise<{ err
       return { error: null } // Silently ignore if not authenticated
     }
 
-    // Call the database function to update activity with geolocation
+    // Call the database function to update activity
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any).rpc('update_user_activity', {
       p_user_id: user.id,
       p_location: params?.location || null,
-      p_latitude: params?.latitude || null,
-      p_longitude: params?.longitude || null,
+      p_latitude: null,
+      p_longitude: null,
     })
 
     if (error) {

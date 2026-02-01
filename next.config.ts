@@ -24,7 +24,7 @@ const securityHeaders = [
   // Permissions policy - restrict sensitive features
   {
     key: 'Permissions-Policy',
-    value: 'camera=(), microphone=(), geolocation=(self)',
+    value: 'camera=(), microphone=(), geolocation=()',
   },
 ]
 

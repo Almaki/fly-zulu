@@ -343,9 +343,9 @@ export function ExchangeRate({ airportCode, onAllFieldsComplete }: ExchangeRateP
   const cheapestLocation = getCheapestSellLocation()
 
   return (
-    <div className="py-4 bg-zinc-800/40 rounded-lg border border-zinc-700/30">
+    <div className="py-4">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 mb-4">
+      <div className="flex items-center justify-between px-2 mb-4">
         <div className="flex items-center gap-2">
           <DollarSign className="w-4 h-4 text-[#22c55e]" />
           <span className="text-xs font-bold text-zinc-300">TIPO DE CAMBIO USD</span>
@@ -356,25 +356,25 @@ export function ExchangeRate({ airportCode, onAllFieldsComplete }: ExchangeRateP
         </div>
       </div>
 
-      {/* Two columns: Toro Shop | Gates */}
-      <div className="grid grid-cols-2 gap-4 px-4">
-        {/* Toro Shop Column */}
-        <div className={`bg-gradient-to-br from-[#f59e0b]/10 to-[#f59e0b]/5 rounded-xl p-4 border transition-all duration-500 ${
+      {/* Two location cards stacked */}
+      <div className="space-y-3">
+        {/* Toro Shop Card */}
+        <div className={`rounded-xl border transition-all duration-500 ${
           cheapestLocation === 'toro_shop'
-            ? 'border-[#22c55e]/60 shadow-[0_0_15px_rgba(34,197,94,0.3)] animate-pulse'
+            ? 'border-[#22c55e]/60 shadow-[0_0_15px_rgba(34,197,94,0.3)]'
             : 'border-[#f59e0b]/20'
-        }`}>
-          <h3 className="text-sm font-bold text-[#fbbf24] mb-4 text-center">Toro Shop</h3>
-          {cheapestLocation === 'toro_shop' && (
-            <div className="text-center mb-2">
+        } bg-gradient-to-br from-[#f59e0b]/10 to-[#f59e0b]/5`}>
+          <div className="flex items-center justify-between px-4 pt-3 pb-2">
+            <h3 className="text-sm font-bold text-[#fbbf24]">Toro Shop</h3>
+            {cheapestLocation === 'toro_shop' && (
               <span className="text-[9px] bg-[#22c55e]/20 text-[#22c55e] px-2 py-0.5 rounded-full font-medium">
                 MEJOR PRECIO
               </span>
-            </div>
-          )}
+            )}
+          </div>
 
           {toroShopRate && (
-            <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3 px-4 pb-4">
               {/* Compra */}
               <div className="text-center">
                 <span className="text-[10px] text-zinc-500 uppercase tracking-wider block mb-1">Compra</span>
@@ -407,23 +407,23 @@ export function ExchangeRate({ airportCode, onAllFieldsComplete }: ExchangeRateP
           )}
         </div>
 
-        {/* Gates Column */}
-        <div className={`bg-gradient-to-br from-[#3b82f6]/10 to-[#3b82f6]/5 rounded-xl p-4 border transition-all duration-500 ${
+        {/* Gates Card */}
+        <div className={`rounded-xl border transition-all duration-500 ${
           cheapestLocation === 'gates'
-            ? 'border-[#22c55e]/60 shadow-[0_0_15px_rgba(34,197,94,0.3)] animate-pulse'
+            ? 'border-[#22c55e]/60 shadow-[0_0_15px_rgba(34,197,94,0.3)]'
             : 'border-[#3b82f6]/20'
-        }`}>
-          <h3 className="text-sm font-bold text-[#60a5fa] mb-4 text-center">Gates</h3>
-          {cheapestLocation === 'gates' && (
-            <div className="text-center mb-2">
+        } bg-gradient-to-br from-[#3b82f6]/10 to-[#3b82f6]/5`}>
+          <div className="flex items-center justify-between px-4 pt-3 pb-2">
+            <h3 className="text-sm font-bold text-[#60a5fa]">Gates</h3>
+            {cheapestLocation === 'gates' && (
               <span className="text-[9px] bg-[#22c55e]/20 text-[#22c55e] px-2 py-0.5 rounded-full font-medium">
                 MEJOR PRECIO
               </span>
-            </div>
-          )}
+            )}
+          </div>
 
           {gatesRate && (
-            <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3 px-4 pb-4">
               {/* Compra */}
               <div className="text-center">
                 <span className="text-[10px] text-zinc-500 uppercase tracking-wider block mb-1">Compra</span>
@@ -459,7 +459,7 @@ export function ExchangeRate({ airportCode, onAllFieldsComplete }: ExchangeRateP
 
       {/* Last update info */}
       {hasValidUpdate && (
-        <div className="mt-4 pt-3 mx-4 border-t border-zinc-700/30 flex items-center justify-center gap-1">
+        <div className="mt-4 pt-3 border-t border-zinc-700/30 flex items-center justify-center gap-1">
           <span className="text-[10px] text-zinc-400">
             Actualizado {formatDistanceToNow(lastUpdate.date, { addSuffix: true, locale: es })}
             {lastUpdate.by && <span className="text-[#f59e0b]"> por {lastUpdate.by}</span>}
