@@ -63,17 +63,15 @@ function RunwayLine({ runway, index, total }: { runway: RunwayInfo; index: numbe
 }
 
 function AnimatedWindArrow({ wdir, wspd, wgst }: { wdir: number; wspd: number; wgst: number | null }) {
-  // Arrow points FROM wind direction toward center
-  const arrowLen = 32
-  const tip = headingToXY(wdir, -arrowLen / 2) // tip goes toward where wind is going
-  const tail = headingToXY(wdir, arrowLen / 2) // tail is where wind comes from
+  // Arrowhead at wind origin side, pointing toward runway center
+  const arrowLen = 50
+  const tip = headingToXY(wdir, arrowLen / 2)   // tip (arrowhead) at wind origin
+  const tail = headingToXY(wdir, -arrowLen / 2)  // tail at downwind side
 
-  // Arrowhead
+  // Arrowhead wings extend outward (away from center), tip points inward
   const headSize = 8
   const headAngle = 28
-  // Arrow points from tail toward tip, so the head direction is opposite of wdir
-  const tipDir = wdir + 180
-  const headRad = (tipDir * Math.PI) / 180
+  const headRad = (wdir * Math.PI) / 180
   const left = {
     x: tip.x + headSize * Math.sin(headRad + (headAngle * Math.PI) / 180),
     y: tip.y - headSize * Math.cos(headRad + (headAngle * Math.PI) / 180),

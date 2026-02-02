@@ -102,6 +102,27 @@ export async function getCurrentWeather(
   }
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function parseAircraftList(acList: any[]): AircraftState[] {
+  return acList.map((a: any) => ({
+    icao24: a.hex || '',
+    callsign: (a.flight || '').trim(),
+    registration: a.r || '',
+    aircraftType: a.t || '',
+    latitude: a.lat ?? null,
+    longitude: a.lon ?? null,
+    baroAltitude: a.alt_baro === 'ground' ? 0 : (a.alt_baro ?? null),
+    geoAltitude: a.alt_geom ?? null,
+    onGround: a.alt_baro === 'ground',
+    groundSpeed: a.gs ?? null,
+    trueTrack: a.track ?? null,
+    verticalRate: a.baro_rate ?? null,
+    squawk: a.squawk ?? null,
+    lastSeen: a.seen ?? 0,
+  }))
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 export async function searchAircraft(
   callsign: string
 ): Promise<{ data: AircraftState[]; error: string | null }> {
@@ -128,26 +149,53 @@ export async function searchAircraft(
       return { data: [], error: `No se encontro "${query}" en aire` }
     }
 
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    const matches: AircraftState[] = json.ac.map((a: any) => ({
-      icao24: a.hex || '',
-      callsign: (a.flight || '').trim(),
-      registration: a.r || '',
-      aircraftType: a.t || '',
-      latitude: a.lat ?? null,
-      longitude: a.lon ?? null,
-      baroAltitude: a.alt_baro === 'ground' ? 0 : (a.alt_baro ?? null),
-      geoAltitude: a.alt_geom ?? null,
-      onGround: a.alt_baro === 'ground',
-      groundSpeed: a.gs ?? null,
-      trueTrack: a.track ?? null,
-      verticalRate: a.baro_rate ?? null,
-      squawk: a.squawk ?? null,
-      lastSeen: a.seen ?? 0,
-    }))
-    /* eslint-enable @typescript-eslint/no-explicit-any */
+    return { data: parseAircraftList(json.ac).slice(0, 10), error: null }
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      return { data: [], error: 'Timeout al consultar ADS-B' }
+    }
+    return { data: [], error: 'Error de conexion con ADS-B' }
+  }
+}
 
-    return { data: matches.slice(0, 10), error: null }
+export async function searchNearby(
+  lat: number,
+  lon: number,
+  dist: number = 150,
+  filterPrefix?: string
+): Promise<{ data: AircraftState[]; error: string | null }> {
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 12000)
+
+    const res = await fetch(
+      `https://api.adsb.lol/v2/lat/${lat}/lon/${lon}/dist/${dist}`,
+      { cache: 'no-store', signal: controller.signal }
+    )
+
+    clearTimeout(timeout)
+
+    if (!res.ok) {
+      return { data: [], error: `ADS-B responded with ${res.status}` }
+    }
+
+    const json = await res.json()
+
+    if (!json?.ac || !Array.isArray(json.ac) || json.ac.length === 0) {
+      return { data: [], error: 'No se encontraron aeronaves en el area' }
+    }
+
+    let results = parseAircraftList(json.ac)
+
+    if (filterPrefix) {
+      const prefix = filterPrefix.toUpperCase()
+      results = results.filter(a => a.callsign.startsWith(prefix))
+    }
+
+    // Sort by altitude descending (airborne first)
+    results.sort((a, b) => (b.baroAltitude ?? -1) - (a.baroAltitude ?? -1))
+
+    return { data: results.slice(0, 20), error: null }
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') {
       return { data: [], error: 'Timeout al consultar ADS-B' }

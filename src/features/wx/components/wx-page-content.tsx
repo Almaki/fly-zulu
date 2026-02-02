@@ -8,9 +8,20 @@ import {
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { cn } from '@/shared/lib/utils'
-import { getMetar, getTaf, getCurrentWeather, searchAircraft } from '../services'
+import { getMetar, getTaf, getCurrentWeather, searchAircraft, searchNearby } from '../services'
 import { resolveIcao } from '../data/airports'
 import { AIRPORT_RUNWAYS } from '../data/airports'
+
+const ADSB_AIRPORTS: Record<string, { name: string; lat: number; lon: number }> = {
+  MMTJ: { name: 'Tijuana', lat: 32.54, lon: -116.97 },
+  MMMX: { name: 'CDMX', lat: 19.43, lon: -99.07 },
+  MMMY: { name: 'Monterrey', lat: 25.78, lon: -100.11 },
+  MMUN: { name: 'Cancun', lat: 21.04, lon: -86.87 },
+  KLAX: { name: 'Los Angeles', lat: 33.94, lon: -118.41 },
+  KJFK: { name: 'New York', lat: 40.64, lon: -73.78 },
+  KORD: { name: 'Chicago', lat: 41.97, lon: -87.91 },
+  KATL: { name: 'Atlanta', lat: 33.64, lon: -84.43 },
+}
 import { AirportDiagram } from './airport-diagram'
 import type { MetarData, TafData, CurrentWeather, AircraftState } from '../types'
 import { FLTCAT_COLORS, FLTCAT_BG, CLOUD_COVER } from '../types'
@@ -95,19 +106,27 @@ export function WxPageContent() {
     setLoading(false)
   }
 
-  const handleAdsbSearch = async () => {
-    const query = adsbInput.trim()
+  const handleAdsbSearch = async (overrideQuery?: string) => {
+    const query = (overrideQuery || adsbInput).trim().toUpperCase()
     if (!query) return
 
     setAdsbLoading(true)
     setAdsbError(null)
     setAircraft([])
 
-    const result = await searchAircraft(query)
-
-    if (result.error) {
-      setAdsbError(result.error)
+    // Check if query is a known airport → geographic search
+    const airport = ADSB_AIRPORTS[query] || ADSB_AIRPORTS[resolveIcao(query)]
+    if (airport) {
+      const result = await searchNearby(airport.lat, airport.lon, 150)
+      if (result.error) setAdsbError(result.error)
+      setAircraft(result.data)
+      setAdsbLoading(false)
+      return
     }
+
+    // Otherwise search by exact callsign
+    const result = await searchAircraft(query)
+    if (result.error) setAdsbError(result.error)
     setAircraft(result.data)
     setAdsbLoading(false)
   }
@@ -442,12 +461,12 @@ export function WxPageContent() {
                 value={adsbInput}
                 onChange={(e) => setAdsbInput(e.target.value.toUpperCase())}
                 onKeyDown={(e) => e.key === 'Enter' && handleAdsbSearch()}
-                placeholder="VOI123, AMX001, UAL..."
+                placeholder="AMX026, MMTJ, KLAX..."
                 className="pl-9 bg-[#141414] border-[#27272a] uppercase font-mono text-center"
               />
             </div>
             <Button
-              onClick={handleAdsbSearch}
+              onClick={() => handleAdsbSearch()}
               disabled={adsbLoading || !adsbInput.trim()}
               className="bg-[#0066CC] hover:bg-[#0066CC]/90 text-white px-6"
             >
@@ -455,15 +474,15 @@ export function WxPageContent() {
             </Button>
           </div>
 
-          {/* Quick airline prefixes */}
+          {/* Quick airport buttons */}
           <div className="flex flex-wrap gap-1.5">
-            {['VOI', 'AMX', 'VIV', 'MAG', 'SWA', 'UAL', 'AAL', 'DAL'].map(code => (
+            {Object.entries(ADSB_AIRPORTS).map(([code, info]) => (
               <button
                 key={code}
-                onClick={() => { setAdsbInput(code); }}
+                onClick={() => { setAdsbInput(code); handleAdsbSearch(code); }}
                 className="px-2.5 py-1 rounded-lg text-xs font-mono bg-[#141414] border border-[#27272a] text-[#a1a1aa] hover:border-[#3f3f46] hover:text-[#fafafa] transition-colors"
               >
-                {code}
+                {info.name}
               </button>
             ))}
           </div>
@@ -594,10 +613,13 @@ export function WxPageContent() {
             <div className="text-center py-12 border border-dashed border-[#27272a] rounded-xl">
               <Plane className="w-10 h-10 text-[#52525b] mx-auto" />
               <p className="text-sm text-[#71717a] mt-3">
-                Busca por callsign / numero de vuelo
+                Busca aeronaves en tiempo real
               </p>
               <p className="text-xs text-[#52525b] mt-1">
-                Ej: VOI123, AMX001, UAL1234
+                Por aeropuerto: MMTJ, MMMX, KLAX
+              </p>
+              <p className="text-xs text-[#52525b]">
+                Por callsign exacto: AMX026, VOI233
               </p>
               <p className="text-[10px] text-[#3f3f46] mt-3">
                 Datos ADS-B en tiempo real via adsb.lol
