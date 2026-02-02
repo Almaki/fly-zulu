@@ -157,10 +157,36 @@ export async function updateAviso(
     return { data: null, error: 'No autenticado' }
   }
 
+  // Build update object with only valid DB columns
+  const updateData: Record<string, unknown> = {
+    titulo: formData.titulo,
+    descripcion: formData.descripcion,
+    categoria: formData.categoria,
+    precio: formData.precio || null,
+    moneda: formData.moneda || 'MXN',
+    whatsapp: formData.whatsapp || null,
+    telefono: formData.telefono || null,
+    email: formData.email || null,
+    direccion: formData.direccion || null,
+    direccion_lat: formData.direccion_lat || null,
+    direccion_lng: formData.direccion_lng || null,
+    fecha_disponibilidad: formData.fecha_disponibilidad || null,
+    tipo_inmueble: formData.tipo_inmueble || null,
+    tiene_cochera: formData.tiene_cochera ?? null,
+    acepta_mascotas: formData.acepta_mascotas ?? null,
+    servicios_incluidos: formData.servicios_incluidos || [],
+    precio_todo_incluido: formData.precio_todo_incluido || false,
+    servicio_domicilio: formData.servicio_domicilio || false,
+    nombre_conductor: formData.nombre_conductor || null,
+    tipo_auto_taxi: formData.tipo_auto_taxi || null,
+    pagina_web: formData.pagina_web || null,
+    solicita_permanente: formData.solicita_permanente || false,
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
     .from('avisos_ocasion')
-    .update(formData)
+    .update(updateData)
     .eq('id', id)
     .eq('created_by', user.id)
     .select()
