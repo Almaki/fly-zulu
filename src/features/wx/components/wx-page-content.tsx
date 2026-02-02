@@ -43,9 +43,9 @@ function ZuluClock() {
   }, [])
 
   return (
-    <div className="flex items-center justify-center gap-2 py-1.5">
-      <span className="text-[10px] text-[#71717a] uppercase">Zulu</span>
-      <span className="font-mono text-sm font-bold text-[#00ff88]">{time}</span>
+    <div className="flex items-center justify-center gap-2 py-1">
+      <span className="text-[10px] text-[#06b6d4] uppercase tracking-wider">Zulu</span>
+      <span className="font-mono text-sm font-bold text-[#00ffff]">{time}</span>
     </div>
   )
 }
@@ -138,9 +138,6 @@ export function WxPageContent() {
 
   return (
     <div className="space-y-4">
-      {/* Zulu Clock */}
-      <ZuluClock />
-
       {/* Tabs */}
       <div className="flex gap-1 p-1 bg-[#141414] rounded-lg border border-[#27272a]">
         <button
@@ -223,6 +220,9 @@ export function WxPageContent() {
               </div>
 
               <AirportDiagram metar={metar} />
+
+              {/* Zulu Clock */}
+              <ZuluClock />
 
               {/* METAR Raw */}
               <div className="rounded-xl border border-[#27272a] bg-[#141414] p-3">
