@@ -513,6 +513,7 @@ export async function getPendingPermanentAvisos(): Promise<{
     .from('avisos_ocasion')
     .select('*, created_by_user:users!avisos_ocasion_created_by_fkey(nombre, posicion, empresa)')
     .eq('solicita_permanente', true)
+    .eq('es_permanente', false)
     .eq('activo', true)
     .order('created_at', { ascending: false })
 
@@ -547,7 +548,11 @@ export async function approvePermanentAviso(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)
     .from('avisos_ocasion')
-    .update({ expires_at: permanentDate.toISOString() })
+    .update({
+      expires_at: permanentDate.toISOString(),
+      es_permanente: true,
+      solicita_permanente: false,
+    })
     .eq('id', avisoId)
 
   if (error) {

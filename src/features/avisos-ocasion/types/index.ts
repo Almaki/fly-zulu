@@ -67,6 +67,7 @@ export interface Aviso {
 
   // Solicitud de aviso permanente
   solicita_permanente: boolean
+  es_permanente: boolean
 
   // Joined data - información del responsable de la publicación
   created_by_user?: {
