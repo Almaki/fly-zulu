@@ -138,31 +138,7 @@ export function WxPageContent() {
 
   return (
     <div className="space-y-4">
-      {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-[#141414] rounded-lg border border-[#27272a]">
-        <button
-          onClick={() => setTab('wx')}
-          className={cn(
-            'flex-1 py-2 rounded-md text-xs font-medium transition-colors',
-            tab === 'wx'
-              ? 'bg-[#0066CC] text-white'
-              : 'text-[#71717a] hover:text-[#a1a1aa]'
-          )}
-        >
-          METAR / TAF
-        </button>
-        <button
-          onClick={() => setTab('adsb')}
-          className={cn(
-            'flex-1 py-2 rounded-md text-xs font-medium transition-colors flex items-center justify-center gap-1.5',
-            tab === 'adsb'
-              ? 'bg-[#0066CC] text-white'
-              : 'text-[#71717a] hover:text-[#a1a1aa]'
-          )}
-        >
-          <Plane className="w-3.5 h-3.5" /> ADS-B
-        </button>
-      </div>
+      {/* Tabs - ADS-B hidden for now */}
 
       {/* === WX TAB === */}
       {tab === 'wx' && (

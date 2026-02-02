@@ -222,10 +222,20 @@ export function DigitalBoard({ initialAirport }: DigitalBoardProps) {
                 </div>
               </div>
 
-              <h3 className="text-xl font-bold text-[#fafafa] mb-2 animate-nudge">
-                ¡Sé el primero en colaborar!
-              </h3>
-              <p className="text-sm text-zinc-400 max-w-xs mx-auto mb-6">
+              <button
+                onClick={() => {
+                  document.getElementById('cta-add-flight')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                }}
+                className="text-xl font-bold text-[#fafafa] mb-2 animate-nudge hover:text-[#E91E8C] transition-colors cursor-pointer"
+              >
+                ¡Se el primero en colaborar!
+              </button>
+              <p
+                onClick={() => {
+                  document.getElementById('cta-add-flight')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                }}
+                className="text-sm text-zinc-400 max-w-xs mx-auto mb-6 cursor-pointer hover:text-zinc-300 transition-colors"
+              >
                 Este tablero es colaborativo. Agrega los vuelos de {selectedAirport} para ayudar a otros tripulantes.
               </p>
             </div>
@@ -264,6 +274,7 @@ export function DigitalBoard({ initialAirport }: DigitalBoardProps) {
             </div>
 
             <Button
+              id="cta-add-flight"
               onClick={() => setShowAddFlight(true)}
               className="w-full bg-[#E91E8C] hover:bg-[#E91E8C]/90 text-white font-bold py-6"
               disabled={!user}
@@ -336,7 +347,7 @@ export function DigitalBoard({ initialAirport }: DigitalBoardProps) {
       {user && selectedAirport && flights.length > 0 && (
         <button
           onClick={() => setShowAddFlight(true)}
-          className="fixed bottom-20 right-4 w-14 h-14 rounded-full bg-[#E91E8C] text-white shadow-lg shadow-[#E91E8C]/30 flex items-center justify-center hover:bg-[#E91E8C]/90 transition-all hover:scale-105 z-30"
+          className="fixed bottom-20 right-4 w-14 h-14 rounded-full bg-[#E91E8C] text-white shadow-lg shadow-[#E91E8C]/30 flex items-center justify-center hover:bg-[#E91E8C]/90 transition-all hover:scale-105 z-30 animate-pulse"
         >
           <Plus className="w-6 h-6" />
         </button>

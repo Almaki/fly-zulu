@@ -14,6 +14,7 @@ const ROUTE_TITLES: Record<string, string> = {
   '/pilot/academy': 'Academy',
   '/pilot/copilot': 'CoPilot 24/7',
   '/pilot/crewmind': 'CrewMind',
+  '/pilot/wx': 'Weather',
   // FA
   '/fa/vuelo': 'Registro de Vuelo',
   '/fa/seguridad': 'Seguridad',

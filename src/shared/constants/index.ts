@@ -107,7 +107,7 @@ export * from './airports'
 
 // Routes by role
 export const ROLE_ROUTES = {
-  PILOT: ['/pilot/mcdu', '/pilot/duty', '/pilot/academy', '/pilot/copilot', '/pilot/crewmind'],
+  PILOT: ['/pilot/mcdu', '/pilot/duty', '/pilot/academy', '/pilot/copilot', '/pilot/crewmind', '/pilot/wx'],
   FA: ['/fa/vuelo', '/fa/seguridad', '/fa/pax', '/fa/catering', '/fa/incidentes'],
   OPS: ['/ops/control', '/ops/walkaround', '/ops/gpu', '/ops/responsabilidad'],
   TRAFICO: ['/trafico/tiempos', '/trafico/especiales', '/trafico/seatmap'],

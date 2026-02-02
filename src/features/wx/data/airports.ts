@@ -24,7 +24,7 @@ export const IATA_TO_ICAO: Record<string, string> = {
   CMH: 'KCMH', PIT: 'KPIT', MKE: 'KMKE', BNA: 'KBNA',
   MSY: 'KMSY', ABQ: 'KABQ', OKC: 'KOKC', TUL: 'KTUL',
   JAX: 'KJAX', PBI: 'KPBI', RSW: 'KRSW', SMF: 'KSMF',
-  LGA: 'KLGA', HNL: 'PHNL', ANC: 'PANC',
+  LGA: 'KLGA', HNL: 'PHNL', ANC: 'PANC', FAT: 'KFAT',
 }
 
 // Airport runway database - main Mexican airports
@@ -613,6 +613,57 @@ export const AIRPORT_RUNWAYS: Record<string, AirportRunwayData> = {
       { label1: '07L', label2: '25R', heading: 70 },
       { label1: '07R', label2: '25L', heading: 70 },
       { label1: '15', label2: '33', heading: 150 },
+    ],
+  },
+  KFAT: {
+    icao: 'KFAT',
+    name: 'Fresno Yosemite Intl',
+    runways: [
+      { label1: '11L', label2: '29R', heading: 110 },
+      { label1: '11R', label2: '29L', heading: 110 },
+    ],
+  },
+  KCMH: {
+    icao: 'KCMH',
+    name: 'Columbus John Glenn Intl',
+    runways: [
+      { label1: '10L', label2: '28R', heading: 100 },
+      { label1: '10R', label2: '28L', heading: 100 },
+    ],
+  },
+  KMKE: {
+    icao: 'KMKE',
+    name: 'Milwaukee Mitchell Intl',
+    runways: [
+      { label1: '01L', label2: '19R', heading: 10 },
+      { label1: '01R', label2: '19L', heading: 10 },
+      { label1: '07L', label2: '25R', heading: 70 },
+      { label1: '07R', label2: '25L', heading: 70 },
+    ],
+  },
+  KOKC: {
+    icao: 'KOKC',
+    name: 'Oklahoma City Will Rogers World',
+    runways: [
+      { label1: '13', label2: '31', heading: 130 },
+      { label1: '17L', label2: '35R', heading: 170 },
+      { label1: '17R', label2: '35L', heading: 170 },
+    ],
+  },
+  KTUL: {
+    icao: 'KTUL',
+    name: 'Tulsa Intl',
+    runways: [
+      { label1: '18L', label2: '36R', heading: 180 },
+      { label1: '18R', label2: '36L', heading: 180 },
+    ],
+  },
+  KJAX: {
+    icao: 'KJAX',
+    name: 'Jacksonville Intl',
+    runways: [
+      { label1: '07', label2: '25', heading: 70 },
+      { label1: '13', label2: '31', heading: 130 },
     ],
   },
 }

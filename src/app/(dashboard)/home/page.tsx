@@ -121,6 +121,14 @@ export default function HomePage() {
                 badgeColor="bg-[#f59e0b]/20 text-[#fbbf24] border border-[#f59e0b]/30"
               />
               <FeatureCard
+                title="Wx"
+                href="/pilot/wx"
+                icon={CloudSun}
+                color="from-[#06b6d4] to-[#22d3ee]"
+                badge="METAR"
+                badgeColor="bg-[#06b6d4]/20 text-[#22d3ee] border border-[#06b6d4]/30"
+              />
+              <FeatureCard
                 title="Flight"
                 href="/pilot/flight"
                 icon={Plane}
