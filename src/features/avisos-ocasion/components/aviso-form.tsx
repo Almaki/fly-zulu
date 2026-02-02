@@ -545,9 +545,9 @@ export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFo
             </label>
             <Input
               value={formData.pagina_web || ''}
-              onChange={(e) => setFormData({ ...formData, pagina_web: e.target.value })}
-              placeholder="https://..."
-              type="url"
+              onChange={(e) => setFormData({ ...formData, pagina_web: e.target.value.trim() })}
+              placeholder="ejemplo.com"
+              type="text"
               className="bg-[#141414] border-[#27272a]"
             />
           </div>

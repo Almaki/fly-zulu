@@ -1,12 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Phone, MessageCircle, Clock, Trash2, MapPin, Calendar, Dog, PawPrint, Truck, Wifi, Droplets, Zap, Wrench, Flame, Package, Ban, Home, Building2, Car, User, Globe, Pin } from 'lucide-react'
+import { Phone, MessageCircle, Clock, Trash2, MapPin, Navigation, Calendar, Dog, PawPrint, Truck, Wifi, Droplets, Zap, Wrench, Flame, Package, Ban, Home, Building2, Car, User, Globe, Pin } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/utils'
 import { useAuth } from '@/features/auth/hooks'
 import { deleteAviso } from '../services'
-import { LocationMap } from './location-map'
 import type { Aviso, ServicioIncluido } from '../types'
 import { AVISO_CATEGORIAS, categoriaNecesitaDireccion, categoriaEsRoomie, categoriaEsInmueble, categoriaEsTaxi, categoriaPermiteMascotas } from '../types'
 
@@ -27,7 +26,6 @@ const SERVICIO_ICONS: Record<ServicioIncluido, { icon: typeof Wifi; label: strin
 export function AvisoCard({ aviso, onDeleted }: AvisoCardProps) {
   const { user } = useAuth()
   const [isDeleting, setIsDeleting] = useState(false)
-  const [showMap, setShowMap] = useState(false)
 
   const isOwner = user?.id === aviso.created_by
   const userRole = (user as { role?: string })?.role
@@ -198,23 +196,21 @@ export function AvisoCard({ aviso, onDeleted }: AvisoCardProps) {
       {/* Additional Info for Inmuebles/Roomie */}
       {(needsDireccion || isRoomie || aviso.servicio_domicilio) && (
         <div className="px-4 pb-3 space-y-2">
-          {/* Dirección */}
+          {/* Dirección - abre Google Maps */}
           {aviso.direccion && (
-            <button
-              onClick={() => hasLocation && setShowMap(!showMap)}
-              className={cn(
-                "flex items-center gap-2 text-xs text-[#a1a1aa] w-full text-left",
-                hasLocation && "hover:text-[#22c55e] cursor-pointer"
-              )}
+            <a
+              href={hasLocation
+                ? `https://www.google.com/maps/dir/?api=1&destination=${aviso.direccion_lat},${aviso.direccion_lng}`
+                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(aviso.direccion)}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-xs text-[#a1a1aa] hover:text-[#22c55e] transition-colors w-full"
             >
-              <MapPin className="w-3 h-3 flex-shrink-0" />
-              <span className="truncate">{aviso.direccion}</span>
-              {hasLocation && (
-                <span className="text-[#22c55e] text-[10px]">
-                  {showMap ? '▲' : '▼'}
-                </span>
-              )}
-            </button>
+              <MapPin className="w-3 h-3 flex-shrink-0 text-[#22c55e]" />
+              <span className="truncate flex-1">{aviso.direccion}</span>
+              <Navigation className="w-3 h-3 flex-shrink-0 text-[#22c55e]" />
+            </a>
           )}
 
           {/* Fecha disponibilidad */}
@@ -284,17 +280,7 @@ export function AvisoCard({ aviso, onDeleted }: AvisoCardProps) {
         </div>
       )}
 
-      {/* Map (collapsible) */}
-      {showMap && hasLocation && (
-        <div className="px-4 pb-3">
-          <LocationMap
-            lat={aviso.direccion_lat!}
-            lng={aviso.direccion_lng!}
-            address={aviso.direccion || undefined}
-            height={150}
-          />
-        </div>
-      )}
+      {/* Map removed - address now opens Google Maps directly */}
 
       {/* Publicado por - Responsable */}
       {aviso.created_by_user?.nombre && (
