@@ -32,6 +32,7 @@ export interface Aviso {
   moneda: 'MXN' | 'USD'
   whatsapp: string | null
   telefono: string | null
+  email: string | null
   imagenes: string[]
   created_by: string
   created_at: string
@@ -84,6 +85,7 @@ export interface AvisoFormData {
   moneda?: 'MXN' | 'USD'
   whatsapp?: string
   telefono?: string
+  email?: string
 
   // Campos para inmuebles y roomie
   direccion?: string

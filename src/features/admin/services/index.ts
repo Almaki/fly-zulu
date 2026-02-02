@@ -474,6 +474,112 @@ export async function generateMagicLink(
 }
 
 // =====================================================
+// AVISOS PERMANENTES
+// =====================================================
+
+export interface PendingAviso {
+  id: string
+  titulo: string
+  descripcion: string
+  categoria: string
+  ciudad_code: string
+  precio: number | null
+  moneda: string
+  whatsapp: string | null
+  telefono: string | null
+  email: string | null
+  pagina_web: string | null
+  solicita_permanente: boolean
+  created_at: string
+  expires_at: string
+  created_by_user?: {
+    nombre: string
+    role: string
+    empresa: string | null
+  }
+}
+
+export async function getPendingPermanentAvisos(): Promise<{
+  data: PendingAviso[] | null
+  error: string | null
+}> {
+  const auth = await checkSuperAdmin()
+  if (!auth.authorized) return { data: null, error: auth.error }
+
+  const supabase = await createServiceRoleClient()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from('avisos_ocasion')
+    .select('*, created_by_user:users!avisos_ocasion_created_by_fkey(nombre, posicion, empresa)')
+    .eq('solicita_permanente', true)
+    .eq('activo', true)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    return { data: null, error: error.message }
+  }
+
+  // Map posicion to role for display
+  const mapped = (data || []).map((a: Record<string, unknown>) => ({
+    ...a,
+    created_by_user: a.created_by_user ? {
+      ...(a.created_by_user as Record<string, unknown>),
+      role: (a.created_by_user as Record<string, string>).posicion
+    } : undefined
+  }))
+
+  return { data: mapped as PendingAviso[], error: null }
+}
+
+export async function approvePermanentAviso(
+  avisoId: string
+): Promise<{ error: string | null }> {
+  const auth = await checkSuperAdmin()
+  if (!auth.authorized) return { error: auth.error }
+
+  const supabase = await createServiceRoleClient()
+
+  // Set expires_at to 10 years from now (effectively permanent)
+  const permanentDate = new Date()
+  permanentDate.setFullYear(permanentDate.getFullYear() + 10)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any)
+    .from('avisos_ocasion')
+    .update({ expires_at: permanentDate.toISOString() })
+    .eq('id', avisoId)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  return { error: null }
+}
+
+export async function rejectPermanentAviso(
+  avisoId: string
+): Promise<{ error: string | null }> {
+  const auth = await checkSuperAdmin()
+  if (!auth.authorized) return { error: auth.error }
+
+  const supabase = await createServiceRoleClient()
+
+  // Remove the permanent request flag
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any)
+    .from('avisos_ocasion')
+    .update({ solicita_permanente: false })
+    .eq('id', avisoId)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  return { error: null }
+}
+
+// =====================================================
 // USERS BY CITY MAP
 // =====================================================
 

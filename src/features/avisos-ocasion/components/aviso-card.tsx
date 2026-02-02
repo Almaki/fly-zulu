@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { Phone, MessageCircle, Clock, Trash2, MapPin, Navigation, Calendar, Dog, PawPrint, Truck, Wifi, Droplets, Zap, Wrench, Flame, Package, Ban, Home, Building2, Car, User, Globe, Pin } from 'lucide-react'
+import { Phone, MessageCircle, Clock, Trash2, MapPin, Navigation, Calendar, Dog, PawPrint, Truck, Wifi, Droplets, Zap, Wrench, Flame, Package, Ban, Home, Building2, Car, User, Globe, Pin, Mail, Pencil } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/utils'
 import { useAuth } from '@/features/auth/hooks'
 import { deleteAviso } from '../services'
+import { AvisoForm } from './aviso-form'
 import type { Aviso, ServicioIncluido } from '../types'
 import { AVISO_CATEGORIAS, categoriaNecesitaDireccion, categoriaEsRoomie, categoriaEsInmueble, categoriaEsTaxi, categoriaPermiteMascotas } from '../types'
 
@@ -26,6 +27,7 @@ const SERVICIO_ICONS: Record<ServicioIncluido, { icon: typeof Wifi; label: strin
 export function AvisoCard({ aviso, onDeleted }: AvisoCardProps) {
   const { user } = useAuth()
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showEditForm, setShowEditForm] = useState(false)
 
   const isOwner = user?.id === aviso.created_by
   const userRole = (user as { role?: string })?.role
@@ -316,6 +318,17 @@ export function AvisoCard({ aviso, onDeleted }: AvisoCardProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          {isOwner && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setShowEditForm(true)}
+              className="h-8 w-8 p-0 text-[#71717a] hover:text-[#3b82f6] hover:bg-[#3b82f6]/10"
+              title="Editar"
+            >
+              <Pencil className="w-4 h-4" />
+            </Button>
+          )}
           {canDelete && (
             <Button
               size="sm"
@@ -326,6 +339,17 @@ export function AvisoCard({ aviso, onDeleted }: AvisoCardProps) {
               title={isSuperAdmin && !isOwner ? 'Eliminar (Admin)' : 'Eliminar'}
             >
               <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
+          {aviso.email && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => window.open(`mailto:${aviso.email}`, '_self')}
+              className="h-8 px-3 text-xs border-[#27272a] hover:border-[#3f3f46]"
+            >
+              <Mail className="w-3 h-3 mr-1" />
+              Email
             </Button>
           )}
           {aviso.telefono && (
@@ -351,6 +375,17 @@ export function AvisoCard({ aviso, onDeleted }: AvisoCardProps) {
           )}
         </div>
       </div>
+
+      {/* Edit Form Dialog */}
+      {showEditForm && (
+        <AvisoForm
+          open={showEditForm}
+          onOpenChange={setShowEditForm}
+          ciudadCode={aviso.ciudad_code}
+          editAviso={aviso}
+          onSuccess={onDeleted}
+        />
+      )}
     </div>
   )
 }

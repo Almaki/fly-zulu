@@ -85,6 +85,7 @@ export async function createAviso(
     moneda: formData.moneda || 'MXN',
     whatsapp: formData.whatsapp || null,
     telefono: formData.telefono || null,
+    email: formData.email || null,
     // Campos para inmuebles y roomie
     direccion: formData.direccion || null,
     direccion_lat: formData.direccion_lat || null,

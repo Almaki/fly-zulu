@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, Truck, Dog, PawPrint, Ban, Check, Car, Home, Building2, User, Globe, Pin } from 'lucide-react'
+import { Calendar, Truck, Dog, PawPrint, Ban, Check, Car, Home, Building2, User, Globe, Pin, Mail } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Textarea } from '@/shared/components/ui/textarea'
@@ -19,9 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/components/ui/select'
-import { createAviso } from '../services'
+import { createAviso, updateAviso } from '../services'
 import { AddressAutocomplete, type AddressResult } from './address-autocomplete'
-import type { CiudadCode, AvisoFormData, AvisoCategoria, ServicioIncluido, TipoInmueble, TipoAutoTaxi } from '../types'
+import type { CiudadCode, Aviso, AvisoFormData, AvisoCategoria, ServicioIncluido, TipoInmueble, TipoAutoTaxi } from '../types'
 import {
   AVISO_CATEGORIAS,
   CIUDADES_INFO,
@@ -41,15 +41,17 @@ interface AvisoFormProps {
   onOpenChange: (open: boolean) => void
   ciudadCode: CiudadCode
   onSuccess?: () => void
+  editAviso?: Aviso | null
 }
 
 const ALL_SERVICES: ServicioIncluido[] = ['internet', 'agua', 'luz', 'gas', 'mantenimiento']
 
-export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFormProps) {
+export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess, editAviso }: AvisoFormProps) {
+  const isEditMode = !!editAviso
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [formData, setFormData] = useState<AvisoFormData>({
+  const getInitialFormData = (): AvisoFormData => ({
     ciudad_code: ciudadCode,
     categoria: 'venta',
     titulo: '',
@@ -58,6 +60,7 @@ export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFo
     moneda: 'MXN',
     whatsapp: '',
     telefono: '',
+    email: '',
     // Campos inmuebles/roomie
     direccion: '',
     direccion_lat: undefined,
@@ -79,6 +82,42 @@ export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFo
     pagina_web: '',
     solicita_permanente: false,
   })
+
+  const [formData, setFormData] = useState<AvisoFormData>(getInitialFormData())
+
+  // Populate form when editing
+  useEffect(() => {
+    if (editAviso && open) {
+      setFormData({
+        ciudad_code: editAviso.ciudad_code,
+        categoria: editAviso.categoria,
+        titulo: editAviso.titulo,
+        descripcion: editAviso.descripcion,
+        precio: editAviso.precio,
+        moneda: editAviso.moneda,
+        whatsapp: editAviso.whatsapp || '',
+        telefono: editAviso.telefono || '',
+        email: editAviso.email || '',
+        direccion: editAviso.direccion || '',
+        direccion_lat: editAviso.direccion_lat || undefined,
+        direccion_lng: editAviso.direccion_lng || undefined,
+        fecha_disponibilidad: editAviso.fecha_disponibilidad || '',
+        tipo_inmueble: editAviso.tipo_inmueble || undefined,
+        tiene_cochera: editAviso.tiene_cochera ?? undefined,
+        acepta_mascotas: editAviso.acepta_mascotas ?? undefined,
+        servicios_incluidos: editAviso.servicios_incluidos || [],
+        precio_todo_incluido: editAviso.precio_todo_incluido || false,
+        servicio_domicilio: editAviso.servicio_domicilio || false,
+        nombre_conductor: editAviso.nombre_conductor || '',
+        tipo_auto_taxi: editAviso.tipo_auto_taxi || undefined,
+        pagina_web: editAviso.pagina_web || '',
+        solicita_permanente: editAviso.solicita_permanente || false,
+      })
+    } else if (!editAviso && open) {
+      setFormData(getInitialFormData())
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editAviso, open])
 
   const needsDireccion = categoriaNecesitaDireccion(formData.categoria)
   const isRoomie = categoriaEsRoomie(formData.categoria)
@@ -149,7 +188,7 @@ export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFo
       return
     }
 
-    if (!formData.whatsapp && !formData.telefono) {
+    if (!formData.whatsapp && !formData.telefono && !formData.email) {
       setError('Debes proporcionar al menos un método de contacto')
       setIsLoading(false)
       return
@@ -162,10 +201,21 @@ export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFo
       return
     }
 
-    const { error: submitError } = await createAviso({
-      ...formData,
-      ciudad_code: ciudadCode,
-    })
+    let submitError: string | null = null
+
+    if (isEditMode && editAviso) {
+      const result = await updateAviso(editAviso.id, {
+        ...formData,
+        ciudad_code: ciudadCode,
+      })
+      submitError = result.error
+    } else {
+      const result = await createAviso({
+        ...formData,
+        ciudad_code: ciudadCode,
+      })
+      submitError = result.error
+    }
 
     setIsLoading(false)
 
@@ -175,30 +225,7 @@ export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFo
     }
 
     // Reset form
-    setFormData({
-      ciudad_code: ciudadCode,
-      categoria: 'venta',
-      titulo: '',
-      descripcion: '',
-      precio: null,
-      moneda: 'MXN',
-      whatsapp: '',
-      telefono: '',
-      direccion: '',
-      direccion_lat: undefined,
-      direccion_lng: undefined,
-      fecha_disponibilidad: '',
-      tipo_inmueble: undefined,
-      tiene_cochera: undefined,
-      acepta_mascotas: undefined,
-      servicios_incluidos: [],
-      precio_todo_incluido: false,
-      servicio_domicilio: false,
-      nombre_conductor: '',
-      tipo_auto_taxi: undefined,
-      pagina_web: '',
-      solicita_permanente: false,
-    })
+    setFormData(getInitialFormData())
 
     onOpenChange(false)
     onSuccess?.()
@@ -211,7 +238,7 @@ export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFo
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-[#0a0a0a] border-[#27272a]">
         <DialogHeader>
           <DialogTitle className="text-[#fafafa]">
-            Nuevo Aviso en {ciudadCode}
+            {isEditMode ? 'Editar Aviso' : `Nuevo Aviso en ${ciudadCode}`}
           </DialogTitle>
           <p className="text-xs text-[#71717a]">{ciudadInfo.city}, {ciudadInfo.state}</p>
         </DialogHeader>
@@ -572,10 +599,10 @@ export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFo
             </p>
           )}
 
-          {/* Contacto WhatsApp - Requerido para todos */}
+          {/* Contacto */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-sm text-[#a1a1aa] mb-1.5 block">WhatsApp *</label>
+              <label className="text-sm text-[#a1a1aa] mb-1.5 block">WhatsApp</label>
               <Input
                 value={formData.whatsapp || ''}
                 onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
@@ -592,6 +619,19 @@ export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFo
                 className="bg-[#141414] border-[#27272a]"
               />
             </div>
+          </div>
+          <div>
+            <label className="text-sm text-[#a1a1aa] mb-1.5 block flex items-center gap-2">
+              <Mail className="w-4 h-4" />
+              Correo electrónico
+            </label>
+            <Input
+              value={formData.email || ''}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value.trim() })}
+              placeholder="correo@ejemplo.com"
+              type="email"
+              className="bg-[#141414] border-[#27272a]"
+            />
           </div>
 
           {/* Error */}
@@ -623,7 +663,7 @@ export function AvisoForm({ open, onOpenChange, ciudadCode, onSuccess }: AvisoFo
               disabled={isLoading}
               className="flex-1 bg-[#E91E8C] hover:bg-[#E91E8C]/90 text-white"
             >
-              {isLoading ? 'Publicando...' : 'Publicar Aviso'}
+              {isLoading ? (isEditMode ? 'Guardando...' : 'Publicando...') : (isEditMode ? 'Guardar Cambios' : 'Publicar Aviso')}
             </Button>
           </div>
         </form>
