@@ -188,15 +188,17 @@ export async function updateAviso(
     .from('avisos_ocasion')
     .update(updateData)
     .eq('id', id)
-    .eq('created_by', user.id)
     .select()
-    .single()
 
   if (error) {
     return { data: null, error: error.message }
   }
 
-  return { data: data as Aviso, error: null }
+  if (!data || data.length === 0) {
+    return { data: null, error: 'No se pudo actualizar el aviso' }
+  }
+
+  return { data: data[0] as Aviso, error: null }
 }
 
 export async function deleteAviso(
