@@ -28,8 +28,9 @@ function RunwayLine({ runway, index, total }: { runway: RunwayInfo; index: numbe
 
   const end1 = headingToXY(runway.heading, RWY_LEN)
   const end2 = headingToXY(runway.heading + 180, RWY_LEN)
-  const lbl1 = headingToXY(runway.heading, RWY_LEN + 12)
-  const lbl2 = headingToXY(runway.heading + 180, RWY_LEN + 12)
+  // Labels go at the threshold (approach end): label1 at opposite of its heading
+  const lbl1 = headingToXY(runway.heading + 180, RWY_LEN + 12)
+  const lbl2 = headingToXY(runway.heading, RWY_LEN + 12)
 
   return (
     <g>
