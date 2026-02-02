@@ -84,6 +84,7 @@ export default function HomePage() {
   const userPosition = (user as { posicion?: string })?.posicion
   const userRole = (user as { role?: string })?.role
   const isSuperAdmin = userRole === 'SUPERADMIN'
+  const isAdmin = userRole === 'ADMIN' || isSuperAdmin
 
   // Determinar nombre para saludo
   const firstName = (user as { nombre?: string })?.nombre?.split(' ')[0] || 'Crew'
@@ -278,48 +279,54 @@ export default function HomePage() {
           )}
 
           {/* === ADMIN / SUPERADMIN === */}
-          {isSuperAdmin && (
+          {isAdmin && (
             <>
-              <FeatureCard
-                title="Usuarios"
-                href="/admin/users"
-                icon={Users}
-                color="from-[#ef4444] to-[#f87171]"
-                badge="Admin"
-                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
-              />
-              <FeatureCard
-                title="Mapa Usuarios"
-                href="/admin/mapa"
-                icon={MapPin}
-                color="from-[#22c55e] to-[#4ade80]"
-                badge="Admin"
-                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
-              />
-              <FeatureCard
-                title="Métricas"
-                href="/admin/metrics"
-                icon={BarChart3}
-                color="from-[#8b5cf6] to-[#a78bfa]"
-                badge="Admin"
-                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
-              />
-              <FeatureCard
-                title="Zulu News"
-                href="/admin/zulu-news"
-                icon={Newspaper}
-                color="from-[#E91E8C] to-[#ff6eb4]"
-                badge="Admin"
-                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
-              />
-              <FeatureCard
-                title="Avisos Perm."
-                href="/admin/avisos"
-                icon={Pin}
-                color="from-[#f59e0b] to-[#fbbf24]"
-                badge="Admin"
-                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
-              />
+              {/* Cards visibles solo para SUPERADMIN */}
+              {isSuperAdmin && (
+                <>
+                  <FeatureCard
+                    title="Usuarios"
+                    href="/admin/users"
+                    icon={Users}
+                    color="from-[#ef4444] to-[#f87171]"
+                    badge="Admin"
+                    badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
+                  />
+                  <FeatureCard
+                    title="Mapa Usuarios"
+                    href="/admin/mapa"
+                    icon={MapPin}
+                    color="from-[#22c55e] to-[#4ade80]"
+                    badge="Admin"
+                    badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
+                  />
+                  <FeatureCard
+                    title="Metricas"
+                    href="/admin/metrics"
+                    icon={BarChart3}
+                    color="from-[#8b5cf6] to-[#a78bfa]"
+                    badge="Admin"
+                    badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
+                  />
+                  <FeatureCard
+                    title="Zulu News"
+                    href="/admin/zulu-news"
+                    icon={Newspaper}
+                    color="from-[#E91E8C] to-[#ff6eb4]"
+                    badge="Admin"
+                    badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
+                  />
+                  <FeatureCard
+                    title="Avisos Perm."
+                    href="/admin/avisos"
+                    icon={Pin}
+                    color="from-[#f59e0b] to-[#fbbf24]"
+                    badge="Admin"
+                    badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
+                  />
+                </>
+              )}
+              {/* Cards visibles para ADMIN y SUPERADMIN */}
               <FeatureCard
                 title="Wx"
                 href="/admin/wx"
@@ -356,7 +363,7 @@ export default function HomePage() {
           )}
 
           {/* === FALLBACK (sin rol definido) === */}
-          {!userPosition && !isSuperAdmin && (
+          {!userPosition && !isAdmin && (
             <>
               <FeatureCard
                 title="Salidas"

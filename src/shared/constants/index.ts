@@ -112,6 +112,7 @@ export const ROLE_ROUTES = {
   OPS: ['/ops/control', '/ops/walkaround', '/ops/gpu', '/ops/responsabilidad'],
   TRAFICO: ['/trafico/tiempos', '/trafico/especiales', '/trafico/seatmap'],
   MANTTO: ['/mantto/transit', '/mantto/certificacion'],
+  ADMIN: ['/admin/wx'],
   SUPERADMIN: ['/admin/users', '/admin/metrics', '/admin/avisos', '/admin/wx', '/admin/fids', '/admin/activity'],
 } as const;
 
