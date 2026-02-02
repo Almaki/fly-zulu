@@ -40,6 +40,7 @@ const ROUTE_TITLES: Record<string, string> = {
   '/admin/invites': 'Invitaciones',
   '/admin/avisos': 'Avisos Permanentes',
   '/admin/zulu-news': 'Zulu News',
+  '/admin/wx': 'Weather',
 }
 
 export function Header() {

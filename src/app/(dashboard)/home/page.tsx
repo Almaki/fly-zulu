@@ -19,6 +19,7 @@ import {
   Radio,
   Newspaper,
   Pin,
+  CloudSun,
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/hooks'
 
@@ -316,6 +317,14 @@ export default function HomePage() {
                 href="/admin/avisos"
                 icon={Pin}
                 color="from-[#f59e0b] to-[#fbbf24]"
+                badge="Admin"
+                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
+              />
+              <FeatureCard
+                title="Wx"
+                href="/admin/wx"
+                icon={CloudSun}
+                color="from-[#06b6d4] to-[#22d3ee]"
                 badge="Admin"
                 badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
               />
