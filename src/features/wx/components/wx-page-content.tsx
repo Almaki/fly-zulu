@@ -5,11 +5,11 @@ import { Search, RefreshCw, Wind, Eye, Thermometer, Gauge, CloudSun, Droplets, E
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { cn } from '@/shared/lib/utils'
-import { getMetar, getTaf, getSmnConditions } from '../services'
+import { getMetar, getTaf, getCurrentWeather } from '../services'
 import { resolveIcao } from '../data/airports'
 import { AIRPORT_RUNWAYS } from '../data/airports'
 import { AirportDiagram } from './airport-diagram'
-import type { MetarData, TafData, SmnStation } from '../types'
+import type { MetarData, TafData, CurrentWeather } from '../types'
 import { FLTCAT_COLORS, FLTCAT_BG, CLOUD_COVER } from '../types'
 
 export function WxPageContent() {
@@ -17,8 +17,8 @@ export function WxPageContent() {
   const [loading, setLoading] = useState(false)
   const [metar, setMetar] = useState<MetarData | null>(null)
   const [taf, setTaf] = useState<TafData | null>(null)
-  const [smn, setSmn] = useState<SmnStation | null>(null)
-  const [smnError, setSmnError] = useState<string | null>(null)
+  const [weather, setWeather] = useState<CurrentWeather | null>(null)
+  const [weatherError, setWeatherError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleSearch = async () => {
@@ -28,8 +28,8 @@ export function WxPageContent() {
     const icao = resolveIcao(code)
     setLoading(true)
     setError(null)
-    setSmn(null)
-    setSmnError(null)
+    setWeather(null)
+    setWeatherError(null)
 
     // Fetch METAR and TAF in parallel
     const [metarResult, tafResult] = await Promise.all([
@@ -48,13 +48,13 @@ export function WxPageContent() {
     setMetar(metarResult.data)
     setTaf(tafResult.data)
 
-    // Fetch SMN data if we have coordinates (Mexico only)
+    // Fetch current weather from Open-Meteo
     if (metarResult.data?.lat && metarResult.data?.lon) {
-      const smnResult = await getSmnConditions(metarResult.data.lat, metarResult.data.lon)
-      if (smnResult.data) {
-        setSmn(smnResult.data)
+      const wxResult = await getCurrentWeather(metarResult.data.lat, metarResult.data.lon)
+      if (wxResult.data) {
+        setWeather(wxResult.data)
       } else {
-        setSmnError(smnResult.error)
+        setWeatherError(wxResult.error)
       }
     }
 
@@ -256,12 +256,12 @@ export function WxPageContent() {
             </div>
           )}
 
-          {/* SMN Section */}
+          {/* Current Weather Section */}
           <div className="rounded-xl border border-[#06b6d4]/30 bg-[#06b6d4]/5 p-3">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-bold text-[#06b6d4] flex items-center gap-1.5">
                 <CloudSun className="w-3.5 h-3.5" />
-                SMN - Servicio Meteorologico Nacional
+                Condiciones Actuales
               </h3>
               <a
                 href="https://smn.conagua.gob.mx/es/"
@@ -273,48 +273,55 @@ export function WxPageContent() {
               </a>
             </div>
 
-            {smn ? (
+            {weather ? (
               <div className="space-y-2">
-                <p className="text-xs text-[#a1a1aa]">
-                  Estacion: <span className="text-[#fafafa] font-medium">{smn.nmun}, {smn.nent}</span>
+                <p className="text-xs text-[#fafafa] font-medium">
+                  {weather.weatherDesc}
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="flex items-center gap-1.5 text-xs">
                     <Thermometer className="w-3 h-3 text-[#ef4444]" />
                     <span className="text-[#71717a]">Temp:</span>
-                    <span className="text-[#fafafa] font-mono">{smn.tempc}°C</span>
+                    <span className="text-[#fafafa] font-mono">{weather.temperature}°C</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs">
                     <Droplets className="w-3 h-3 text-[#3b82f6]" />
                     <span className="text-[#71717a]">Hum:</span>
-                    <span className="text-[#fafafa] font-mono">{smn.hr}%</span>
+                    <span className="text-[#fafafa] font-mono">{weather.humidity}%</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs">
                     <Wind className="w-3 h-3 text-[#22c55e]" />
                     <span className="text-[#71717a]">Viento:</span>
-                    <span className="text-[#fafafa] font-mono">{smn.dirvien} {smn.velvien} km/h</span>
+                    <span className="text-[#fafafa] font-mono">{weather.windDirection}° {weather.windSpeed} km/h</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs">
                     <Gauge className="w-3 h-3 text-[#f59e0b]" />
                     <span className="text-[#71717a]">Presion:</span>
-                    <span className="text-[#fafafa] font-mono">{smn.pression} hPa</span>
+                    <span className="text-[#fafafa] font-mono">{weather.pressure} hPa</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 text-xs">
                   <CloudSun className="w-3 h-3 text-[#06b6d4]" />
-                  <span className="text-[#71717a]">Cielo:</span>
-                  <span className="text-[#fafafa]">{smn.cc}</span>
+                  <span className="text-[#71717a]">Nubosidad:</span>
+                  <span className="text-[#fafafa]">{weather.cloudCover}%</span>
                 </div>
-                {smn.dtefecha && (
+                {weather.windGusts > 0 && (
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <Wind className="w-3 h-3 text-[#f59e0b]" />
+                    <span className="text-[#71717a]">Rachas:</span>
+                    <span className="text-[#fafafa] font-mono">{weather.windGusts} km/h</span>
+                  </div>
+                )}
+                {weather.time && (
                   <p className="text-[10px] text-[#52525b]">
-                    Actualizado: {smn.dtefecha}
+                    Actualizado: {weather.time}
                   </p>
                 )}
               </div>
-            ) : smnError ? (
-              <p className="text-xs text-[#52525b]">{smnError}</p>
+            ) : weatherError ? (
+              <p className="text-xs text-[#52525b]">{weatherError}</p>
             ) : (
-              <p className="text-xs text-[#52525b]">Cargando datos SMN...</p>
+              <p className="text-xs text-[#52525b]">Cargando condiciones actuales...</p>
             )}
           </div>
 

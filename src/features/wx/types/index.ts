@@ -45,19 +45,50 @@ export interface TafData {
   lon: number
 }
 
-// SMN (conagua) current conditions
-export interface SmnStation {
-  nmun: string
-  nent: string
-  lat: string
-  lon: string
-  tempc: string
-  velvien: string
-  dirvien: string
-  pression: string
-  cc: string
-  hr: string
-  dtefecha: string
+// Current weather from Open-Meteo API
+export interface CurrentWeather {
+  temperature: number
+  humidity: number
+  weatherCode: number
+  weatherDesc: string
+  cloudCover: number
+  pressure: number
+  windSpeed: number
+  windDirection: number
+  windGusts: number
+  time: string
+}
+
+// WMO Weather interpretation codes
+export const WMO_CODES: Record<number, string> = {
+  0: 'Cielo despejado',
+  1: 'Principalmente despejado',
+  2: 'Parcialmente nublado',
+  3: 'Nublado',
+  45: 'Niebla',
+  48: 'Niebla con escarcha',
+  51: 'Llovizna ligera',
+  53: 'Llovizna moderada',
+  55: 'Llovizna densa',
+  56: 'Llovizna helada ligera',
+  57: 'Llovizna helada densa',
+  61: 'Lluvia ligera',
+  63: 'Lluvia moderada',
+  65: 'Lluvia fuerte',
+  66: 'Lluvia helada ligera',
+  67: 'Lluvia helada fuerte',
+  71: 'Nevada ligera',
+  73: 'Nevada moderada',
+  75: 'Nevada fuerte',
+  77: 'Granizo fino',
+  80: 'Chubascos ligeros',
+  81: 'Chubascos moderados',
+  82: 'Chubascos violentos',
+  85: 'Nieve ligera',
+  86: 'Nieve fuerte',
+  95: 'Tormenta electrica',
+  96: 'Tormenta con granizo ligero',
+  99: 'Tormenta con granizo fuerte',
 }
 
 // Runway info for diagram

@@ -1,6 +1,7 @@
 'use server'
 
-import type { MetarData, TafData, SmnStation } from '../types'
+import type { MetarData, TafData, CurrentWeather } from '../types'
+import { WMO_CODES } from '../types'
 
 export async function getMetar(
   icao: string
@@ -52,81 +53,51 @@ export async function getTaf(
   }
 }
 
-// Haversine distance in km
-function haversineDistance(
-  lat1: number, lon1: number,
-  lat2: number, lon2: number
-): number {
-  const R = 6371
-  const dLat = ((lat2 - lat1) * Math.PI) / 180
-  const dLon = ((lon2 - lon1) * Math.PI) / 180
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2)
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-}
-
-export async function getSmnConditions(
+export async function getCurrentWeather(
   lat: number,
   lon: number
-): Promise<{ data: SmnStation | null; error: string | null }> {
+): Promise<{ data: CurrentWeather | null; error: string | null }> {
   try {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 8000)
 
-    const res = await fetch(
-      'https://smn.conagua.gob.mx/tools/GUI/webservices/index.php?method=1',
-      { cache: 'no-store', signal: controller.signal }
-    )
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m&timezone=auto`
+
+    const res = await fetch(url, { cache: 'no-store', signal: controller.signal })
 
     clearTimeout(timeout)
 
     if (!res.ok) {
-      return { data: null, error: `SMN responded with ${res.status}` }
+      return { data: null, error: `Open-Meteo responded with ${res.status}` }
     }
 
-    const text = await res.text()
+    const json = await res.json()
 
-    // Try to parse as JSON - SMN sometimes returns non-standard JSON
-    let stations: SmnStation[]
-    try {
-      stations = JSON.parse(text)
-    } catch {
-      return { data: null, error: 'Formato de respuesta SMN invalido' }
+    if (!json?.current) {
+      return { data: null, error: 'Sin datos meteorologicos actuales' }
     }
 
-    if (!Array.isArray(stations) || stations.length === 0) {
-      return { data: null, error: 'Sin datos de estaciones SMN' }
+    const c = json.current
+    const weatherCode = c.weather_code ?? 0
+
+    const weather: CurrentWeather = {
+      temperature: c.temperature_2m,
+      humidity: c.relative_humidity_2m,
+      weatherCode,
+      weatherDesc: WMO_CODES[weatherCode] || `Codigo ${weatherCode}`,
+      cloudCover: c.cloud_cover,
+      pressure: c.pressure_msl,
+      windSpeed: c.wind_speed_10m,
+      windDirection: c.wind_direction_10m,
+      windGusts: c.wind_gusts_10m,
+      time: c.time || '',
     }
 
-    // Find nearest station to the given lat/lon
-    let nearest: SmnStation | null = null
-    let minDist = Infinity
-
-    for (const station of stations) {
-      const sLat = parseFloat(station.lat)
-      const sLon = parseFloat(station.lon)
-      if (isNaN(sLat) || isNaN(sLon)) continue
-
-      const dist = haversineDistance(lat, lon, sLat, sLon)
-      if (dist < minDist) {
-        minDist = dist
-        nearest = station
-      }
-    }
-
-    if (!nearest || minDist > 150) {
-      return { data: null, error: 'No hay estacion SMN cercana' }
-    }
-
-    return { data: nearest, error: null }
+    return { data: weather, error: null }
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') {
-      return { data: null, error: 'Timeout al consultar SMN' }
+      return { data: null, error: 'Timeout al consultar condiciones actuales' }
     }
-    return { data: null, error: 'Error de conexion con SMN' }
+    return { data: null, error: 'Error de conexion al obtener condiciones actuales' }
   }
 }
