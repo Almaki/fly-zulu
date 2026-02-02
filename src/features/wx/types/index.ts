@@ -91,6 +91,24 @@ export const WMO_CODES: Record<number, string> = {
   99: 'Tormenta con granizo fuerte',
 }
 
+// ADS-B aircraft state
+export interface AircraftState {
+  icao24: string
+  callsign: string
+  registration: string
+  aircraftType: string
+  latitude: number | null
+  longitude: number | null
+  baroAltitude: number | null // feet
+  geoAltitude: number | null // feet
+  onGround: boolean
+  groundSpeed: number | null // knots
+  trueTrack: number | null // degrees
+  verticalRate: number | null // ft/min
+  squawk: string | null
+  lastSeen: number // seconds ago
+}
+
 // Runway info for diagram
 export interface RunwayInfo {
   label1: string

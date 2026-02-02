@@ -1,6 +1,6 @@
 'use server'
 
-import type { MetarData, TafData, CurrentWeather } from '../types'
+import type { MetarData, TafData, CurrentWeather, AircraftState } from '../types'
 import { WMO_CODES } from '../types'
 
 export async function getMetar(
@@ -99,5 +99,59 @@ export async function getCurrentWeather(
       return { data: null, error: 'Timeout al consultar condiciones actuales' }
     }
     return { data: null, error: 'Error de conexion al obtener condiciones actuales' }
+  }
+}
+
+export async function searchAircraft(
+  callsign: string
+): Promise<{ data: AircraftState[]; error: string | null }> {
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 10000)
+
+    const query = callsign.toUpperCase().trim()
+
+    const res = await fetch(
+      `https://api.adsb.lol/v2/callsign/${encodeURIComponent(query)}`,
+      { cache: 'no-store', signal: controller.signal }
+    )
+
+    clearTimeout(timeout)
+
+    if (!res.ok) {
+      return { data: [], error: `ADS-B responded with ${res.status}` }
+    }
+
+    const json = await res.json()
+
+    if (!json?.ac || !Array.isArray(json.ac) || json.ac.length === 0) {
+      return { data: [], error: `No se encontro "${query}" en aire` }
+    }
+
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const matches: AircraftState[] = json.ac.map((a: any) => ({
+      icao24: a.hex || '',
+      callsign: (a.flight || '').trim(),
+      registration: a.r || '',
+      aircraftType: a.t || '',
+      latitude: a.lat ?? null,
+      longitude: a.lon ?? null,
+      baroAltitude: a.alt_baro === 'ground' ? 0 : (a.alt_baro ?? null),
+      geoAltitude: a.alt_geom ?? null,
+      onGround: a.alt_baro === 'ground',
+      groundSpeed: a.gs ?? null,
+      trueTrack: a.track ?? null,
+      verticalRate: a.baro_rate ?? null,
+      squawk: a.squawk ?? null,
+      lastSeen: a.seen ?? 0,
+    }))
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+
+    return { data: matches.slice(0, 10), error: null }
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      return { data: [], error: 'Timeout al consultar ADS-B' }
+    }
+    return { data: [], error: 'Error de conexion con ADS-B' }
   }
 }
