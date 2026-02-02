@@ -18,6 +18,7 @@ import {
   MapPin,
   Radio,
   Newspaper,
+  Pin,
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/hooks'
 
@@ -307,6 +308,14 @@ export default function HomePage() {
                 href="/admin/zulu-news"
                 icon={Newspaper}
                 color="from-[#E91E8C] to-[#ff6eb4]"
+                badge="Admin"
+                badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
+              />
+              <FeatureCard
+                title="Avisos Perm."
+                href="/admin/avisos"
+                icon={Pin}
+                color="from-[#f59e0b] to-[#fbbf24]"
                 badge="Admin"
                 badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
               />
