@@ -129,7 +129,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-zinc-400 text-lg leading-relaxed mb-10 max-w-xl mx-auto">
-            Salidas en tiempo real, meteorología, comunicación entre tripulaciones y
+            Salidas en tiempo real (creadas por nosotros), meteorología, comunicación entre tripulaciones y
             herramientas operativas — todo en un solo lugar.
           </p>
 
