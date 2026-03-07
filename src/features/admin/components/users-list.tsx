@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Search, Ban, Crown, AlertTriangle, MoreVertical, ChevronDown, Users, Trash2, Phone, Mail, Calendar, Eye } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Search, Ban, Crown, AlertTriangle, MoreVertical, ChevronDown, Users, Trash2, Phone, Mail, Calendar, Eye, UserCheck } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from 'sonner'
@@ -38,6 +39,7 @@ import {
 } from '@/shared/components/ui/dialog'
 import { Separator } from '@/shared/components/ui/separator'
 import { getUsers, addStrike, removeStrike, toggleBan, setUserPremium, deleteUser, updateUserRole } from '../services'
+import { useImpersonationStore } from '@/shared/stores/impersonation-store'
 import type { User } from '@/shared/types'
 import type { AdminFilters } from '../types'
 
@@ -75,6 +77,8 @@ const POSICION_BY_CATEGORIA: Record<string, Array<{ value: string; label: string
 }
 
 export function UsersList() {
+  const router = useRouter()
+  const setImpersonating = useImpersonationStore((s) => s.setImpersonating)
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -195,6 +199,11 @@ export function UsersList() {
     setSelectedUser(user)
     setEditCategoria(user.categoria)
     setEditPosicion(user.posicion)
+  }
+
+  const handleImpersonate = (user: User) => {
+    setImpersonating(user)
+    router.push('/home')
   }
 
   const togglePosition = (position: string) => {
@@ -396,6 +405,15 @@ export function UsersList() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8"
+                            title="Visualizar como este usuario"
+                            onClick={() => handleImpersonate(user)}
+                          >
+                            <UserCheck className="h-4 w-4 text-amber-400" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
                             onClick={() => handleSelectUser(user)}
                           >
                             <Eye className="h-4 w-4 text-zinc-400" />
@@ -408,6 +426,10 @@ export function UsersList() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleImpersonate(user)} className="text-amber-400 focus:text-amber-400">
+                                <UserCheck className="h-4 w-4 mr-2" />
+                                Visualizar como
+                              </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleSelectUser(user)}>
                                 <Eye className="h-4 w-4 mr-2" />
                                 Ver Detalles

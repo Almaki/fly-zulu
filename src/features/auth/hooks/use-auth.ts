@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/shared/lib/supabase'
 import { useAuthStore } from '../store'
+import { useImpersonationStore } from '@/shared/stores/impersonation-store'
 import type { User } from '@/shared/types'
 
 export function useAuth() {
@@ -12,6 +13,7 @@ export function useAuth() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const setUser = useAuthStore((state) => state.setUser)
   const storeLogout = useAuthStore((state) => state.logout)
+  const impersonating = useImpersonationStore((s) => s.impersonating)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -111,7 +113,7 @@ export function useAuth() {
   }
 
   return {
-    user,
+    user: impersonating ?? user,
     isLoading,
     isAuthenticated,
     logout,

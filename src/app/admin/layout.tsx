@@ -1,4 +1,4 @@
-import { Header, BottomNav, AdminGlow } from '@/shared/components'
+import { Header, BottomNav, AdminGlow, ImpersonateBar } from '@/shared/components'
 import { AdminNotifications } from '@/features/admin/components'
 
 export default function AdminLayout({
@@ -8,6 +8,7 @@ export default function AdminLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col">
+      <ImpersonateBar />
       <AdminGlow />
       <AdminNotifications />
       <Header />

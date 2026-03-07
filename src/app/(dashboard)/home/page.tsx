@@ -20,6 +20,7 @@ import {
   Newspaper,
   Pin,
   CloudSun,
+  Shirt,
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/hooks'
 
@@ -160,6 +161,14 @@ export default function HomePage() {
                 badge="Live"
                 badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
               />
+              <FeatureCard
+                title="Canje de Uniformes"
+                href="/CanjeUniforme"
+                icon={Shirt}
+                color="from-[#6366f1] to-[#818cf8]"
+                badge="Crew"
+                badgeColor="bg-[#6366f1]/20 text-[#818cf8] border border-[#6366f1]/30"
+              />
             </>
           )}
 
@@ -198,6 +207,14 @@ export default function HomePage() {
                 badge="Live"
                 badgeColor="bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30"
               />
+              <FeatureCard
+                title="Canje de Uniformes"
+                href="/CanjeUniforme"
+                icon={Shirt}
+                color="from-[#6366f1] to-[#818cf8]"
+                badge="Crew"
+                badgeColor="bg-[#6366f1]/20 text-[#818cf8] border border-[#6366f1]/30"
+              />
             </>
           )}
 
@@ -225,6 +242,14 @@ export default function HomePage() {
                 color="from-[#8b5cf6] to-[#a78bfa]"
                 badge="OPS"
                 badgeColor="bg-[#8b5cf6]/20 text-[#a78bfa] border border-[#8b5cf6]/30"
+              />
+              <FeatureCard
+                title="Canje de Uniformes"
+                href="/CanjeUniforme"
+                icon={Shirt}
+                color="from-[#6366f1] to-[#818cf8]"
+                badge="Crew"
+                badgeColor="bg-[#6366f1]/20 text-[#818cf8] border border-[#6366f1]/30"
               />
             </>
           )}
@@ -255,6 +280,14 @@ export default function HomePage() {
                 badge="Tráfico"
                 badgeColor="bg-[#06b6d4]/20 text-[#22d3ee] border border-[#06b6d4]/30"
               />
+              <FeatureCard
+                title="Canje de Uniformes"
+                href="/CanjeUniforme"
+                icon={Shirt}
+                color="from-[#6366f1] to-[#818cf8]"
+                badge="Crew"
+                badgeColor="bg-[#6366f1]/20 text-[#818cf8] border border-[#6366f1]/30"
+              />
             </>
           )}
 
@@ -282,6 +315,14 @@ export default function HomePage() {
                 color="from-[#ef4444] to-[#f87171]"
                 badge="Mantto"
                 badgeColor="bg-[#ef4444]/20 text-[#f87171] border border-[#ef4444]/30"
+              />
+              <FeatureCard
+                title="Canje de Uniformes"
+                href="/CanjeUniforme"
+                icon={Shirt}
+                color="from-[#6366f1] to-[#818cf8]"
+                badge="Crew"
+                badgeColor="bg-[#6366f1]/20 text-[#818cf8] border border-[#6366f1]/30"
               />
             </>
           )}
