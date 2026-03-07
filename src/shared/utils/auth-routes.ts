@@ -41,6 +41,7 @@ export function getDashboardRoute(_role: UserRole | string): string {
  */
 export function isPublicRoute(pathname: string): boolean {
   const publicPaths = [
+    '/',
     '/login',
     '/register',
     '/forgot-password',
@@ -51,7 +52,7 @@ export function isPublicRoute(pathname: string): boolean {
     '/auth/callback',
     '/CanjeUniforme',
   ]
-  return publicPaths.some(path => pathname.startsWith(path))
+  return publicPaths.some(path => pathname === path || (path !== '/' && pathname.startsWith(path)))
 }
 
 /**
@@ -60,5 +61,5 @@ export function isPublicRoute(pathname: string): boolean {
  * @returns true si es ruta de auth
  */
 export function isAuthRoute(pathname: string): boolean {
-  return pathname === '/login' || pathname === '/register'
+  return pathname === '/' || pathname === '/login' || pathname === '/register'
 }
