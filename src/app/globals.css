@@ -1,10 +1,24 @@
 @import "tailwindcss";
+@config "../../tailwind.config.ts";
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Sky palette — needed for canje-uniforme feature (Tailwind v4 always generates @theme colors) */
+  --color-sky-50: oklch(0.977 0.013 236.62);
+  --color-sky-100: oklch(0.951 0.026 236.824);
+  --color-sky-200: oklch(0.901 0.058 230.902);
+  --color-sky-300: oklch(0.828 0.111 230.318);
+  --color-sky-400: oklch(0.746 0.16 232.661);
+  --color-sky-500: oklch(0.685 0.169 237.323);
+  --color-sky-600: oklch(0.588 0.158 241.966);
+  --color-sky-700: oklch(0.5 0.134 242.749);
+  --color-sky-800: oklch(0.443 0.11 240.79);
+  --color-sky-900: oklch(0.391 0.09 240.876);
+  --color-sky-950: oklch(0.293 0.066 243.157);
 }
 
 /* Dark mode (default) */
@@ -260,4 +274,84 @@
 
 .animate-nudge {
   animation: nudge-attention 4s ease-in-out infinite;
+}
+
+
+/* Canje Uniforme — sky color utilities (explicit because Tailwind v4 scanning misses new feature files) */
+@layer utilities {
+  .bg-sky-50 { background-color: #f0f9ff; }
+  .bg-sky-100 { background-color: #e0f2fe; }
+  .bg-sky-200 { background-color: #bae6fd; }
+  .bg-sky-400 { background-color: #38bdf8; }
+  .bg-sky-500 { background-color: #0ea5e9; }
+  .bg-sky-600 { background-color: #0284c7; }
+  .text-sky-100 { color: #e0f2fe; }
+  .text-sky-200 { color: #bae6fd; }
+  .text-sky-300 { color: #7dd3fc; }
+  .text-sky-600 { color: #0284c7; }
+  .text-sky-700 { color: #0369a1; }
+  .border-sky-100 { border-color: #e0f2fe; }
+  .border-sky-200 { border-color: #bae6fd; }
+  .border-sky-300 { border-color: #7dd3fc; }
+  .border-sky-400 { border-color: #38bdf8; }
+  .hover\:border-sky-300:hover { border-color: #7dd3fc; }
+  .hover\:bg-sky-50:hover { background-color: #f0f9ff; }
+  .hover\:bg-sky-600:hover { background-color: #0284c7; }
+  .focus\:ring-sky-400:focus { --tw-ring-color: #38bdf8; }
+  .shadow-sky-200 { --tw-shadow-color: #bae6fd; }
+  /* violet utilities */
+  .bg-violet-50 { background-color: #f5f3ff; }
+  .bg-violet-100 { background-color: #ede9fe; }
+  .border-violet-200 { border-color: #ddd6fe; }
+  .border-violet-300 { border-color: #c4b5fd; }
+  .border-violet-400\/40 { border-color: rgb(167 139 250 / 0.4); }
+  .bg-violet-500\/20 { background-color: rgb(139 92 246 / 0.2); }
+  .text-violet-700 { color: #6d28d9; }
+  /* orange utilities */
+  .border-orange-200 { border-color: #fed7aa; }
+  .border-orange-300 { border-color: #fdba74; }
+  .bg-orange-400\/20 { background-color: rgb(251 146 60 / 0.2); }
+  .border-orange-400\/40 { border-color: rgb(251 146 60 / 0.4); }
+  .text-orange-300 { color: #fdba74; }
+  /* amber utilities */
+  .text-amber-200 { color: #fde68a; }
+  .text-amber-700 { color: #b45309; }
+  .border-amber-300 { border-color: #fcd34d; }
+  .hover\:border-amber-300:hover { border-color: #fcd34d; }
+  /* indigo utilities */
+  .bg-indigo-50 { background-color: #eef2ff; }
+  .border-indigo-300 { border-color: #a5b4fc; }
+  .hover\:border-indigo-300:hover { border-color: #a5b4fc; }
+  .hover\:bg-indigo-50:hover { background-color: #eef2ff; }
+  .shadow-indigo-200 { --tw-shadow-color: #c7d2fe; }
+  .focus\:ring-indigo-400:focus { --tw-ring-color: #818cf8; }
+  /* emerald shadow */
+  .shadow-emerald-200 { --tw-shadow-color: #a7f3d0; }
+  .shadow-amber-200 { --tw-shadow-color: #fde68a; }
+  .shadow-orange-100 { --tw-shadow-color: #ffedd5; }
+  .shadow-orange-200 { --tw-shadow-color: #fed7aa; }
+  /* pink utilities — for Femenino gender selector */
+  .bg-pink-100 { background-color: #fce7f3; }
+  .bg-pink-500 { background-color: #ec4899; }
+  .text-pink-700 { color: #be185d; }
+  .border-pink-500 { border-color: #ec4899; }
+  .hover\:border-pink-300:hover { border-color: #f9a8d4; }
+  .shadow-pink-200 { --tw-shadow-color: #fbcfe8; }
+  .text-pink-600 { color: #db2777; }
+  /* blue utilities — for Masculino gender selector */
+  .bg-blue-100 { background-color: #dbeafe; }
+  .bg-blue-500 { background-color: #3b82f6; }
+  .text-blue-700 { color: #1d4ed8; }
+  .border-blue-500 { border-color: #3b82f6; }
+  .hover\:border-blue-300:hover { border-color: #93c5fd; }
+  .shadow-blue-200 { --tw-shadow-color: #bfdbfe; }
+}
+
+/* Canje Uniforme - animación suave de pulse para matches */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 2.5s ease-in-out infinite;
 }

@@ -49,6 +49,7 @@ export function isPublicRoute(pathname: string): boolean {
     '/banned',
     '/api/auth/callback',
     '/auth/callback',
+    '/CanjeUniforme',
   ]
   return publicPaths.some(path => pathname.startsWith(path))
 }
