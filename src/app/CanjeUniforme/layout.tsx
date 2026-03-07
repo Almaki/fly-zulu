@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { HomeButton } from './home-button'
 
 export const metadata: Metadata = {
   title: 'Bolsa de Canje de Uniformes | FLY-ZULU',
@@ -17,12 +18,7 @@ export default function CanjeUniformeLayout({
 
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white/60 py-4 px-4 text-center space-y-3">
-        <a
-          href="https://fly-zulu.com/home"
-          className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
-        >
-          ← Ir al Home
-        </a>
+        <HomeButton />
         <p className="text-slate-500 text-xs leading-relaxed">
           Visita{' '}
           <a
