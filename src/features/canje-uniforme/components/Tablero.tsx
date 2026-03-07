@@ -1,8 +1,17 @@
 'use client'
 
-import type { Publicacion, Match } from '../types'
+import type { Publicacion, Match, Prenda } from '../types'
 import { PRENDA_ICONS } from '../types'
 import { Trash2, CheckCircle, MessageCircle, Clock, XCircle } from 'lucide-react'
+
+function fmt(prenda: Prenda, talla: string): string {
+  if (prenda === 'CAMISA MC') return `C.${talla}`
+  if (prenda === 'CAMISA ML') {
+    const [c, m] = talla.split('/')
+    return c && m ? `C.${c}/M.${m}` : talla
+  }
+  return `T.${talla}`
+}
 
 interface Props {
   publicaciones: Publicacion[]
@@ -89,9 +98,9 @@ export function Tablero({
             <div className="min-w-0">
               <p className="text-slate-800 font-bold text-sm leading-tight flex items-center gap-1 flex-wrap">
                 <span>
-                  {pub.prenda} · T.{pub.talla}
+                  {pub.prenda} · {fmt(pub.prenda, pub.talla)}
                   {pub.talla_alternativa && (
-                    <span className="text-slate-500 font-normal"> / T.{pub.talla_alternativa}</span>
+                    <span className="text-slate-500 font-normal"> / {fmt(pub.prenda, pub.talla_alternativa)}</span>
                   )}
                 </span>
                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${pub.genero === 'F' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'}`}>

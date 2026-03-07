@@ -5,6 +5,9 @@ import { Plus, X, Minus } from 'lucide-react'
 import type { Tipo, Prenda, Genero } from '../types'
 import { PRENDAS, PRENDA_ICONS } from '../types'
 
+const CUELLO_SIZES = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45']
+const MANGA_SIZES = ['78', '80', '82', '84', '86', '88']
+
 interface Props {
   onPublicar: (
     tipo: Tipo,
@@ -21,9 +24,17 @@ interface Props {
 export function FormPublicacion({ onPublicar }: Props) {
   const [tipo, setTipo] = useState<Tipo>('TENGO')
   const [prenda, setPrenda] = useState<Prenda | ''>('')
+  // Tallas generales (no-camisa)
   const [talla, setTalla] = useState('')
   const [tallaAlt, setTallaAlt] = useState('')
   const [mostrarTallaAlt, setMostrarTallaAlt] = useState(false)
+  // Tallas camisa (cuello / manga)
+  const [tallaCuello, setTallaCuello] = useState('')
+  const [tallaManga, setTallaManga] = useState('')
+  const [tallaCuelloAlt, setTallaCuelloAlt] = useState('')
+  const [tallaMangaAlt, setTallaMangaAlt] = useState('')
+  const [mostrarTallaAltCamisa, setMostrarTallaAltCamisa] = useState(false)
+
   const [genero, setGenero] = useState<Genero>('M')
   const [cantidad, setCantidad] = useState(1)
   const [comentario, setComentario] = useState('')
@@ -33,14 +44,37 @@ export function FormPublicacion({ onPublicar }: Props) {
   const [error, setError] = useState('')
   const [exito, setExito] = useState(false)
 
+  const esCamisa = prenda === 'CAMISA MC' || prenda === 'CAMISA ML'
+  const esML = prenda === 'CAMISA ML'
+
   const handleTipo = (t: Tipo) => {
     setTipo(t)
     if (t === 'REQUIERO') setEnPool(false)
   }
 
+  const handlePrenda = (p: Prenda) => {
+    setPrenda(p)
+    // Reset talla state when switching prenda type
+    setTalla('')
+    setTallaAlt('')
+    setMostrarTallaAlt(false)
+    setTallaCuello('')
+    setTallaManga('')
+    setTallaCuelloAlt('')
+    setTallaMangaAlt('')
+    setMostrarTallaAltCamisa(false)
+    setError('')
+  }
+
   const quitarTallaAlt = () => {
     setTallaAlt('')
     setMostrarTallaAlt(false)
+  }
+
+  const quitarTallaAltCamisa = () => {
+    setTallaCuelloAlt('')
+    setTallaMangaAlt('')
+    setMostrarTallaAltCamisa(false)
   }
 
   const quitarComentario = () => {
@@ -51,25 +85,44 @@ export function FormPublicacion({ onPublicar }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!prenda) { setError('Selecciona una prenda'); return }
-    const tallaNum = parseInt(talla)
-    if (!talla || isNaN(tallaNum) || tallaNum < 1) {
-      setError('Ingresa una talla válida (número)')
-      return
+
+    let tallaFinal = ''
+    let tallaAltFinal: string | undefined
+
+    if (esCamisa) {
+      if (!tallaCuello) { setError('Selecciona la talla de cuello'); return }
+      if (esML && !tallaManga) { setError('Selecciona la talla de manga'); return }
+      tallaFinal = esML ? `${tallaCuello}/${tallaManga}` : tallaCuello
+      if (mostrarTallaAltCamisa) {
+        if (!tallaCuelloAlt) { setError('Selecciona la talla de cuello alternativa'); return }
+        if (esML && !tallaMangaAlt) { setError('Selecciona la talla de manga alternativa'); return }
+        const alt = esML ? `${tallaCuelloAlt}/${tallaMangaAlt}` : tallaCuelloAlt
+        if (alt === tallaFinal) { setError('La talla alternativa debe ser diferente a la principal'); return }
+        tallaAltFinal = alt
+      }
+    } else {
+      const tallaNum = parseInt(talla)
+      if (!talla || isNaN(tallaNum) || tallaNum < 1) {
+        setError('Ingresa una talla válida (número)')
+        return
+      }
+      tallaFinal = talla.trim()
+      if (tallaAlt) {
+        if (tallaAlt === talla) { setError('La talla alternativa debe ser diferente a la principal'); return }
+        tallaAltFinal = tallaAlt.trim()
+      }
     }
-    if (tallaAlt && tallaAlt === talla) {
-      setError('La talla alternativa debe ser diferente a la principal')
-      return
-    }
+
     setError('')
     setEnviando(true)
     try {
       const errorMsg = await onPublicar(
         tipo,
         prenda as Prenda,
-        talla.trim(),
+        tallaFinal,
         genero,
         tipo === 'TENGO' ? enPool : false,
-        tallaAlt.trim() || undefined,
+        tallaAltFinal,
         cantidad,
         comentario.trim() || undefined,
       )
@@ -81,6 +134,11 @@ export function FormPublicacion({ onPublicar }: Props) {
       setTalla('')
       setTallaAlt('')
       setMostrarTallaAlt(false)
+      setTallaCuello('')
+      setTallaManga('')
+      setTallaCuelloAlt('')
+      setTallaMangaAlt('')
+      setMostrarTallaAltCamisa(false)
       setCantidad(1)
       setComentario('')
       setMostrarComentario(false)
@@ -188,7 +246,7 @@ export function FormPublicacion({ onPublicar }: Props) {
               <button
                 key={p}
                 type="button"
-                onClick={() => setPrenda(p)}
+                onClick={() => handlePrenda(p)}
                 className={`py-2.5 rounded-xl text-sm font-medium border transition-all flex items-center gap-2 px-3 ${
                   prenda === p
                     ? 'bg-indigo-500 text-white border-indigo-500 shadow-md shadow-indigo-200'
@@ -231,117 +289,239 @@ export function FormPublicacion({ onPublicar }: Props) {
           </div>
         </div>
 
-        {/* Talla principal */}
-        <div>
-          <label className="text-slate-600 text-sm font-medium block mb-1">
-            Talla (número)
-          </label>
-          <input
-            type="number"
-            inputMode="numeric"
-            value={talla}
-            onChange={(e) => setTalla(e.target.value)}
-            placeholder="Ej: 42, 30, 58..."
-            min={1}
-            max={99}
-            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-slate-50 placeholder-slate-400"
-          />
-        </div>
+        {/* ── Talla: camisa (cuello / manga) ── */}
+        {esCamisa ? (
+          <div className="space-y-3">
+            {/* Cuello */}
+            <div>
+              <label className="text-slate-600 text-sm font-medium block mb-1.5">
+                Talla de cuello (cm)
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {CUELLO_SIZES.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setTallaCuello(s)}
+                    className={`w-11 py-2 rounded-xl text-sm font-bold border transition-all ${
+                      tallaCuello === s
+                        ? 'bg-indigo-500 text-white border-indigo-500'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-indigo-300'
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        {/* Talla alternativa */}
-        {!mostrarTallaAlt ? (
-          <button
-            type="button"
-            onClick={() => setMostrarTallaAlt(true)}
-            className="text-slate-400 text-xs font-medium hover:text-indigo-500 transition-colors flex items-center gap-1 -mt-2 ml-1"
-          >
-            <span className="text-base leading-none">+</span> También acepto otra talla
-          </button>
-        ) : (
-          <div className="-mt-2">
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-slate-500 text-xs font-medium">También acepto talla</label>
+            {/* Manga — solo para ML */}
+            {esML && (
+              <div>
+                <label className="text-slate-600 text-sm font-medium block mb-1.5">
+                  Talla de manga (cm)
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {MANGA_SIZES.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setTallaManga(s)}
+                      className={`w-11 py-2 rounded-xl text-sm font-bold border transition-all ${
+                        tallaManga === s
+                          ? 'bg-indigo-500 text-white border-indigo-500'
+                          : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-indigo-300'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Talla alternativa — camisa */}
+            {!mostrarTallaAltCamisa ? (
               <button
                 type="button"
-                onClick={quitarTallaAlt}
-                className="text-slate-400 hover:text-red-400 transition-colors flex items-center gap-0.5 text-[11px]"
+                onClick={() => setMostrarTallaAltCamisa(true)}
+                className="text-slate-400 text-xs font-medium hover:text-indigo-500 transition-colors flex items-center gap-1"
               >
-                <X size={11} /> quitar
+                <span className="text-base leading-none">+</span> También acepto otra talla
               </button>
-            </div>
-            <input
-              type="number"
-              inputMode="numeric"
-              value={tallaAlt}
-              onChange={(e) => setTallaAlt(e.target.value)}
-              placeholder="Ej: 44"
-              min={1}
-              max={99}
-              className="w-full border border-dashed border-indigo-300 rounded-xl px-4 py-2.5 text-slate-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-indigo-50/40 placeholder-slate-400"
-            />
+            ) : (
+              <div className="border border-dashed border-indigo-200 rounded-xl p-3 bg-indigo-50/30 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <p className="text-slate-500 text-xs font-medium">También acepto talla</p>
+                  <button
+                    type="button"
+                    onClick={quitarTallaAltCamisa}
+                    className="text-slate-400 hover:text-red-400 transition-colors flex items-center gap-0.5 text-[11px]"
+                  >
+                    <X size={11} /> quitar
+                  </button>
+                </div>
+                <div>
+                  <label className="text-slate-500 text-[11px] block mb-1">Cuello alternativo</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {CUELLO_SIZES.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setTallaCuelloAlt(s)}
+                        className={`w-10 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                          tallaCuelloAlt === s
+                            ? 'bg-indigo-400 text-white border-indigo-400'
+                            : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-300'
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {esML && (
+                  <div>
+                    <label className="text-slate-500 text-[11px] block mb-1">Manga alternativa</label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {MANGA_SIZES.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => setTallaMangaAlt(s)}
+                          className={`w-10 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                            tallaMangaAlt === s
+                              ? 'bg-indigo-400 text-white border-indigo-400'
+                              : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-300'
+                          }`}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
+        ) : (
+          /* ── Talla: prenda normal (número) ── */
+          prenda && (
+            <div>
+              <label className="text-slate-600 text-sm font-medium block mb-1">
+                Talla (número)
+              </label>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={talla}
+                onChange={(e) => setTalla(e.target.value)}
+                placeholder="Ej: 42, 30, 58..."
+                min={1}
+                max={99}
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-slate-50 placeholder-slate-400"
+              />
+              {/* Talla alternativa — prenda normal */}
+              {!mostrarTallaAlt ? (
+                <button
+                  type="button"
+                  onClick={() => setMostrarTallaAlt(true)}
+                  className="text-slate-400 text-xs font-medium hover:text-indigo-500 transition-colors flex items-center gap-1 mt-2 ml-1"
+                >
+                  <span className="text-base leading-none">+</span> También acepto otra talla
+                </button>
+              ) : (
+                <div className="mt-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-slate-500 text-xs font-medium">También acepto talla</label>
+                    <button
+                      type="button"
+                      onClick={quitarTallaAlt}
+                      className="text-slate-400 hover:text-red-400 transition-colors flex items-center gap-0.5 text-[11px]"
+                    >
+                      <X size={11} /> quitar
+                    </button>
+                  </div>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    value={tallaAlt}
+                    onChange={(e) => setTallaAlt(e.target.value)}
+                    placeholder="Ej: 44"
+                    min={1}
+                    max={99}
+                    className="w-full border border-dashed border-indigo-300 rounded-xl px-4 py-2.5 text-slate-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-indigo-50/40 placeholder-slate-400"
+                  />
+                </div>
+              )}
+            </div>
+          )
         )}
 
         {/* Cantidad */}
-        <div>
-          <label className="text-slate-600 text-sm font-medium block mb-2">
-            Cantidad de prendas
-          </label>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setCantidad((c) => Math.max(1, c - 1))}
-              disabled={cantidad <= 1}
-              className="w-10 h-10 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-slate-100 disabled:opacity-30 transition-all"
-            >
-              <Minus size={16} />
-            </button>
-            <span className="text-slate-800 font-bold text-lg w-8 text-center">{cantidad}</span>
-            <button
-              type="button"
-              onClick={() => setCantidad((c) => Math.min(10, c + 1))}
-              disabled={cantidad >= 10}
-              className="w-10 h-10 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-slate-100 disabled:opacity-30 transition-all"
-            >
-              <Plus size={16} />
-            </button>
-            <span className="text-slate-400 text-xs ml-1">
-              {cantidad === 1 ? 'prenda' : 'prendas'}
-            </span>
-          </div>
-        </div>
-
-        {/* Comentario opcional */}
-        {!mostrarComentario ? (
-          <button
-            type="button"
-            onClick={() => setMostrarComentario(true)}
-            className="text-slate-400 text-xs font-medium hover:text-slate-600 transition-colors flex items-center gap-1 -mt-2 ml-1"
-          >
-            <span className="text-base leading-none">+</span> Agregar comentario (estado, detalles...)
-          </button>
-        ) : (
-          <div className="-mt-2">
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-slate-500 text-xs font-medium">Comentario (opcional)</label>
+        {prenda && (
+          <div>
+            <label className="text-slate-600 text-sm font-medium block mb-2">
+              Cantidad de prendas
+            </label>
+            <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={quitarComentario}
-                className="text-slate-400 hover:text-red-400 transition-colors flex items-center gap-0.5 text-[11px]"
+                onClick={() => setCantidad((c) => Math.max(1, c - 1))}
+                disabled={cantidad <= 1}
+                className="w-10 h-10 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-slate-100 disabled:opacity-30 transition-all"
               >
-                <X size={11} /> quitar
+                <Minus size={16} />
               </button>
+              <span className="text-slate-800 font-bold text-lg w-8 text-center">{cantidad}</span>
+              <button
+                type="button"
+                onClick={() => setCantidad((c) => Math.min(10, c + 1))}
+                disabled={cantidad >= 10}
+                className="w-10 h-10 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-slate-100 disabled:opacity-30 transition-all"
+              >
+                <Plus size={16} />
+              </button>
+              <span className="text-slate-400 text-xs ml-1">
+                {cantidad === 1 ? 'prenda' : 'prendas'}
+              </span>
             </div>
-            <textarea
-              value={comentario}
-              onChange={(e) => setComentario(e.target.value)}
-              placeholder="Ej: En buen estado, sin manchas. Disponible en base TIJ."
-              maxLength={150}
-              rows={2}
-              className="w-full border border-dashed border-slate-300 rounded-xl px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-slate-50/60 placeholder-slate-400 resize-none"
-            />
-            <p className="text-slate-400 text-[10px] text-right mt-0.5">{comentario.length}/150</p>
           </div>
+        )}
+
+        {/* Comentario opcional */}
+        {prenda && (
+          !mostrarComentario ? (
+            <button
+              type="button"
+              onClick={() => setMostrarComentario(true)}
+              className="text-slate-400 text-xs font-medium hover:text-slate-600 transition-colors flex items-center gap-1 -mt-2 ml-1"
+            >
+              <span className="text-base leading-none">+</span> Agregar comentario (estado, detalles...)
+            </button>
+          ) : (
+            <div className="-mt-2">
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-slate-500 text-xs font-medium">Comentario (opcional)</label>
+                <button
+                  type="button"
+                  onClick={quitarComentario}
+                  className="text-slate-400 hover:text-red-400 transition-colors flex items-center gap-0.5 text-[11px]"
+                >
+                  <X size={11} /> quitar
+                </button>
+              </div>
+              <textarea
+                value={comentario}
+                onChange={(e) => setComentario(e.target.value)}
+                placeholder="Ej: En buen estado, sin manchas. Disponible en base TIJ."
+                maxLength={150}
+                rows={2}
+                className="w-full border border-dashed border-slate-300 rounded-xl px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-slate-50/60 placeholder-slate-400 resize-none"
+              />
+              <p className="text-slate-400 text-[10px] text-right mt-0.5">{comentario.length}/150</p>
+            </div>
+          )
         )}
 
         {error && (

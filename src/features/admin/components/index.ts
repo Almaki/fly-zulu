@@ -1,4 +1,5 @@
 export { MetricsDashboard } from './metrics-dashboard'
+export { CanjeDashboard } from './canje-dashboard'
 export { UsersList } from './users-list'
 
 export { CityUsersMap } from './city-users-map'

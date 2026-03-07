@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Users, Crown, Plane, TrendingUp, AlertTriangle, RefreshCw, Activity, MapPin, MessageCircle, ChevronRight, UserPlus } from 'lucide-react'
+import { Users, Crown, Plane, TrendingUp, AlertTriangle, RefreshCw, Activity, MapPin, MessageCircle, ChevronRight, UserPlus, ShirtIcon } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -216,6 +216,23 @@ export function MetricsDashboard() {
                 <div>
                   <p className="font-medium text-[#fafafa] text-sm">Invitar</p>
                   <p className="text-xs text-zinc-500">Usuarios</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Canje Uniformes Link */}
+        <Link href="/admin/canje">
+          <Card className="border-indigo-500/30 bg-indigo-500/5 hover:bg-indigo-500/10 transition-colors cursor-pointer h-full">
+            <CardContent className="p-4">
+              <div className="flex flex-col items-center text-center gap-2">
+                <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                  <ShirtIcon className="h-5 w-5 text-indigo-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-[#fafafa] text-sm">Canje</p>
+                  <p className="text-xs text-zinc-500">Uniformes</p>
                 </div>
               </div>
             </CardContent>
