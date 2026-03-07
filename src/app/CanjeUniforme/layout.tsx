@@ -16,7 +16,13 @@ export default function CanjeUniformeLayout({
       <div className="flex-1">{children}</div>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white/60 py-4 px-4 text-center">
+      <footer className="border-t border-slate-200 bg-white/60 py-4 px-4 text-center space-y-3">
+        <a
+          href="https://fly-zulu.com/home"
+          className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
+        >
+          ← Ir al Home
+        </a>
         <p className="text-slate-500 text-xs leading-relaxed">
           Visita{' '}
           <a
