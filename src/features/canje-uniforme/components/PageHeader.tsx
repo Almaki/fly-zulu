@@ -27,7 +27,7 @@ const pasos = [
     num: '1',
     color: 'bg-sky-500',
     titulo: 'Identifícate',
-    desc: 'Ingresa tu Número de Rol y selecciona tu base. No necesitas contraseña ni cuenta.',
+    desc: 'Ingresa tu Nombre de Rol y selecciona tu base. No necesitas contraseña ni cuenta.',
   },
   {
     num: '2',

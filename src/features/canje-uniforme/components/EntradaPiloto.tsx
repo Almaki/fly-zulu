@@ -16,7 +16,7 @@ export function EntradaPiloto({ onEntrar }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!rol.trim()) { setError('Ingresa tu Número de Rol'); return }
+    if (!rol.trim()) { setError('Ingresa tu Nombre de Rol'); return }
     if (!base) { setError('Selecciona tu base'); return }
     setError('')
     onEntrar({ numero_rol: rol.trim().toUpperCase(), base: base as Base })
@@ -32,16 +32,16 @@ export function EntradaPiloto({ onEntrar }: Props) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
-        {/* Número de Rol */}
+        {/* Nombre de Rol */}
         <div>
           <label className="text-slate-600 text-sm font-medium block mb-1">
-            Número de Rol
+            Nombre de Rol
           </label>
           <input
             type="text"
             value={rol}
             onChange={(e) => setRol(e.target.value)}
-            placeholder="Ej: 12345"
+            placeholder="Ej: GARCIA LOPEZ"
             maxLength={20}
             className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent bg-slate-50 placeholder-slate-400"
           />
