@@ -33,7 +33,7 @@ const FEATURES = [
     icon: Clock,
     color: 'bg-amber-500/10 text-amber-400',
     title: 'Board de Salidas',
-    desc: 'FIDS en tiempo real: estado de vuelos, puertas y retrasos actualizados al minuto.',
+    desc: 'COLABORATIVO · FIDS en tiempo real: estado de vuelos, puertas y retrasos. Incluye Tipo de Cambio USD/MXN. Disponible para TIJ y MEX.',
   },
   {
     icon: Wind,
