@@ -7,6 +7,7 @@ import {
   crearPublicacion,
   marcarResueltoMatch,
   eliminarPublicacion,
+  cancelarMatchPublicacion,
   existePublicacionActiva,
   buildChatKey,
 } from '../services/supabase'
@@ -44,6 +45,13 @@ export function useCanje() {
 
   // ─── Calcular matches (memoizado) ────────────────────────────────────────
   const matches = useMemo<Match[]>(() => {
+    // Compatibilidad de talla: cualquier combinación principal/alternativa entre las dos pubs
+    const tallasMatch = (a: Publicacion, b: Publicacion): boolean => {
+      const aOps = [a.talla, a.talla_alternativa].filter((x): x is string => !!x)
+      const bOps = [b.talla, b.talla_alternativa].filter((x): x is string => !!x)
+      return aOps.some((t) => bOps.includes(t))
+    }
+
     const result: Match[] = []
     const tengo = publicaciones.filter((p) => p.tipo === 'TENGO')
     const requiero = publicaciones.filter((p) => p.tipo === 'REQUIERO')
@@ -63,17 +71,18 @@ export function useCanje() {
     for (const t of tengo) {
       for (const r of requiero) {
         if (t.numero_rol === r.numero_rol) continue
-        if (t.prenda !== r.prenda || t.talla !== r.talla || t.genero !== r.genero) continue
+        if (t.prenda !== r.prenda || t.genero !== r.genero) continue
+        if (!tallasMatch(t, r)) continue
         const key = buildChatKey(t.id, r.id)
         if (yaAgregados.has(key)) continue
 
         const mismo_base = t.base === r.base
 
-        // Match Directo: quien requiere también TIENE algo que el otro requiere
+        // Match Directo: quien requiere también TIENE algo que el otro requiere (con tallas flexibles)
         const bTienes = tengosPorPiloto.get(r.numero_rol) ?? []
         const aRequiere = requierosPorPiloto.get(t.numero_rol) ?? []
         const esRecíproco = bTienes.some((bt) =>
-          aRequiere.some((ar) => ar.prenda === bt.prenda && ar.talla === bt.talla && ar.genero === bt.genero)
+          aRequiere.some((ar) => ar.prenda === bt.prenda && ar.genero === bt.genero && tallasMatch(ar, bt))
         )
 
         if (esRecíproco) {
@@ -141,7 +150,16 @@ export function useCanje() {
   }, [])
 
   // ─── Publicar ─────────────────────────────────────────────────────────────
-  const publicar = async (tipo: Tipo, prenda: Prenda, talla: string, genero: Genero, enPool: boolean): Promise<string | null> => {
+  const publicar = async (
+    tipo: Tipo,
+    prenda: Prenda,
+    talla: string,
+    genero: Genero,
+    enPool: boolean,
+    tallaAlternativa?: string,
+    cantidad: number = 1,
+    comentario?: string,
+  ): Promise<string | null> => {
     if (!piloto) return 'No hay piloto activo'
     const duplicado = await existePublicacionActiva({
       numero_rol: piloto.numero_rol,
@@ -157,7 +175,10 @@ export function useCanje() {
       tipo,
       prenda,
       talla,
+      talla_alternativa: tallaAlternativa || undefined,
       genero,
+      cantidad,
+      comentario: comentario || undefined,
       en_pool: enPool,
     })
     return null // sin error
@@ -172,6 +193,15 @@ export function useCanje() {
   // ─── Retirar publicación propia sin match ─────────────────────────────────
   const retirar = async (id: string) => {
     await eliminarPublicacion(id)
+  }
+
+  // ─── Cancelar match: limpia estado para volver al tablero libre ───────────
+  const cancelarMatch = async (match: Match) => {
+    if (!piloto) return
+    // Solo cancela la publicación del piloto que solicita
+    const miPubId = match.tengo.numero_rol === piloto.numero_rol ? match.tengo.id : match.requiero.id
+    await cancelarMatchPublicacion(miPubId)
+    cerrarChat()
   }
 
   const abrirChat = (match: Match) => setChatKey(match.chat_key)
@@ -195,6 +225,7 @@ export function useCanje() {
     publicar,
     resolverMatch,
     retirar,
+    cancelarMatch,
     abrirChat,
     cerrarChat,
   }

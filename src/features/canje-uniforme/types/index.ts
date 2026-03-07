@@ -12,7 +12,10 @@ export interface Publicacion {
   tipo: Tipo
   prenda: Prenda
   talla: string
+  talla_alternativa?: string
   genero: Genero
+  cantidad: number
+  comentario?: string
   en_pool: boolean
   estado: EstadoPub
   resuelto_por: string[]

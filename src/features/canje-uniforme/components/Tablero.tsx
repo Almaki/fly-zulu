@@ -2,7 +2,7 @@
 
 import type { Publicacion, Match } from '../types'
 import { PRENDA_ICONS } from '../types'
-import { Trash2, CheckCircle, MessageCircle, Clock } from 'lucide-react'
+import { Trash2, CheckCircle, MessageCircle, Clock, XCircle } from 'lucide-react'
 
 interface Props {
   publicaciones: Publicacion[]
@@ -12,6 +12,7 @@ interface Props {
   onRetirar: (id: string) => Promise<void>
   onResolver: (match: Match) => Promise<void>
   onAbrirChat: (match: Match) => void
+  onCancelarMatch: (match: Match) => Promise<void>
 }
 
 export function Tablero({
@@ -22,6 +23,7 @@ export function Tablero({
   onRetirar,
   onResolver,
   onAbrirChat,
+  onCancelarMatch,
 }: Props) {
   const tengo = publicaciones.filter((p) => p.tipo === 'TENGO')
   const requiero = publicaciones.filter((p) => p.tipo === 'REQUIERO')
@@ -36,7 +38,6 @@ export function Tablero({
     const tipoMatch = match?.tipo
     const yaResolvi = pub.resuelto_por?.includes(numeroRol) ?? false
 
-    // Estilos según tipo de match
     let borderClass = ''
     let badgeLabel = ''
     let badgeClass = ''
@@ -86,15 +87,28 @@ export function Tablero({
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-2xl shrink-0">{PRENDA_ICONS[pub.prenda]}</span>
             <div className="min-w-0">
-              <p className="text-slate-800 font-bold text-sm leading-tight">
-                {pub.prenda} · T.{pub.talla}
-                <span className={`ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${pub.genero === 'F' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'}`}>
+              <p className="text-slate-800 font-bold text-sm leading-tight flex items-center gap-1 flex-wrap">
+                <span>
+                  {pub.prenda} · T.{pub.talla}
+                  {pub.talla_alternativa && (
+                    <span className="text-slate-500 font-normal"> / T.{pub.talla_alternativa}</span>
+                  )}
+                </span>
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${pub.genero === 'F' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'}`}>
                   {pub.genero === 'F' ? '♀ F' : '♂ M'}
                 </span>
               </p>
               <p className="text-slate-500 text-xs truncate">
                 <span className="font-semibold">{pub.numero_rol}</span> · {pub.base}
+                {pub.cantidad > 1 && (
+                  <span className="ml-1 text-indigo-600 font-semibold">× {pub.cantidad}</span>
+                )}
               </p>
+              {pub.comentario && (
+                <p className="text-slate-400 text-[11px] mt-0.5 leading-snug italic truncate" title={pub.comentario}>
+                  💬 {pub.comentario}
+                </p>
+              )}
               {pub.resuelto_por && pub.resuelto_por.length > 0 && (
                 <p className="text-amber-600 text-[10px] font-medium mt-0.5">
                   ⏳ {pub.resuelto_por.length}/2 confirmaron
@@ -128,6 +142,15 @@ export function Tablero({
                 <Clock size={10} /> Esperando...
               </span>
             )}
+            {esMia && tieneMatch && match && !yaResolvi && (
+              <button
+                onClick={() => onCancelarMatch(match)}
+                className="text-slate-400 hover:text-red-500 p-1 rounded-lg hover:bg-red-50 transition-colors"
+                title="Cancelar match y volver al tablero"
+              >
+                <XCircle size={13} />
+              </button>
+            )}
             {esMia && !tieneMatch && (
               <button
                 onClick={() => onRetirar(pub.id)}
@@ -149,7 +172,6 @@ export function Tablero({
 
   return (
     <div className="space-y-5">
-      {/* Resumen de matches globales */}
       {matches.length > 0 && (
         <div className="flex gap-2 flex-wrap">
           {directosMismaBase > 0 && (

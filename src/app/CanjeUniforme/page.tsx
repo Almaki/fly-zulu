@@ -24,6 +24,7 @@ export default function CanjeUniformePage() {
     publicar,
     resolverMatch,
     retirar,
+    cancelarMatch,
     abrirChat,
     cerrarChat,
   } = useCanje()
@@ -76,6 +77,7 @@ export default function CanjeUniformePage() {
             onRetirar={retirar}
             onResolver={resolverMatch}
             onAbrirChat={abrirChat}
+            onCancelarMatch={cancelarMatch}
           />
         )}
       </div>

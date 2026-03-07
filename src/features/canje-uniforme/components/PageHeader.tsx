@@ -33,13 +33,13 @@ const pasos = [
     num: '2',
     color: 'bg-emerald-500',
     titulo: 'Publica lo que TIENES',
-    desc: 'Selecciona "TENGO", elige la prenda y escribe la talla disponible para intercambiar.',
+    desc: 'Selecciona "TENGO", elige la prenda, el género y la talla disponible. Puedes agregar una talla alternativa que también aceptes, la cantidad de prendas disponibles y un comentario opcional (estado, detalles, etc.).',
   },
   {
     num: '3',
     color: 'bg-amber-500',
     titulo: 'Publica lo que REQUIERES',
-    desc: 'Selecciona "REQUIERO", elige la prenda y la talla que necesitas. El sistema buscará quién la tiene.',
+    desc: 'Selecciona "REQUIERO", elige la prenda y la talla que necesitas. Puedes indicar una talla alternativa aceptable. El sistema buscará coincidencias automáticamente.',
   },
   {
     num: '4',
@@ -51,7 +51,7 @@ const pasos = [
     num: '5',
     color: 'bg-violet-500',
     titulo: 'Recibe la alerta de Match',
-    desc: '🟣 Morado = Match Directo (intercambio exacto entre dos pilotos). 🟠 Naranja = Match POOL (intercambio comunitario flexible).',
+    desc: '🟣 Morado = Match Directo (intercambio exacto entre dos pilotos). 🟠 Naranja = Match POOL (intercambio comunitario flexible). La talla alternativa amplía tus posibilidades de match.',
   },
   {
     num: '6',
@@ -64,6 +64,12 @@ const pasos = [
     color: 'bg-teal-500',
     titulo: 'Confirma RESUELTO',
     desc: 'Cuando se concrete el intercambio, AMBOS pilotos deben confirmar "RESUELTO". Solo entonces la publicación se retira del tablero.',
+  },
+  {
+    num: '8',
+    color: 'bg-slate-500',
+    titulo: '¿No hubo acuerdo? Cancela el match',
+    desc: 'Si no llegaste a un acuerdo con el otro piloto, puedes cancelar el match desde tu tarjeta (ícono ✕). Tu publicación regresará al tablero activo para encontrar otro match.',
   },
 ]
 
@@ -88,6 +94,7 @@ export function PageHeader() {
       <p className="text-sky-100 text-sm leading-relaxed mb-3">
         Intercambia prendas de uniforme con compañeros de tu base y/o de otras bases.
         Publica lo que tienes y lo que necesitas — el sistema hace el match automáticamente.
+        Puedes indicar una <span className="text-sky-200 font-semibold">talla alternativa</span> para más opciones de match.
         También puedes unirte al{' '}
         <span className="text-orange-300 font-semibold">POOL comunitario</span>{' '}
         para intercambios más flexibles.

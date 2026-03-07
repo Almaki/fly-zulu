@@ -1,19 +1,33 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, X, Minus } from 'lucide-react'
 import type { Tipo, Prenda, Genero } from '../types'
 import { PRENDAS, PRENDA_ICONS } from '../types'
 
 interface Props {
-  onPublicar: (tipo: Tipo, prenda: Prenda, talla: string, genero: Genero, enPool: boolean) => Promise<string | null>
+  onPublicar: (
+    tipo: Tipo,
+    prenda: Prenda,
+    talla: string,
+    genero: Genero,
+    enPool: boolean,
+    tallaAlternativa?: string,
+    cantidad?: number,
+    comentario?: string,
+  ) => Promise<string | null>
 }
 
 export function FormPublicacion({ onPublicar }: Props) {
   const [tipo, setTipo] = useState<Tipo>('TENGO')
   const [prenda, setPrenda] = useState<Prenda | ''>('')
   const [talla, setTalla] = useState('')
+  const [tallaAlt, setTallaAlt] = useState('')
+  const [mostrarTallaAlt, setMostrarTallaAlt] = useState(false)
   const [genero, setGenero] = useState<Genero>('M')
+  const [cantidad, setCantidad] = useState(1)
+  const [comentario, setComentario] = useState('')
+  const [mostrarComentario, setMostrarComentario] = useState(false)
   const [enPool, setEnPool] = useState(false)
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState('')
@@ -21,7 +35,17 @@ export function FormPublicacion({ onPublicar }: Props) {
 
   const handleTipo = (t: Tipo) => {
     setTipo(t)
-    if (t === 'REQUIERO') setEnPool(false) // POOL solo aplica a TENGO
+    if (t === 'REQUIERO') setEnPool(false)
+  }
+
+  const quitarTallaAlt = () => {
+    setTallaAlt('')
+    setMostrarTallaAlt(false)
+  }
+
+  const quitarComentario = () => {
+    setComentario('')
+    setMostrarComentario(false)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,16 +56,34 @@ export function FormPublicacion({ onPublicar }: Props) {
       setError('Ingresa una talla válida (número)')
       return
     }
+    if (tallaAlt && tallaAlt === talla) {
+      setError('La talla alternativa debe ser diferente a la principal')
+      return
+    }
     setError('')
     setEnviando(true)
     try {
-      const errorMsg = await onPublicar(tipo, prenda as Prenda, talla.trim(), genero, tipo === 'TENGO' ? enPool : false)
+      const errorMsg = await onPublicar(
+        tipo,
+        prenda as Prenda,
+        talla.trim(),
+        genero,
+        tipo === 'TENGO' ? enPool : false,
+        tallaAlt.trim() || undefined,
+        cantidad,
+        comentario.trim() || undefined,
+      )
       if (errorMsg) {
         setError(errorMsg)
         return
       }
       setPrenda('')
       setTalla('')
+      setTallaAlt('')
+      setMostrarTallaAlt(false)
+      setCantidad(1)
+      setComentario('')
+      setMostrarComentario(false)
       setEnPool(false)
       setExito(true)
       setTimeout(() => setExito(false), 3500)
@@ -111,12 +153,9 @@ export function FormPublicacion({ onPublicar }: Props) {
             }`}
           >
             <div className="flex items-start gap-3">
-              {/* Checkbox visual */}
               <div
                 className={`mt-0.5 w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center transition-all ${
-                  enPool
-                    ? 'bg-orange-500 border-orange-500'
-                    : 'bg-white border-slate-300'
+                  enPool ? 'bg-orange-500 border-orange-500' : 'bg-white border-slate-300'
                 }`}
               >
                 {enPool && <span className="text-white text-[10px] font-bold">✓</span>}
@@ -192,7 +231,7 @@ export function FormPublicacion({ onPublicar }: Props) {
           </div>
         </div>
 
-        {/* Talla */}
+        {/* Talla principal */}
         <div>
           <label className="text-slate-600 text-sm font-medium block mb-1">
             Talla (número)
@@ -208,6 +247,102 @@ export function FormPublicacion({ onPublicar }: Props) {
             className="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-slate-50 placeholder-slate-400"
           />
         </div>
+
+        {/* Talla alternativa */}
+        {!mostrarTallaAlt ? (
+          <button
+            type="button"
+            onClick={() => setMostrarTallaAlt(true)}
+            className="text-slate-400 text-xs font-medium hover:text-indigo-500 transition-colors flex items-center gap-1 -mt-2 ml-1"
+          >
+            <span className="text-base leading-none">+</span> También acepto otra talla
+          </button>
+        ) : (
+          <div className="-mt-2">
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-slate-500 text-xs font-medium">También acepto talla</label>
+              <button
+                type="button"
+                onClick={quitarTallaAlt}
+                className="text-slate-400 hover:text-red-400 transition-colors flex items-center gap-0.5 text-[11px]"
+              >
+                <X size={11} /> quitar
+              </button>
+            </div>
+            <input
+              type="number"
+              inputMode="numeric"
+              value={tallaAlt}
+              onChange={(e) => setTallaAlt(e.target.value)}
+              placeholder="Ej: 44"
+              min={1}
+              max={99}
+              className="w-full border border-dashed border-indigo-300 rounded-xl px-4 py-2.5 text-slate-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-indigo-50/40 placeholder-slate-400"
+            />
+          </div>
+        )}
+
+        {/* Cantidad */}
+        <div>
+          <label className="text-slate-600 text-sm font-medium block mb-2">
+            Cantidad de prendas
+          </label>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setCantidad((c) => Math.max(1, c - 1))}
+              disabled={cantidad <= 1}
+              className="w-10 h-10 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-slate-100 disabled:opacity-30 transition-all"
+            >
+              <Minus size={16} />
+            </button>
+            <span className="text-slate-800 font-bold text-lg w-8 text-center">{cantidad}</span>
+            <button
+              type="button"
+              onClick={() => setCantidad((c) => Math.min(10, c + 1))}
+              disabled={cantidad >= 10}
+              className="w-10 h-10 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-slate-100 disabled:opacity-30 transition-all"
+            >
+              <Plus size={16} />
+            </button>
+            <span className="text-slate-400 text-xs ml-1">
+              {cantidad === 1 ? 'prenda' : 'prendas'}
+            </span>
+          </div>
+        </div>
+
+        {/* Comentario opcional */}
+        {!mostrarComentario ? (
+          <button
+            type="button"
+            onClick={() => setMostrarComentario(true)}
+            className="text-slate-400 text-xs font-medium hover:text-slate-600 transition-colors flex items-center gap-1 -mt-2 ml-1"
+          >
+            <span className="text-base leading-none">+</span> Agregar comentario (estado, detalles...)
+          </button>
+        ) : (
+          <div className="-mt-2">
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-slate-500 text-xs font-medium">Comentario (opcional)</label>
+              <button
+                type="button"
+                onClick={quitarComentario}
+                className="text-slate-400 hover:text-red-400 transition-colors flex items-center gap-0.5 text-[11px]"
+              >
+                <X size={11} /> quitar
+              </button>
+            </div>
+            <textarea
+              value={comentario}
+              onChange={(e) => setComentario(e.target.value)}
+              placeholder="Ej: En buen estado, sin manchas. Disponible en base TIJ."
+              maxLength={150}
+              rows={2}
+              className="w-full border border-dashed border-slate-300 rounded-xl px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-slate-50/60 placeholder-slate-400 resize-none"
+            />
+            <p className="text-slate-400 text-[10px] text-right mt-0.5">{comentario.length}/150</p>
+          </div>
+        )}
 
         {error && (
           <p className="text-red-500 text-xs bg-red-50 px-3 py-2 rounded-lg">{error}</p>

@@ -45,7 +45,10 @@ export async function crearPublicacion(pub: {
   tipo: Tipo
   prenda: Prenda
   talla: string
+  talla_alternativa?: string
   genero: Genero
+  cantidad: number
+  comentario?: string
   en_pool: boolean
 }): Promise<Publicacion> {
   const { data, error } = await db()
@@ -97,6 +100,17 @@ export async function eliminarPublicacion(id: string): Promise<void> {
     .from('canje_publicaciones')
     .update({ estado: 'resuelto' })
     .eq('id', id)
+
+  if (error) throw error
+}
+
+// Cancela el match de UNA publicación: limpia resuelto_por para que vuelva al tablero activo
+export async function cancelarMatchPublicacion(id: string): Promise<void> {
+  const { error } = await db()
+    .from('canje_publicaciones')
+    .update({ resuelto_por: [] })
+    .eq('id', id)
+    .eq('estado', 'activo')
 
   if (error) throw error
 }
