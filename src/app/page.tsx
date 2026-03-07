@@ -305,7 +305,7 @@ export default function LandingPage() {
               FLY<span className="text-[#00ff88]">-ZULU</span>
             </span>
             <span className="text-zinc-700 text-xs ml-1">
-              App colaborativa para tripulaciones
+              App colaborativa para tripulaciones ❤️
             </span>
           </div>
           <div className="flex items-center gap-5 text-xs text-zinc-600">
