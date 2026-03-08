@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { RefreshCw, MessageCircle, ChevronDown, ChevronUp, ShirtIcon } from 'lucide-react'
+import { RefreshCw, MessageCircle, ChevronDown, ChevronUp, ShirtIcon, Trophy, CheckCircle2 } from 'lucide-react'
 import { formatDistanceToNow, format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { createClient } from '@/shared/lib/supabase'
@@ -42,6 +42,22 @@ interface ChatConvo {
   ultimo_mensaje: string
 }
 
+interface Resolucion {
+  numero_rol: string
+  base: string
+  prenda: string
+  talla: string
+  tipo: string
+  genero: string
+  fecha: string
+}
+
+interface PilotoStats {
+  nombre: string
+  publicadas: number
+  resueltas: number
+}
+
 interface Stats {
   activas: number
   resueltas: number
@@ -50,6 +66,8 @@ interface Stats {
   tasaResolucion: number
   porPrenda: Record<string, { activo: number; resuelto: number }>
   porBase: Record<string, number>
+  resoluciones: Resolucion[]
+  pilotosRanking: PilotoStats[]
 }
 
 /* ─── Component ─────────────────────────────────────────────────────── */
@@ -91,6 +109,31 @@ export function CanjeDashboard() {
       (p) => p.estado === 'activo' && p.resuelto_por && p.resuelto_por.length > 0
     ).length
 
+    // ── Resoluciones ─────────────────────────────────────────────────
+    const resoluciones: Resolucion[] = publicaciones
+      .filter((p) => p.estado === 'resuelto')
+      .map((p) => ({
+        numero_rol: p.numero_rol,
+        base: p.base,
+        prenda: p.prenda,
+        talla: p.talla,
+        tipo: p.tipo,
+        genero: p.genero,
+        fecha: p.created_at,
+      }))
+
+    // ── Ranking de pilotos ───────────────────────────────────────────
+    const pilotoMap = new Map<string, { publicadas: number; resueltas: number }>()
+    for (const p of publicaciones) {
+      const entry = pilotoMap.get(p.numero_rol) ?? { publicadas: 0, resueltas: 0 }
+      entry.publicadas++
+      if (p.estado === 'resuelto') entry.resueltas++
+      pilotoMap.set(p.numero_rol, entry)
+    }
+    const pilotosRanking: PilotoStats[] = Array.from(pilotoMap.entries())
+      .map(([nombre, s]) => ({ nombre, ...s }))
+      .sort((a, b) => b.resueltas - a.resueltas || b.publicadas - a.publicadas)
+
     setStats({
       activas,
       resueltas,
@@ -99,6 +142,8 @@ export function CanjeDashboard() {
       tasaResolucion: total > 0 ? Math.round((resueltas / total) * 100) : 0,
       porPrenda,
       porBase,
+      resoluciones,
+      pilotosRanking,
     })
 
     // ── Chats ──────────────────────────────────────────────────────────
@@ -231,6 +276,79 @@ export function CanjeDashboard() {
                         {base} · {count}
                       </span>
                     ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          {/* Ranking de pilotos */}
+          {stats.pilotosRanking.length > 0 && (
+            <Card className="border-zinc-800 bg-zinc-900/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Trophy className="h-4 w-4 text-amber-400" />
+                  Pilotos — Actividad en Canje
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3">
+                <div className="space-y-1.5">
+                  {stats.pilotosRanking.map((p, i) => (
+                    <div
+                      key={p.nombre}
+                      className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-zinc-800/50"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-xs font-bold text-zinc-500 w-5 text-right shrink-0">
+                          {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}
+                        </span>
+                        <span className="text-zinc-200 text-sm font-medium truncate">{p.nombre}</span>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-zinc-500 text-xs">{p.publicadas} pub</span>
+                        <span className={`text-xs font-bold ${p.resueltas > 0 ? 'text-emerald-400' : 'text-zinc-600'}`}>
+                          {p.resueltas} resueltas
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Historial de resoluciones */}
+          {stats.resoluciones.length > 0 && (
+            <Card className="border-zinc-800 bg-zinc-900/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                  Matches resueltos
+                  <span className="text-zinc-600 font-normal">({stats.resoluciones.length})</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3">
+                <div className="space-y-1.5">
+                  {stats.resoluciones.map((r, i) => (
+                    <div
+                      key={`${r.numero_rol}-${r.fecha}-${i}`}
+                      className="flex items-start justify-between gap-2 px-3 py-2 rounded-lg bg-zinc-800/50"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-zinc-200 text-sm font-medium truncate">{r.numero_rol}</p>
+                        <p className="text-zinc-500 text-xs">
+                          {r.tipo === 'TENGO' ? '✅ Tenía' : '🔍 Requería'}{' '}
+                          <span className="text-zinc-300 font-semibold">{r.prenda}</span>{' '}
+                          T.{r.talla}{' '}
+                          <span className={`${r.genero === 'F' ? 'text-pink-400' : 'text-sky-400'}`}>
+                            {r.genero === 'F' ? '♀' : '♂'}
+                          </span>{' '}
+                          · {r.base}
+                        </p>
+                      </div>
+                      <span className="text-zinc-600 text-[10px] shrink-0 mt-0.5">
+                        {format(new Date(r.fecha), 'dd/MM/yy', { locale: es })}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
