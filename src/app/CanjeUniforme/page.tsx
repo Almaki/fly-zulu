@@ -10,6 +10,8 @@ import { Tablero } from '@/features/canje-uniforme/components/Tablero'
 import { ChatModal } from '@/features/canje-uniforme/components/ChatModal'
 import { ResumenInventario } from '@/features/canje-uniforme/components/ResumenInventario'
 import { MatchesPublicos } from '@/features/canje-uniforme/components/MatchesPublicos'
+import { PosiblesPools } from '@/features/canje-uniforme/components/PosiblesPools'
+import { CadenasMatch } from '@/features/canje-uniforme/components/CadenasMatch'
 
 export default function CanjeUniformePage() {
   const {
@@ -48,13 +50,23 @@ export default function CanjeUniformePage() {
         </>
       )}
 
-      {!cargando && publicaciones.length > 0 && (
-        <ResumenInventario publicaciones={publicaciones} />
-      )}
-
       {/* Matches públicos — visible para todos */}
       {!cargando && (
         <MatchesPublicos matches={matches} resueltas={resueltas} />
+      )}
+
+      {/* Cadenas de intercambio triangular */}
+      {!cargando && publicaciones.length > 0 && (
+        <CadenasMatch publicaciones={publicaciones} />
+      )}
+
+      {/* Posibles pools — incentivar activar pool */}
+      {!cargando && publicaciones.length > 0 && (
+        <PosiblesPools publicaciones={publicaciones} matches={matches} />
+      )}
+
+      {!cargando && publicaciones.length > 0 && (
+        <ResumenInventario publicaciones={publicaciones} />
       )}
 
       <div className="bg-white rounded-2xl shadow-md border border-slate-100 p-5">
