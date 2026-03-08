@@ -14,6 +14,7 @@ import { MatchesPublicos } from '@/features/canje-uniforme/components/MatchesPub
 export default function CanjeUniformePage() {
   const {
     publicaciones,
+    resueltas,
     matches,
     misMatchIds,
     misPubs,
@@ -53,7 +54,7 @@ export default function CanjeUniformePage() {
 
       {/* Matches públicos — visible para todos */}
       {!cargando && (
-        <MatchesPublicos matches={matches} publicaciones={publicaciones} />
+        <MatchesPublicos matches={matches} resueltas={resueltas} />
       )}
 
       <div className="bg-white rounded-2xl shadow-md border border-slate-100 p-5">

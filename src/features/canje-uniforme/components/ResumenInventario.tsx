@@ -1,6 +1,7 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import type { Publicacion, Prenda, Genero } from '../types'
 import { PRENDAS, PRENDA_ICONS } from '../types'
 
@@ -18,6 +19,17 @@ type ResumenPorGenero = Record<Genero, Record<string, { tengo: number; requiero:
 type Resumen = Record<Prenda, ResumenPorGenero>
 
 export function ResumenInventario({ publicaciones }: Props) {
+  const [abiertos, setAbiertos] = useState<Set<Prenda>>(new Set())
+
+  const toggle = (prenda: Prenda) => {
+    setAbiertos((prev) => {
+      const next = new Set(prev)
+      if (next.has(prenda)) next.delete(prenda)
+      else next.add(prenda)
+      return next
+    })
+  }
+
   const resumen = useMemo(() => {
     const mapa = {} as Resumen
     for (const prenda of PRENDAS) {
@@ -42,6 +54,16 @@ export function ResumenInventario({ publicaciones }: Props) {
   )
 
   if (prendasConDatos.length === 0) return null
+
+  const contarPrenda = (prenda: Prenda) => {
+    let total = 0
+    for (const g of ['M', 'F'] as Genero[]) {
+      for (const counts of Object.values(resumen[prenda][g])) {
+        total += counts.tengo + counts.requiero
+      }
+    }
+    return total
+  }
 
   const renderTabla = (entradas: EntradaTalla[]) => (
     <table className="w-full text-xs">
@@ -87,8 +109,11 @@ export function ResumenInventario({ publicaciones }: Props) {
         Resumen de inventario por talla
       </h2>
 
-      <div className="space-y-5">
+      <div className="space-y-2">
         {prendasConDatos.map((prenda) => {
+          const isOpen = abiertos.has(prenda)
+          const total = contarPrenda(prenda)
+
           const entradasM: EntradaTalla[] = Object.entries(resumen[prenda].M)
             .map(([talla, counts]) => ({ talla, ...counts }))
             .sort((a, b) => Number(a.talla) - Number(b.talla))
@@ -98,26 +123,41 @@ export function ResumenInventario({ publicaciones }: Props) {
             .sort((a, b) => Number(a.talla) - Number(b.talla))
 
           return (
-            <div key={prenda}>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">{PRENDA_ICONS[prenda]}</span>
-                <span className="text-slate-700 font-semibold text-sm">{prenda}</span>
-              </div>
+            <div key={prenda} className="border border-slate-100 rounded-xl overflow-hidden">
+              <button
+                onClick={() => toggle(prenda)}
+                className="w-full flex items-center justify-between gap-2 px-4 py-3 hover:bg-slate-50 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{PRENDA_ICONS[prenda]}</span>
+                  <span className="text-slate-700 font-semibold text-sm">{prenda}</span>
+                  <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    {total}
+                  </span>
+                </div>
+                {isOpen ? (
+                  <ChevronUp className="h-4 w-4 text-slate-400" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-slate-400" />
+                )}
+              </button>
 
-              <div className="space-y-3">
-                {entradasM.length > 0 && (
-                  <div>
-                    <p className="text-xs font-bold text-blue-600 mb-1.5 ml-1">👔 Masculino</p>
-                    <div className="overflow-x-auto">{renderTabla(entradasM)}</div>
-                  </div>
-                )}
-                {entradasF.length > 0 && (
-                  <div>
-                    <p className="text-xs font-bold text-pink-600 mb-1.5 ml-1">👗 Femenino</p>
-                    <div className="overflow-x-auto">{renderTabla(entradasF)}</div>
-                  </div>
-                )}
-              </div>
+              {isOpen && (
+                <div className="px-4 pb-4 space-y-3">
+                  {entradasM.length > 0 && (
+                    <div>
+                      <p className="text-xs font-bold text-blue-600 mb-1.5 ml-1">👔 Masculino</p>
+                      <div className="overflow-x-auto">{renderTabla(entradasM)}</div>
+                    </div>
+                  )}
+                  {entradasF.length > 0 && (
+                    <div>
+                      <p className="text-xs font-bold text-pink-600 mb-1.5 ml-1">👗 Femenino</p>
+                      <div className="overflow-x-auto">{renderTabla(entradasF)}</div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )
         })}

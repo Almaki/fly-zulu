@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/shared/lib/supabase'
 import {
   obtenerPublicaciones,
+  obtenerResueltas,
   crearPublicacion,
   marcarResueltoMatch,
   eliminarPublicacion,
@@ -15,6 +16,7 @@ import type { Publicacion, Match, PilotoActual, Tipo, Prenda, Genero } from '../
 
 export function useCanje() {
   const [publicaciones, setPublicaciones] = useState<Publicacion[]>([])
+  const [resueltas, setResueltas] = useState<Publicacion[]>([])
   const [piloto, setPiloto] = useState<PilotoActual | null>(null)
   const [cargando, setCargando] = useState(true)
   // Guardamos solo el chat_key para evitar estado stale del Match
@@ -22,8 +24,12 @@ export function useCanje() {
 
   const cargarPublicaciones = useCallback(async () => {
     try {
-      const pubs = await obtenerPublicaciones()
+      const [pubs, resolved] = await Promise.all([
+        obtenerPublicaciones(),
+        obtenerResueltas(),
+      ])
       setPublicaciones(pubs)
+      setResueltas(resolved)
     } catch (err) {
       console.error('[Canje] Error cargando publicaciones:', err)
     } finally {
@@ -214,6 +220,7 @@ export function useCanje() {
 
   return {
     publicaciones,
+    resueltas,
     matches,
     misMatchIds,
     misPubs,

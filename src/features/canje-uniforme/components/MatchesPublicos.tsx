@@ -15,11 +15,10 @@ function fmtTalla(prenda: Prenda, talla: string): string {
 
 interface Props {
   matches: Match[]
-  publicaciones: Publicacion[]
+  resueltas: Publicacion[]
 }
 
-export function MatchesPublicos({ matches, publicaciones }: Props) {
-  const resueltas = publicaciones.filter((p) => p.estado === 'resuelto')
+export function MatchesPublicos({ matches, resueltas }: Props) {
 
   // Agrupar resoluciones en pares por proximidad (TENGO + REQUIERO del mismo piloto o matching)
   const paresResueltos: { piloto1: string; piloto2: string; prenda: Prenda; base1: string; base2: string }[] = []

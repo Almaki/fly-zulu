@@ -18,6 +18,18 @@ export async function obtenerPublicaciones(): Promise<Publicacion[]> {
   return (data ?? []) as Publicacion[]
 }
 
+export async function obtenerResueltas(): Promise<Publicacion[]> {
+  const { data, error } = await db()
+    .from('canje_publicaciones')
+    .select('*')
+    .eq('estado', 'resuelto')
+    .order('created_at', { ascending: false })
+    .limit(50)
+
+  if (error) throw error
+  return (data ?? []) as Publicacion[]
+}
+
 export async function existePublicacionActiva(params: {
   numero_rol: string
   tipo: Tipo
