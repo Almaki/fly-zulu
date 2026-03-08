@@ -1,6 +1,6 @@
 export type Base = 'TIJ' | 'MTY' | 'BJX' | 'GDL' | 'MEX' | 'CUN'
 export type Tipo = 'TENGO' | 'REQUIERO'
-export type Prenda = 'GABARDINA' | 'PANTALON' | 'KEPI' | 'CAMISA MC' | 'CAMISA ML'
+export type Prenda = 'GABARDINA' | 'PANTALON' | 'KEPI' | 'CAMISA MC' | 'CAMISA ML' | 'MALETIN DE VUELO' | 'MALETA DE PERNOCTA'
 export type Genero = 'M' | 'F'
 export type EstadoPub = 'activo' | 'resuelto'
 export type TipoMatch = 'directo' | 'pool'
@@ -44,7 +44,7 @@ export interface PilotoActual {
 }
 
 export const BASES: Base[] = ['TIJ', 'MTY', 'BJX', 'GDL', 'MEX', 'CUN']
-export const PRENDAS: Prenda[] = ['GABARDINA', 'PANTALON', 'KEPI', 'CAMISA MC', 'CAMISA ML']
+export const PRENDAS: Prenda[] = ['GABARDINA', 'PANTALON', 'KEPI', 'CAMISA MC', 'CAMISA ML', 'MALETIN DE VUELO', 'MALETA DE PERNOCTA']
 
 export const BASE_LABELS: Record<Base, string> = {
   TIJ: 'Tijuana (TIJ)',
@@ -61,4 +61,6 @@ export const PRENDA_ICONS: Record<Prenda, string> = {
   KEPI: '🧢',
   'CAMISA MC': '👔',
   'CAMISA ML': '🥼',
+  'MALETIN DE VUELO': '💼',
+  'MALETA DE PERNOCTA': '🧳',
 }

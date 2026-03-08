@@ -10,6 +10,7 @@ function fmt(prenda: Prenda, talla: string): string {
     const [c, m] = talla.split('/')
     return c && m ? `C.${c}/M.${m}` : talla
   }
+  if (prenda === 'MALETIN DE VUELO' || prenda === 'MALETA DE PERNOCTA') return talla
   return `T.${talla}`
 }
 

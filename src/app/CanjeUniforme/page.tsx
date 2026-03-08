@@ -9,6 +9,7 @@ import { AlertaMatch } from '@/features/canje-uniforme/components/AlertaMatch'
 import { Tablero } from '@/features/canje-uniforme/components/Tablero'
 import { ChatModal } from '@/features/canje-uniforme/components/ChatModal'
 import { ResumenInventario } from '@/features/canje-uniforme/components/ResumenInventario'
+import { MatchesPublicos } from '@/features/canje-uniforme/components/MatchesPublicos'
 
 export default function CanjeUniformePage() {
   const {
@@ -48,6 +49,11 @@ export default function CanjeUniformePage() {
 
       {!cargando && publicaciones.length > 0 && (
         <ResumenInventario publicaciones={publicaciones} />
+      )}
+
+      {/* Matches públicos — visible para todos */}
+      {!cargando && (
+        <MatchesPublicos matches={matches} publicaciones={publicaciones} />
       )}
 
       <div className="bg-white rounded-2xl shadow-md border border-slate-100 p-5">

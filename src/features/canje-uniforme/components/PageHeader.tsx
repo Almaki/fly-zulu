@@ -108,6 +108,8 @@ export function PageHeader() {
           { icon: '🧢', label: 'Kepí' },
           { icon: '👔', label: 'Camisa MC' },
           { icon: '🥼', label: 'Camisa ML' },
+          { icon: '💼', label: 'Maletín' },
+          { icon: '🧳', label: 'Maleta' },
         ].map((p) => (
           <span
             key={p.label}

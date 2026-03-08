@@ -46,6 +46,7 @@ export function FormPublicacion({ onPublicar }: Props) {
 
   const esCamisa = prenda === 'CAMISA MC' || prenda === 'CAMISA ML'
   const esML = prenda === 'CAMISA ML'
+  const esMaleta = prenda === 'MALETIN DE VUELO' || prenda === 'MALETA DE PERNOCTA'
 
   const handleTipo = (t: Tipo) => {
     setTipo(t)
@@ -89,7 +90,9 @@ export function FormPublicacion({ onPublicar }: Props) {
     let tallaFinal = ''
     let tallaAltFinal: string | undefined
 
-    if (esCamisa) {
+    if (esMaleta) {
+      tallaFinal = 'UNICO'
+    } else if (esCamisa) {
       if (!tallaCuello) { setError('Selecciona la talla de cuello'); return }
       if (esML && !tallaManga) { setError('Selecciona la talla de manga'); return }
       tallaFinal = esML ? `${tallaCuello}/${tallaManga}` : tallaCuello
@@ -289,8 +292,12 @@ export function FormPublicacion({ onPublicar }: Props) {
           </div>
         </div>
 
-        {/* ── Talla: camisa (cuello / manga) ── */}
-        {esCamisa ? (
+        {/* ── Talla: maleta = UNICO, camisa = cuello/manga, otro = número ── */}
+        {esMaleta ? (
+          <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
+            <p className="text-slate-500 text-sm">Talla: <span className="font-bold text-slate-700">UNICO</span></p>
+          </div>
+        ) : esCamisa ? (
           <div className="space-y-3">
             {/* Cuello */}
             <div>
@@ -406,7 +413,7 @@ export function FormPublicacion({ onPublicar }: Props) {
           </div>
         ) : (
           /* ── Talla: prenda normal (número) ── */
-          prenda && (
+          prenda && !esMaleta && (
             <div>
               <label className="text-slate-600 text-sm font-medium block mb-1">
                 Talla (número)
